@@ -5,7 +5,8 @@ import { UsersService } from '../users/users.service';
 @Controller('auth')
 export class AuthController {
 
-  constructor(private userService: UsersService) {}
+  constructor(private userService: UsersService) {
+  }
 
   @Post('google/login')
   async googleLogin(@Body('token') token: string) {
@@ -19,12 +20,15 @@ export class AuthController {
       return new BadRequestException('Not valid Google user');
     }
 
-    // const user = await this.userService.findByEmail(payload.email);
-    // if (user) {
-    //   return user;
-    // } else {
-    //   console.log('create user');
-    // }
-
+    const user = await this.userService.findByEmail(payload.email);
+    if (user) {
+      return user;
+    } else {
+      return await this.userService.createUser({
+        email: payload.email,
+        firstName: payload.given_name,
+        lastName: payload.family_name,
+      });
+    }
   }
 }

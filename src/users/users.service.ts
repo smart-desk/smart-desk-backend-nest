@@ -9,7 +9,8 @@ export class UsersService {
   }
 
   async createUser(user: UserDto): Promise<User> {
-    return this.userRepository.create(user)
+    const userEntity = this.userRepository.create(user);
+    return this.userRepository.save(userEntity);
   }
 
   async fineOne(id: string): Promise<User> {
