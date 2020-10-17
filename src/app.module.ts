@@ -8,6 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
   imports: [TypeOrmModule.forRoot(), AuthModule, UsersModule, ConfigModule.forRoot()],
   controllers: [],
   providers: [],
+  exports: []
 })
 export class AppModule {
 }
