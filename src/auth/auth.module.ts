@@ -10,7 +10,7 @@ dotenv.config();
 
 @Module({
   imports: [UsersModule, PassportModule, JwtModule.register({
-    secretOrPrivateKey: process.env.JWT_SECRET,
+    secret: process.env.JWT_SECRET,
     signOptions: { expiresIn: '7d' },
   })],
   providers: [JwtStrategy],
