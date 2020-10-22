@@ -43,7 +43,9 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-## DataBase Issue
+## Migrations/DAtabase Issues
+
+### Error run migration
 
 If migrations fails with `function uuid_generate_v4() does not exist` you need to add _uuid-ossp_ extention by executing SQL query on database:
 
@@ -52,3 +54,7 @@ If migrations fails with `function uuid_generate_v4() does not exist` you need t
 This should solve the problem.
 
 > [https://github.com/typeorm/typeorm/issues/3009#issuecomment-638503671](https://github.com/typeorm/typeorm/issues/3009#issuecomment-638503671)
+
+### If typeorm doesn't see migrations folder
+
+[https://stackoverflow.com/questions/62821983/typeorm-no-migrations-pending-when-attempting-to-run-migrations-manually](https://stackoverflow.com/questions/62821983/typeorm-no-migrations-pending-when-attempting-to-run-migrations-manually)
