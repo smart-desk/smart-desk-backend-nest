@@ -49,4 +49,6 @@ If migrations fails with `function uuid_generate_v4() does not exist` you need t
 
 `CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`.
 
-This should solve the problem
+This should solve the problem.
+
+> [https://github.com/typeorm/typeorm/issues/3009#issuecomment-638503671](https://github.com/typeorm/typeorm/issues/3009#issuecomment-638503671)
