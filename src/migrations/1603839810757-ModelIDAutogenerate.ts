@@ -29,7 +29,7 @@ export class ModelIDAutogenerate1603839810757 implements MigrationInterface {
     }));
 
     await queryRunner.query('ALTER TABLE models ALTER COLUMN created_at DROP DEFAULT;');
-    await queryRunner.query('ALTER TABLE models ALTER COLUMN created_at DROP DEFAULT;');
+    await queryRunner.query('ALTER TABLE models ALTER COLUMN updated_at DROP DEFAULT;');
   }
 
 }
