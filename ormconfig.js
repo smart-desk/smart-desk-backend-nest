@@ -4,7 +4,7 @@ module.exports = {
   entities: ['dist/**/*.entity.js'],
   synchronize: false,
   migrationsTableName: 'nest_migrations',
-  migrations: ['src/migrations/**/*.{ts, js}'],
+  migrations: ['dist/migrations/**/*.{ts, js}'],
   migrationsRun: true,
   cli: {
     migrationsDir: 'src/migrations'
