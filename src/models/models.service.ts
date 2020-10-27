@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Model } from './model.entity';
+import { ModelCreateDto } from './model.dto';
 
 @Injectable()
 export class ModelsService {
@@ -11,6 +12,11 @@ export class ModelsService {
 
   getAll(): Promise<Model[]> {
     return this.modelRepository.find();
+  }
+
+  create(modelDto: ModelCreateDto): Promise<Model> {
+    const model = this.modelRepository.create(modelDto)
+    return this.modelRepository.save(model);
   }
 
 }

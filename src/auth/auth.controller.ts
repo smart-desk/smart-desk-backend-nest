@@ -2,8 +2,10 @@ import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
 import { OAuth2Client } from 'google-auth-library';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('auth')
+@ApiTags('Auth')
 export class AuthController {
 
   constructor(private userService: UsersService, private jwtService: JwtService) {
