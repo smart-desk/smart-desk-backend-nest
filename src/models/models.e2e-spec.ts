@@ -8,39 +8,39 @@ import { AppModule } from '../app.module';
 import { ModelsController } from './models.controller';
 
 describe('Models', () => {
-  let app: INestApplication;
-  const modelsService = {
-    getAll: () => {
-      const model = {
-        id: 'id_string',
-        name: 'name',
-      };
-      return [model];
-    },
-  };
+    let app: INestApplication;
+    const modelsService = {
+        getAll: () => {
+            const model = {
+                id: 'id_string',
+                name: 'name',
+            };
+            return [model];
+        },
+    };
 
-  beforeAll(async() => {
-    const moduleRef = await Test.createTestingModule({
-      imports: [],
-      controllers: [ModelsController],
-      providers: [ModelsService],
-    })
-      .overrideProvider(ModelsService)
-      .useValue(modelsService)
-      .compile();
+    beforeAll(async () => {
+        const moduleRef = await Test.createTestingModule({
+            imports: [],
+            controllers: [ModelsController],
+            providers: [ModelsService],
+        })
+            .overrideProvider(ModelsService)
+            .useValue(modelsService)
+            .compile();
 
-    app = moduleRef.createNestApplication();
-    await app.init();
-  });
+        app = moduleRef.createNestApplication();
+        await app.init();
+    });
 
-  it(`/GET models`, () => {
-    return request(app.getHttpServer())
-      .get('/models')
-      .expect(200)
-      .expect(modelsService.getAll());
-  });
+    it(`/GET models`, () => {
+        return request(app.getHttpServer())
+            .get('/models')
+            .expect(200)
+            .expect(modelsService.getAll());
+    });
 
-  afterAll(async() => {
-    await app.close();
-  });
+    afterAll(async () => {
+        await app.close();
+    });
 });

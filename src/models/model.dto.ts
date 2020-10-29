@@ -1,3 +1,3 @@
 export class ModelCreateDto {
-  name: string;
+    name: string;
 }

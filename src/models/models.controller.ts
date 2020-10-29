@@ -7,18 +7,15 @@ import { ModelCreateDto } from './model.dto';
 @Controller('models')
 @ApiTags('Models')
 export class ModelsController {
+    constructor(private modelsService: ModelsService) {}
 
-  constructor(private modelsService: ModelsService) {
-  }
+    @Get()
+    getAll(): Promise<Model[]> {
+        return this.modelsService.getAll();
+    }
 
-  @Get()
-  getAll(): Promise<Model[]> {
-    return this.modelsService.getAll();
-  }
-
-  @Post()
-  createModel(@Body() model: ModelCreateDto): Promise<Model> {
-    return this.modelsService.create(model);
-  }
-
+    @Post()
+    createModel(@Body() model: ModelCreateDto): Promise<Model> {
+        return this.modelsService.create(model);
+    }
 }
