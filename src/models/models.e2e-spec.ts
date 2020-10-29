@@ -1,10 +1,7 @@
 import * as request from 'supertest';
 import { Test } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { ModelsModule } from './models.module';
 import { ModelsService } from './models.service';
-import { Model } from './model.entity';
-import { AppModule } from '../app.module';
 import { ModelsController } from './models.controller';
 
 describe('Models', () => {

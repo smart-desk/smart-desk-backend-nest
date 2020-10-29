@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { Model } from './model.entity';
-import { ModelCreateDto } from './model.dto';
+import { ModelCreateDto, ModelUpdateDto } from './model.dto';
 
 @Injectable()
 export class ModelsService {
@@ -14,8 +14,36 @@ export class ModelsService {
         return this.modelRepository.find();
     }
 
+    async getById(id: string): Promise<Model> {
+        const model = await this.modelRepository.findOne({ id });
+        if (!model) {
+            throw new NotFoundException('Model not found');
+        }
+        return model;
+    }
+
     create(modelDto: ModelCreateDto): Promise<Model> {
         const model = this.modelRepository.create(modelDto);
         return this.modelRepository.save(model);
+    }
+
+    async update(modelDto: ModelUpdateDto): Promise<Model> {
+        const model = await this.modelRepository.findOne({ id: modelDto.id });
+        if (!model) {
+            throw new NotFoundException('Model not found');
+        }
+
+        await this.modelRepository.update(model.id, modelDto);
+
+        return this.modelRepository.findOne(model.id);
+    }
+
+    async delete(id): Promise<DeleteResult> {
+        const model = await this.modelRepository.findOne({ id });
+        if (!model) {
+            throw new NotFoundException('Model not found');
+        }
+
+        return this.modelRepository.delete({ id });
     }
 }

@@ -1,27 +1,30 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ValidationPipe } from '@nestjs/common';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix('api')
-  app.enableCors({
-    origin: 'http://localhost:4200',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type, Accept',
-    credentials: true,
-  });
+    const app = await NestFactory.create(AppModule);
 
-  const options = new DocumentBuilder()
-    .setTitle('Smart Desk')
-    .setDescription('Smart Desk REST API')
-    .setVersion('1.0')
-    .build();
+    app.useGlobalPipes(new ValidationPipe());
+    app.setGlobalPrefix('api');
+    app.enableCors({
+        origin: 'http://localhost:4200',
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+        allowedHeaders: 'Content-Type, Accept',
+        credentials: true,
+    });
 
-  const document = SwaggerModule.createDocument(app, options);
-  SwaggerModule.setup('swag', app, document);
+    const options = new DocumentBuilder()
+        .setTitle('Smart Desk')
+        .setDescription('Smart Desk REST API')
+        .setVersion('1.0')
+        .build();
 
-  await app.listen(3001);
+    const document = SwaggerModule.createDocument(app, options);
+    SwaggerModule.setup('swag', app, document);
+
+    await app.listen(3001);
 }
 
 bootstrap();
