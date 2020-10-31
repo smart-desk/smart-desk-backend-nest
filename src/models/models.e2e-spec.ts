@@ -103,10 +103,17 @@ describe('Models controller', () => {
     });
 
     describe('delete modelEntity by id', () => {
-        it(`delete model by id`, () => {
+        it(`successfully`, () => {
             return request(app.getHttpServer())
                 .delete('/models/123123')
                 .expect(204);
+        });
+
+        it(`with error - not found`, () => {
+            modelRepositoryMock.findOne.mockReturnValueOnce(undefined);
+            return request(app.getHttpServer())
+                .delete('/models/123123')
+                .expect(404);
         });
     });
 
