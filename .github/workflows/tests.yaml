@@ -1,0 +1,27 @@
+name: Run tests
+
+on:
+    pull_request:
+        branches: [master]
+
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Install NodeJS
+              uses: actions/setup-node@v1
+              with:
+                  node-version: 14.x
+
+            - name: Install Yarn
+              run: npm install -g yarn
+
+            - name: Install dependencies
+              run: yarn
+
+            - name: Run unit tests
+              run: yarn test
+
+            - name: Run e2e tests
+              run: yarn test:e2e
