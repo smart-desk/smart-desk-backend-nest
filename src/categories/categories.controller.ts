@@ -8,9 +8,12 @@ import {
     Post,
     Put,
 } from '@nestjs/common';
+import { CategoriesService } from './categories.service';
+import { Category } from './category.entity';
 
 @Controller('categories')
 export class CategoriesController {
+    constructor(private categoriesService: CategoriesService) {}
     @Get()
     getCategoryList(): any {
         return '[GET] category list';
@@ -22,8 +25,10 @@ export class CategoriesController {
     }
 
     @Get(':id')
-    getCategoryById(@Param('id', ParseIntPipe) id: number): any {
-        return `[GET] Category by id: ${id}`;
+    async getCategoryById(
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<Category> {
+        return await this.categoriesService.getCategory(id);
     }
 
     @Put(':id')
