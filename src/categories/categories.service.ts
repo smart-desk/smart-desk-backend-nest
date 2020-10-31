@@ -1,11 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, UpdateResult } from 'typeorm';
-import { Category, CategoryDto } from './entities';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { Category } from './entities/category.entity';
 
 @Injectable()
 export class CategoriesService {
-    private categories: CategoryDto[] = [];
+    private categories: CreateCategoryDto[] = [];
 
     constructor(
         @InjectRepository(Category)
@@ -26,11 +27,11 @@ export class CategoriesService {
         return category;
     }
 
-    create(data: CategoryDto) {
+    create(data: CreateCategoryDto) {
         this.categories.push(data);
     }
 
-    async update(id: string, data: CategoryDto): Promise<UpdateResult> {
+    async update(id: string, data: CreateCategoryDto): Promise<UpdateResult> {
         const category = await this.categoryRepository.update(id, data);
 
         return category;
