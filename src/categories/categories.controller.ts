@@ -4,7 +4,6 @@ import {
     Delete,
     Get,
     Param,
-    ParseIntPipe,
     Post,
     Put
 } from '@nestjs/common';
@@ -26,17 +25,17 @@ export class CategoriesController {
     }
 
     @Get(':id')
-    async getOne(@Param('id', ParseIntPipe) id: number): Promise<Category> {
+    async getOne(@Param('id') id: string): Promise<Category> {
         return this.categoriesService.getOne(id);
     }
 
     @Put(':id')
-    update(@Param('id', ParseIntPipe) id: number, @Body() body: any): any {
+    update(@Param('id') id: string, @Body() body: any): any {
         return this.categoriesService.update(id, body);
     }
 
     @Delete(':id')
-    delete(@Param('id', ParseIntPipe) id: number): any {
+    delete(@Param('id') id: string): any {
         return this.categoriesService.delete(id);
     }
 }
