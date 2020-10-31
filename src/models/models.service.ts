@@ -11,11 +11,14 @@ export class ModelsService {
     ) {}
 
     getAll(): Promise<Model[]> {
-        return this.modelRepository.find();
+        return this.modelRepository.find({ relations: ['sections'] });
     }
 
     async getById(id: string): Promise<Model> {
-        const model = await this.modelRepository.findOne({ id });
+        const model = await this.modelRepository.findOne(
+            { id },
+            { relations: ['sections'] },
+        );
         if (!model) {
             throw new NotFoundException('Model not found');
         }
@@ -35,7 +38,9 @@ export class ModelsService {
 
         await this.modelRepository.update(model.id, modelDto);
 
-        return this.modelRepository.findOne(model.id);
+        return this.modelRepository.findOne(model.id, {
+            relations: ['sections'],
+        });
     }
 
     async delete(id): Promise<DeleteResult> {

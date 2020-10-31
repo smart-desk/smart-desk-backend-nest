@@ -5,8 +5,15 @@ import { ModelsModule } from './models/models.module';
 import { AuthModule } from './auth';
 import { CategoriesModule } from './categories';
 import { UsersModule } from './users';
+import { SectionsModule } from './sections/sections.module';
 
-const app = [AuthModule, UsersModule, CategoriesModule, ModelsModule];
+const app = [
+    AuthModule,
+    UsersModule,
+    CategoriesModule,
+    ModelsModule,
+    SectionsModule,
+];
 
 @Module({
     imports: [TypeOrmModule.forRoot(), ConfigModule.forRoot(), ...app],
@@ -14,5 +21,4 @@ const app = [AuthModule, UsersModule, CategoriesModule, ModelsModule];
     providers: [],
     exports: [],
 })
-export class AppModule {
-}
+export class AppModule {}
