@@ -5,17 +5,19 @@ import { ModelsModule } from './models.module';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Model } from './model.entity';
 import { createTestAppForModule } from '../../test/test.utils';
+import fn = jest.fn;
 
 describe('Models controller', () => {
     let app: INestApplication;
+    const modelEntity = new Model();
 
     const modelRepositoryMock = {
-        find: () => [new Model()],
-        findOne: () => new Model(),
-        create: () => new Model(),
-        save: () => new Model(),
-        update: () => {},
-        delete: () => {},
+        find: fn().mockReturnValue([modelEntity]),
+        findOne: fn().mockReturnValue(modelEntity),
+        create: fn().mockReturnValue(modelEntity),
+        save: fn().mockReturnValue(modelEntity),
+        update: fn(),
+        delete: fn(),
     };
 
     beforeAll(async () => {
@@ -33,14 +35,23 @@ describe('Models controller', () => {
         return request(app.getHttpServer()).get('/models').expect(200);
     });
 
-    it(`get model by id`, () => {
-        return request(app.getHttpServer())
-            .get('/models/123123')
-            .expect(200)
-            .expect({});
+    describe('get modelEntity by id', () => {
+        it(`successfully`, () => {
+            return request(app.getHttpServer())
+                .get('/models/123123')
+                .expect(200)
+                .expect({});
+        });
+
+        it(`with error - not found`, () => {
+            modelRepositoryMock.findOne.mockReturnValueOnce(undefined);
+            return request(app.getHttpServer())
+                .get('/models/123123')
+                .expect(404);
+        });
     });
 
-    describe('create model', () => {
+    describe('create modelEntity', () => {
         it(`successfully`, () => {
             return request(app.getHttpServer())
                 .post('/models')
@@ -61,35 +72,42 @@ describe('Models controller', () => {
         });
     });
 
-    describe('update model', () => {
+    describe('update modelEntity', () => {
         it(`successfully`, () => {
             return request(app.getHttpServer())
-                .put('/models')
-                .send({ id: '123123', name: 'test' })
+                .put('/models/123')
+                .send({ name: 'test' })
                 .expect(200)
                 .expect({});
         });
 
         it(`with error - no ID and name is to short`, () => {
             return request(app.getHttpServer())
-                .put('/models')
+                .put('/models/123')
                 .send({ name: '1' })
                 .expect(400)
                 .expect((res) => {
-                    expect(res.body.message).toContain(
-                        'id should not be empty',
-                    );
                     expect(res.body.message).toContain(
                         'name must be longer than or equal to 3 characters',
                     );
                 });
         });
+
+        it(`with error - not found`, () => {
+            modelRepositoryMock.findOne.mockReturnValueOnce(undefined);
+            return request(app.getHttpServer())
+                .put('/models/123123')
+                .send({ name: '113' })
+                .expect(404);
+        });
     });
 
-    it(`delete model by id`, () => {
-        return request(app.getHttpServer())
-            .delete('/models/123123')
-            .expect(204);
+    describe('delete modelEntity by id', () => {
+        it(`delete model by id`, () => {
+            return request(app.getHttpServer())
+                .delete('/models/123123')
+                .expect(204);
+        });
     });
 
     afterAll(async () => {
