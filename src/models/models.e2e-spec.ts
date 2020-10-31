@@ -1,40 +1,95 @@
 import * as request from 'supertest';
 import { Test } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { ModelsService } from './models.service';
-import { ModelsController } from './models.controller';
+import { ModelsModule } from './models.module';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Model } from './model.entity';
+import { createTestAppForModule } from '../../test/test.utils';
 
-describe('Models', () => {
+describe('Models controller', () => {
     let app: INestApplication;
-    const modelsService = {
-        getAll: () => {
-            const model = {
-                id: 'id_string',
-                name: 'name',
-            };
-            return [model];
-        },
+
+    const modelRepositoryMock = {
+        find: () => [new Model()],
+        findOne: () => new Model(),
+        create: () => new Model(),
+        save: () => new Model(),
+        update: () => {},
+        delete: () => {},
     };
 
     beforeAll(async () => {
         const moduleRef = await Test.createTestingModule({
-            imports: [],
-            controllers: [ModelsController],
-            providers: [ModelsService],
+            imports: [ModelsModule],
         })
-            .overrideProvider(ModelsService)
-            .useValue(modelsService)
+            .overrideProvider(getRepositoryToken(Model))
+            .useValue(modelRepositoryMock)
             .compile();
 
-        app = moduleRef.createNestApplication();
-        await app.init();
+        app = await createTestAppForModule(moduleRef);
     });
 
-    it(`/GET models`, () => {
+    it(`get all models`, () => {
+        return request(app.getHttpServer()).get('/models').expect(200);
+    });
+
+    it(`get model by id`, () => {
         return request(app.getHttpServer())
-            .get('/models')
+            .get('/models/123123')
             .expect(200)
-            .expect(modelsService.getAll());
+            .expect({});
+    });
+
+    describe('create model', () => {
+        it(`successfully`, () => {
+            return request(app.getHttpServer())
+                .post('/models')
+                .send({ name: 'test' })
+                .expect(201);
+        });
+
+        it(`with error - no name`, () => {
+            return request(app.getHttpServer())
+                .post('/models')
+                .send({ name: '1' })
+                .expect(400)
+                .expect((res) => {
+                    expect(res.body.message).toContain(
+                        'name must be longer than or equal to 3 characters',
+                    );
+                });
+        });
+    });
+
+    describe('update model', () => {
+        it(`successfully`, () => {
+            return request(app.getHttpServer())
+                .put('/models')
+                .send({ id: '123123', name: 'test' })
+                .expect(200)
+                .expect({});
+        });
+
+        it(`with error - no ID and name is to short`, () => {
+            return request(app.getHttpServer())
+                .put('/models')
+                .send({ name: '1' })
+                .expect(400)
+                .expect((res) => {
+                    expect(res.body.message).toContain(
+                        'id should not be empty',
+                    );
+                    expect(res.body.message).toContain(
+                        'name must be longer than or equal to 3 characters',
+                    );
+                });
+        });
+    });
+
+    it(`delete model by id`, () => {
+        return request(app.getHttpServer())
+            .delete('/models/123123')
+            .expect(204);
     });
 
     afterAll(async () => {
