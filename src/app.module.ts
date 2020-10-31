@@ -1,18 +1,17 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ModelsModule } from './models/models.module';
 import { AuthModule } from './auth';
-import { CategoriesModule } from './categories';
+import { CategoriesModule } from './categories/categories.module';
+import { ModelsModule } from './models/models.module';
 import { UsersModule } from './users';
 
-const app = [AuthModule, UsersModule, CategoriesModule, ModelsModule];
+const app = [AuthModule, UsersModule, ModelsModule, CategoriesModule];
 
 @Module({
     imports: [TypeOrmModule.forRoot(), ConfigModule.forRoot(), ...app],
     controllers: [],
     providers: [],
-    exports: [],
+    exports: []
 })
-export class AppModule {
-}
+export class AppModule {}
