@@ -1,4 +1,4 @@
-import { IsNotEmpty, MinLength } from 'class-validator';
+import { MinLength } from 'class-validator';
 
 export class ModelCreateDto {
     @MinLength(3)
@@ -6,9 +6,6 @@ export class ModelCreateDto {
 }
 
 export class ModelUpdateDto {
-    @IsNotEmpty()
-    id: string;
-
     @MinLength(3)
     name?: string;
 }
