@@ -1,1 +1,3 @@
-export class Text {}
+export class Text {
+    value?: string;
+}
