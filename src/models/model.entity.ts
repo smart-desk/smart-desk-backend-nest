@@ -1,10 +1,5 @@
-import {
-    Column,
-    CreateDateColumn,
-    Entity,
-    PrimaryGeneratedColumn,
-    UpdateDateColumn,
-} from 'typeorm';
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Section } from '../sections/section.entity';
 
 @Entity('models')
 export class Model {
@@ -19,4 +14,7 @@ export class Model {
 
     @UpdateDateColumn({ name: 'updated_at', type: 'timestamp with time zone' })
     updatedAt: Date;
+
+    @OneToMany(() => Section, section => section.model, { eager: true })
+    sections: Section[];
 }

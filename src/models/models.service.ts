@@ -6,9 +6,7 @@ import { ModelCreateDto, ModelUpdateDto } from './model.dto';
 
 @Injectable()
 export class ModelsService {
-    constructor(
-        @InjectRepository(Model) private modelRepository: Repository<Model>,
-    ) {}
+    constructor(@InjectRepository(Model) private modelRepository: Repository<Model>) {}
 
     getAll(): Promise<Model[]> {
         return this.modelRepository.find();
