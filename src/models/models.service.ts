@@ -27,8 +27,8 @@ export class ModelsService {
         return this.modelRepository.save(model);
     }
 
-    async update(modelDto: ModelUpdateDto): Promise<Model> {
-        const model = await this.modelRepository.findOne({ id: modelDto.id });
+    async update(id: string, modelDto: ModelUpdateDto): Promise<Model> {
+        const model = await this.modelRepository.findOne({ id });
         if (!model) {
             throw new NotFoundException('Model not found');
         }

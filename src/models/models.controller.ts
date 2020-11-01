@@ -34,9 +34,12 @@ export class ModelsController {
         return this.modelsService.create(model);
     }
 
-    @Put()
-    updateModel(@Body() model: ModelUpdateDto): Promise<Model> {
-        return this.modelsService.update(model);
+    @Put(':id')
+    updateModel(
+        @Param('id') id: string,
+        @Body() model: ModelUpdateDto,
+    ): Promise<Model> {
+        return this.modelsService.update(id, model);
     }
 
     @Delete(':id')
