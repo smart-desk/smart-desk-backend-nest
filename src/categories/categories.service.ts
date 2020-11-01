@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, UpdateResult } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { Category } from './entities/category.entity';
 
@@ -32,14 +32,13 @@ export class CategoriesService {
     }
 
     async update(id: string, data: CreateCategoryDto): Promise<UpdateResult> {
-        const category = await this.categoryRepository.update(id, data);
+        await this.getOne(id);
 
-        return category;
+        return this.categoryRepository.update(id, data);
     }
 
-    delete(categoryId: string) {
-        this.categories = this.categories.filter(({ id }) => id !== categoryId);
-
-        return 'OK';
+    async delete(id: string): Promise<DeleteResult> {
+        await this.getOne(id);
+        return this.categoryRepository.delete(id);
     }
 }
