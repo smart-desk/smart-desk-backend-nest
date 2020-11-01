@@ -1,6 +1,4 @@
-export class UpdateCategoryDto {
-    modelId: string;
-    parentId: string;
-    name: string;
-    updatedAt: string;
-}
+import { PartialType } from '@nestjs/swagger';
+import { CreateCategoryDto } from './create-category.dto';
+
+export class UpdateCategoryDto extends PartialType(CreateCategoryDto) {}
