@@ -1,11 +1,6 @@
-import {
-    Column,
-    Entity,
-    JoinColumn,
-    ManyToOne,
-    PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Model } from '../models/model.entity';
+import { Field } from '../fields/field.entity';
 
 export enum SectionType {
     PARAMS = 'params',
@@ -28,4 +23,7 @@ export class Section {
     @ManyToOne(() => Model, (model: Model) => model.sections)
     @JoinColumn({ name: 'model_id' })
     model: Model;
+
+    @OneToMany(() => Field, (field: Field) => field.section, { eager: true })
+    fields: Field[];
 }
