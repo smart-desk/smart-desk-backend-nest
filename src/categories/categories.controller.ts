@@ -10,6 +10,7 @@ import {
 import { DeleteResult, UpdateResult } from 'typeorm';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Category } from './entities/category.entity';
 
 @Controller('categories')
@@ -22,8 +23,8 @@ export class CategoriesController {
     }
 
     @Post()
-    create(@Body() body: CreateCategoryDto): any {
-        this.categoriesService.create(body);
+    create(@Body() createCategoryDto: CreateCategoryDto): any {
+        this.categoriesService.create(createCategoryDto);
     }
 
     @Get(':id')
@@ -34,9 +35,9 @@ export class CategoriesController {
     @Patch(':id')
     async update(
         @Param('id') id: string,
-        @Body() body: any
+        @Body() updateCategoryDto: UpdateCategoryDto
     ): Promise<UpdateResult> {
-        return this.categoriesService.update(id, body);
+        return this.categoriesService.update(id, updateCategoryDto);
     }
 
     @Delete(':id')

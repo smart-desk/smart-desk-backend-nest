@@ -1,7 +1,6 @@
-export class CreateCategoryDto {
+export class UpdateCategoryDto {
     modelId: string;
     parentId: string;
     name: string;
-    createdAt: string;
     updatedAt: string;
 }
