@@ -1,5 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Section } from '../sections/section.entity';
+import { InputText, Radio, Textarea, Text } from './field-params';
 
 export enum FieldType {
     INPUT_TEXT = 'input_text',
@@ -21,6 +22,9 @@ export class Field {
 
     @Column('uuid')
     section_id: string;
+
+    @Column('json')
+    params: InputText | Textarea | Text | Radio;
 
     @ManyToOne(() => Section, (section: Section) => section.fields)
     @JoinColumn({ name: 'section_id' })
