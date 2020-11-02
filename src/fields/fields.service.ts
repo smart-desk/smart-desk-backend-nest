@@ -23,19 +23,7 @@ export class FieldsService {
     async create(fieldDto: FieldCreateDto): Promise<Field> {
         await this.sectionsService.getById(fieldDto.section_id);
 
-        const validationErrors = await this.validateFieldParams(fieldDto.params, fieldDto.type);
-        if (validationErrors) {
-            throw new BadRequestException(validationErrors);
-        }
-
         const field = this.fieldRepository.create(fieldDto);
         return this.fieldRepository.save(field);
-    }
-
-    private async validateFieldParams(params: FieldParamsType, type: FieldType): Promise<string | undefined> {
-        const validationErrors = await validate(plainToClass(ParamClasses.get(type), params));
-        if (validationErrors) {
-            return validationErrors.map(err => Object.values(err.constraints).map(cons => cons)).join(', ');
-        }
     }
 }
