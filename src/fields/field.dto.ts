@@ -22,3 +22,12 @@ export class FieldCreateDto {
     @ValidateNested()
     params?: FieldParamsType;
 }
+
+export class FieldUpdateDto {
+    @MaxLength(255)
+    title?: string;
+
+    @Type(options => ParamClasses.get(options.object.type as FieldType))
+    @ValidateNested()
+    params?: FieldParamsType;
+}

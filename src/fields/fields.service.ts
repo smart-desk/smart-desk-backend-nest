@@ -1,12 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { validate } from 'class-validator';
-import { plainToClass } from 'class-transformer';
-import { Field, FieldType } from './field.entity';
-import { FieldCreateDto, FieldParamsType } from './field.dto';
+import { Field } from './field.entity';
+import { FieldCreateDto, FieldUpdateDto } from './field.dto';
 import { SectionsService } from '../sections/sections.service';
-import { ParamClasses } from './constants';
 
 @Injectable()
 export class FieldsService {
@@ -25,5 +22,16 @@ export class FieldsService {
 
         const field = this.fieldRepository.create(fieldDto);
         return this.fieldRepository.save(field);
+    }
+
+    async update(id: string, fieldDto: FieldUpdateDto): Promise<Field> {
+        const field = await this.fieldRepository.findOne({ id });
+        if (!field) {
+            throw new NotFoundException('Field not found');
+        }
+
+        await this.fieldRepository.update(field.id, fieldDto);
+
+        return this.fieldRepository.findOne(field.id);
     }
 }
