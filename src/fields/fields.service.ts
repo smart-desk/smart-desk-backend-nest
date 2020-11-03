@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { Field } from './field.entity';
 import { FieldCreateDto, FieldUpdateDto } from './field.dto';
 import { SectionsService } from '../sections/sections.service';
@@ -33,5 +33,14 @@ export class FieldsService {
         await this.fieldRepository.update(field.id, fieldDto);
 
         return this.fieldRepository.findOne(field.id);
+    }
+
+    async delete(id: string): Promise<DeleteResult> {
+        const field = await this.fieldRepository.findOne({ id });
+        if (!field) {
+            throw new NotFoundException('Field not found');
+        }
+
+        return this.fieldRepository.delete(field.id);
     }
 }

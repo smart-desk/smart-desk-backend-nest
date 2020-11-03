@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, HttpCode, HttpStatus, Param, Post, Put } from '@nestjs/common';
 import { Field } from './field.entity';
 import { FieldsService } from './fields.service';
 import { ApiTags } from '@nestjs/swagger';
@@ -17,5 +17,11 @@ export class FieldsController {
     @Put(':id')
     updateField(@Param('id') id: string, @Body() body: FieldUpdateDto): Promise<Field> {
         return this.fieldsService.update(id, body);
+    }
+
+    @Delete(':id')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    async deleteField(@Param('id') id: string) {
+        await this.fieldsService.delete(id);
     }
 }
