@@ -27,6 +27,10 @@ export class FieldUpdateDto {
     @MaxLength(255)
     title?: string;
 
+    @IsNotEmpty()
+    @IsEnum(FieldType)
+    type: FieldType;
+
     @Type(options => ParamClasses.get(options.object.type as FieldType))
     @ValidateNested()
     params?: FieldParamsType;
