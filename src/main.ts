@@ -12,6 +12,9 @@ async function bootstrap() {
             forbidNonWhitelisted: true,
             // May have impact on performance
             transform: true,
+            transformOptions: {
+                enableImplicitConversion: true,
+            },
         })
     );
     app.setGlobalPrefix('api');
