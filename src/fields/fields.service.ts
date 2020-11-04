@@ -9,14 +9,6 @@ import { SectionsService } from '../sections/sections.service';
 export class FieldsService {
     constructor(@InjectRepository(Field) private fieldRepository: Repository<Field>, private sectionsService: SectionsService) {}
 
-    async getById(id: string): Promise<Field> {
-        const field = await this.fieldRepository.findOne({ id });
-        if (!field) {
-            throw new NotFoundException('Field not found');
-        }
-        return this.fieldRepository.findOne({ id });
-    }
-
     async create(fieldDto: FieldCreateDto): Promise<Field> {
         await this.sectionsService.getById(fieldDto.section_id);
 
