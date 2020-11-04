@@ -11,7 +11,7 @@ async function bootstrap() {
             whitelist: true,
             forbidNonWhitelisted: true,
             // May have impact on performance
-            transform: true
+            transform: true,
         })
     );
     app.setGlobalPrefix('api');
@@ -19,16 +19,12 @@ async function bootstrap() {
         origin: 'http://localhost:4200',
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
         allowedHeaders: 'Content-Type, Accept',
-        credentials: true
+        credentials: true,
     });
 
-    const options = new DocumentBuilder()
-        .setTitle('Smart Desk')
-        .setDescription('Smart Desk REST API')
-        .setVersion('1.0')
-        .build();
+    const swaggerOptions = new DocumentBuilder().setTitle('Smart Desk').setDescription('Smart Desk REST API').setVersion('1.0').build();
 
-    const document = SwaggerModule.createDocument(app, options);
+    const document = SwaggerModule.createDocument(app, swaggerOptions);
     SwaggerModule.setup('swag', app, document);
 
     await app.listen(3001);

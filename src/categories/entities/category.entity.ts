@@ -5,18 +5,18 @@ export class Category {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column('uuid')
+    @Column('uuid', { name: 'model_id' })
     modelId: string;
 
-    @Column('uuid')
+    @Column('uuid', { name: 'parent_id' })
     parentId: string;
 
     @Column('varchar', { length: 255 })
     name: string;
 
-    @Column('date')
+    @Column('date', { name: 'created_at' })
     createdAt: string;
 
-    @Column('date')
+    @Column('date', { name: 'updated_at' })
     updatedAt: string;
 }

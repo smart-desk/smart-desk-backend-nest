@@ -7,18 +7,13 @@ import { Category } from './entities/category.entity';
 
 @Injectable()
 export class CategoriesService {
-    private categories: CreateCategoryDto[] = [];
+    constructor(@InjectRepository(Category) private categoryRepository: Repository<Category>) {}
 
-    constructor(
-        @InjectRepository(Category)
-        private categoryRepository: Repository<Category>
-    ) {}
-
-    getAll() {
-        return this.categories;
+    findAll(): Promise<Category[]> {
+        return this.categoryRepository.find();
     }
 
-    async getOne(id: string): Promise<Category> {
+    async findOne(id: string): Promise<Category> {
         const category = await this.categoryRepository.findOne(id);
 
         if (!category) {
@@ -28,17 +23,18 @@ export class CategoriesService {
         return category;
     }
 
-    create(data: CreateCategoryDto) {
-        this.categories.push(data);
+    create(createCategoryDto: CreateCategoryDto): Promise<Category> {
+        const category = this.categoryRepository.create(createCategoryDto);
+        return this.categoryRepository.save(category);
     }
 
     async update(id: string, data: UpdateCategoryDto): Promise<UpdateResult> {
-        await this.getOne(id);
+        await this.findOne(id);
         return this.categoryRepository.update(id, data);
     }
 
     async delete(id: string): Promise<DeleteResult> {
-        await this.getOne(id);
+        await this.findOne(id);
         return this.categoryRepository.delete(id);
     }
 }
