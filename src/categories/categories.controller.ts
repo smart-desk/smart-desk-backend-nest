@@ -1,5 +1,4 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
-import { DeleteResult, UpdateResult } from 'typeorm';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -25,12 +24,12 @@ export class CategoriesController {
     }
 
     @Patch(':id')
-    async update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto): Promise<UpdateResult> {
+    async update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto): Promise<Category> {
         return this.categoriesService.update(id, updateCategoryDto);
     }
 
     @Delete(':id')
-    async delete(@Param('id') id: string): Promise<DeleteResult> {
+    async delete(@Param('id') id: string): Promise<Category> {
         return this.categoriesService.delete(id);
     }
 }
