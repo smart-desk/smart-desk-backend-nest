@@ -10,13 +10,13 @@ export class CategoriesController {
     constructor(private categoriesService: CategoriesService) {}
 
     @Get()
-    gerAll(): any {
-        this.categoriesService.findAll();
+    getAll(): Promise<Category[]> {
+        return this.categoriesService.findAll();
     }
 
     @Post()
-    create(@Body() createCategoryDto: CreateCategoryDto): any {
-        this.categoriesService.create(createCategoryDto);
+    create(@Body() createCategoryDto: CreateCategoryDto): Promise<Category> {
+        return this.categoriesService.create(createCategoryDto);
     }
 
     @Get(':id')
