@@ -15,6 +15,6 @@ export class Model {
     @UpdateDateColumn({ name: 'updated_at', type: 'timestamp with time zone' })
     updatedAt: Date;
 
-    @OneToMany(() => Section, section => section.model, { eager: true })
+    @OneToMany(() => Section, (section: Section) => section.model, { eager: true })
     sections: Section[];
 }

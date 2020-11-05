@@ -1,14 +1,4 @@
-import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    HttpCode,
-    HttpStatus,
-    Param,
-    Post,
-    Put,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Model } from './model.entity';
 import { ModelsService } from './models.service';
@@ -35,10 +25,7 @@ export class ModelsController {
     }
 
     @Put(':id')
-    updateModel(
-        @Param('id') id: string,
-        @Body() model: ModelUpdateDto,
-    ): Promise<Model> {
+    updateModel(@Param('id') id: string, @Body() model: ModelUpdateDto): Promise<Model> {
         return this.modelsService.update(id, model);
     }
 
