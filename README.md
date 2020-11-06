@@ -59,5 +59,3 @@ This should solve the problem.
 ### If typeorm doesn't see migrations folder
 
 [https://stackoverflow.com/questions/62821983/typeorm-no-migrations-pending-when-attempting-to-run-migrations-manually](https://stackoverflow.com/questions/62821983/typeorm-no-migrations-pending-when-attempting-to-run-migrations-manually)
-
-> Change `migrations: ['dist/migrations/**/*.{ts, js}'],` to `migrations: ['src/migrations/**/*.{ts, js}'],`
