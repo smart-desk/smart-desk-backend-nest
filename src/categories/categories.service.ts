@@ -17,7 +17,7 @@ export class CategoriesService {
         const category = await this.categoryRepository.findOne(id);
 
         if (!category) {
-            throw new NotFoundException(`Category doesn't exist`);
+            throw new NotFoundException(`Category ${id} doesn't exist`);
         }
 
         return category;
