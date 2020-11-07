@@ -11,13 +11,16 @@ export class AdvertsService {
     async getAll(options: AdvertsGetDto): Promise<AdvertsGetResponseDto> {
         const skipped = (options.page - 1) * options.limit;
 
-        const totalCount = await this.advertRepository.count();
-        const adverts = await this.advertRepository
-            .createQueryBuilder()
-            .orderBy('created_at', 'DESC')
-            .offset(skipped)
-            .limit(options.limit)
-            .getMany();
+        const query = await this.advertRepository
+            .createQueryBuilder('')
+            .andWhere(options.category_id ? 'advert.category_id = :category_id' : '1=1', { category_id: options.category_id })
+            .andWhere(options.search ? 'LOWER(title COLLATE "en_US") LIKE :search' : '1=1', {
+                search: `%${options.search.toLocaleLowerCase()}%`,
+            });
+
+        const adverts = await query.orderBy('created_at', 'DESC').offset(skipped).limit(options.limit).getMany();
+
+        const totalCount = await query.getCount();
 
         const response = new AdvertsGetResponseDto();
         response.adverts = adverts;
