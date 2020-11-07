@@ -1,8 +1,7 @@
 import { InputText, Text, Radio, Textarea } from './field-params';
-import { FieldType } from './field.entity';
 import { IsEnum, IsNotEmpty, IsUUID, MaxLength, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ParamClasses } from './constants';
+import { FieldType, ParamClasses } from './constants';
 
 export type FieldParamsType = InputText | Textarea | Text | Radio;
 

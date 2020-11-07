@@ -1,12 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Connection } from 'typeorm';
 import { Advert } from './advert.entity';
 import { AdvertsGetDto, AdvertsGetResponseDto } from './advert.dto';
+import { SectionsService } from '../sections/sections.service';
+import { DataEntities } from './constants';
 
 @Injectable()
 export class AdvertsService {
-    constructor(@InjectRepository(Advert) private advertRepository: Repository<Advert>) {}
+    constructor(
+        @InjectRepository(Advert) private advertRepository: Repository<Advert>,
+        private sectionsService: SectionsService,
+        private connection: Connection
+    ) {}
 
     async getAll(options: AdvertsGetDto): Promise<AdvertsGetResponseDto> {
         const skipped = (options.page - 1) * options.limit;
@@ -19,6 +25,18 @@ export class AdvertsService {
             });
 
         const adverts = await query.orderBy('created_at', 'DESC').offset(skipped).limit(options.limit).getMany();
+
+        for (const advert of adverts) {
+            advert.sections = await this.sectionsService.getByModelId(advert.model_id);
+
+            for (const section of advert.sections) {
+                for (const field of section.fields) {
+                    if (DataEntities.get(field.type)) {
+                        field.data = await this.connection.manager.findOne(DataEntities.get(field.type), { field_id: field.id });
+                    }
+                }
+            }
+        }
 
         const totalCount = await query.getCount();
 
