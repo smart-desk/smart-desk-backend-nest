@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Model } from '../models/model.entity';
 import { Field } from '../fields/field.entity';
+import { Model } from '../models/model.entity';
 
 export enum SectionType {
     PARAMS = 'params',

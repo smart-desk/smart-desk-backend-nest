@@ -1,43 +1,37 @@
-import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    Param,
-    ParseIntPipe,
-    Post,
-    Put,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { CategoriesService } from './categories.service';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
+import { Category } from './entities/category.entity';
 
 @Controller('categories')
+@ApiTags('Categories')
 export class CategoriesController {
+    constructor(private categoriesService: CategoriesService) {}
+
     @Get()
-    getCategoryList(): any {
-        return '[GET] category list';
+    getAll(): Promise<Category[]> {
+        return this.categoriesService.findAll();
     }
 
     @Post()
-    createCategory(@Body() categoryDto: any): any {
-        return `[POST] Create category: ${JSON.stringify(categoryDto)}`;
+    create(@Body() createCategoryDto: CreateCategoryDto): Promise<Category> {
+        return this.categoriesService.create(createCategoryDto);
     }
 
     @Get(':id')
-    getCategoryById(@Param('id', ParseIntPipe) id: number): any {
-        return `[GET] Category by id: ${id}`;
+    getOne(@Param('id') id: string): Promise<Category> {
+        return this.categoriesService.findOne(id);
     }
 
-    @Put(':id')
-    updateCategory(
-        @Param('id', ParseIntPipe) id: number,
-        @Body() categoryDto: any,
-    ): any {
-        return `[PUT] Update category by id: ${id}, ${JSON.stringify(
-            categoryDto,
-        )}`;
+    @Patch(':id')
+    update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto): Promise<Category> {
+        return this.categoriesService.update(id, updateCategoryDto);
     }
 
     @Delete(':id')
-    deleteCategory(@Param('id', ParseIntPipe) id: number): any {
-        return `[DELETE] Delete category by id : ${id}`;
+    delete(@Param('id') id: string): Promise<Category> {
+        return this.categoriesService.delete(id);
     }
 }

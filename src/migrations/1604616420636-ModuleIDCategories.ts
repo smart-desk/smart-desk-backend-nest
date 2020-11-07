@@ -1,9 +1,9 @@
 import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
 
-export class ChangeSection1604170028043 implements MigrationInterface {
+export class ModuleIDCategories1604616420636 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.changeColumn(
-            'sections',
+            'categories',
             'id',
             new TableColumn({
                 name: 'id',
@@ -16,13 +16,13 @@ export class ChangeSection1604170028043 implements MigrationInterface {
             })
         );
 
-        await queryRunner.dropColumn('sections', 'created_at');
-        await queryRunner.dropColumn('sections', 'updated_at');
+        await queryRunner.query('ALTER TABLE categories ALTER COLUMN created_at SET DEFAULT NOW()');
+        await queryRunner.query('ALTER TABLE categories ALTER COLUMN updated_at SET DEFAULT NOW()');
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.changeColumn(
-            'sections',
+            'categories',
             'id',
             new TableColumn({
                 name: 'id',
@@ -35,21 +35,7 @@ export class ChangeSection1604170028043 implements MigrationInterface {
             })
         );
 
-        await queryRunner.addColumn(
-            'sections',
-            new TableColumn({
-                name: 'created_at',
-                type: 'timestamp',
-                default: 'NOW()',
-            })
-        );
-        await queryRunner.addColumn(
-            'sections',
-            new TableColumn({
-                name: 'updated_at',
-                type: 'timestamp',
-                default: 'NOW()',
-            })
-        );
+        await queryRunner.query('ALTER TABLE categories ALTER COLUMN created_at DROP DEFAULT;');
+        await queryRunner.query('ALTER TABLE categories ALTER COLUMN updated_at DROP DEFAULT;');
     }
 }

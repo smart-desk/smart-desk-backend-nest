@@ -5,22 +5,23 @@ import { User } from './user.entity';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectRepository(User) private userRepository: Repository<User>) {
-  }
+    constructor(
+        @InjectRepository(User) private userRepository: Repository<User>,
+    ) {}
 
-  async createUser(user: UserDto): Promise<User> {
-    const userEntity = this.userRepository.create(user);
-    return this.userRepository.save(userEntity);
-  }
+    async createUser(user: UserDto): Promise<User> {
+        const userEntity = this.userRepository.create(user);
+        return this.userRepository.save(userEntity);
+    }
 
-  async fineOne(id: string): Promise<User> {
-    return this.userRepository.findOne(id)
-  }
+    async fineOne(id: string): Promise<User> {
+        return this.userRepository.findOne(id);
+    }
 
-  async findByEmail(email: string) {
-    return this.userRepository.createQueryBuilder('user')
-      .where('user.email = :email', { email })
-      .getOne();
-  }
-
+    async findByEmail(email: string) {
+        return this.userRepository
+            .createQueryBuilder('user')
+            .where('user.email = :email', { email })
+            .getOne();
+    }
 }
