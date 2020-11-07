@@ -1,10 +1,12 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Category } from './entities/category.entity';
 
 @Controller('categories')
+@ApiTags('Categories')
 export class CategoriesController {
     constructor(private categoriesService: CategoriesService) {}
 
@@ -19,17 +21,17 @@ export class CategoriesController {
     }
 
     @Get(':id')
-    async getOne(@Param('id') id: string): Promise<Category> {
+    getOne(@Param('id') id: string): Promise<Category> {
         return this.categoriesService.findOne(id);
     }
 
     @Patch(':id')
-    async update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto): Promise<Category> {
+    update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto): Promise<Category> {
         return this.categoriesService.update(id, updateCategoryDto);
     }
 
     @Delete(':id')
-    async delete(@Param('id') id: string): Promise<Category> {
+    delete(@Param('id') id: string): Promise<Category> {
         return this.categoriesService.delete(id);
     }
 }

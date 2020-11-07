@@ -9,10 +9,4 @@ export class CreateCategoryDto {
 
     @IsString()
     name: string;
-
-    @IsString()
-    createdAt: string;
-
-    @IsString()
-    updatedAt: string;
 }
