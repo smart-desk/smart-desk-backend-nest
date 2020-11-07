@@ -1,5 +1,5 @@
 import { Advert } from './advert.entity';
-import { IsNumber, IsOptional, IsPositive, IsString, IsUUID, MaxLength } from 'class-validator';
+import { IsNumber, IsOptional, IsPositive, IsString, IsUUID, Max, MaxLength } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class AdvertsGetDto {
@@ -13,6 +13,7 @@ export class AdvertsGetDto {
     @IsPositive()
     @IsNumber()
     @Transform(limit => parseInt(limit), { toClassOnly: true })
+    @Max(100)
     limit?: number = 20;
 
     @IsOptional()
@@ -22,7 +23,7 @@ export class AdvertsGetDto {
     @IsOptional()
     @IsString()
     @MaxLength(255)
-    search?: string;
+    search?: string = '';
 }
 
 export class AdvertsGetResponseDto {
