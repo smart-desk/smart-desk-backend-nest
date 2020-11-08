@@ -5,6 +5,7 @@ import { Advert } from './entities/advert.entity';
 import { AdvertsGetDto, AdvertsGetResponseDto } from './dto/advert.dto';
 import { SectionsService } from '../sections/sections.service';
 import { DataEntities } from './constants';
+import { AdvertCreateDto } from './dto/advert-create.dto';
 
 @Injectable()
 export class AdvertsService {
@@ -44,6 +45,11 @@ export class AdvertsService {
         }
 
         return this.loadFieldDataForAdvert(advert);
+    }
+
+    async create(advertDto: AdvertCreateDto): Promise<Advert> {
+        const category = this.advertRepository.create(advertDto);
+        return this.advertRepository.save(category);
     }
 
     private async loadFieldDataForAdvert(advert: Advert): Promise<Advert> {
