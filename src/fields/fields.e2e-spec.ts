@@ -6,11 +6,12 @@ import { v4 as uuid } from 'uuid';
 import fn = jest.fn;
 import { createTestAppForModule } from '../../test/test.utils';
 import { FieldsModule } from './fields.module';
-import { Field, FieldType } from './field.entity';
+import { Field } from './field.entity';
 import { FieldCreateDto, FieldUpdateDto } from './field.dto';
 import { InputText, Radio, Text, Textarea } from './field-params';
 import { SectionsModule } from '../sections/sections.module';
 import { Section } from '../sections/section.entity';
+import { FieldType } from './constants';
 
 describe('Fields controller', () => {
     let app: INestApplication;
