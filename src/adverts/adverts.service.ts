@@ -1,17 +1,22 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Connection } from 'typeorm';
 import { Advert } from './entities/advert.entity';
 import { AdvertsGetDto, AdvertsGetResponseDto } from './dto/advert-get.dto';
 import { SectionsService } from '../sections/sections.service';
-import { FieldDataEntities } from './constants';
+import { FieldDataCreateDto, FieldDataEntities, FieldDataEntityType } from './constants';
 import { AdvertCreateDto } from './dto/advert-create.dto';
+import { plainToClass } from 'class-transformer';
+import { FieldsService } from '../fields/fields.service';
+import { EntityTarget } from 'typeorm/common/EntityTarget';
+import { validate } from 'class-validator';
 
 @Injectable()
 export class AdvertsService {
     constructor(
         @InjectRepository(Advert) private advertRepository: Repository<Advert>,
         private sectionsService: SectionsService,
+        private fieldsService: FieldsService,
         private connection: Connection
     ) {}
 
@@ -48,9 +53,30 @@ export class AdvertsService {
     }
 
     async create(advertDto: AdvertCreateDto): Promise<Advert> {
-        const category = this.advertRepository.create(advertDto);
+        // todo validate fields before creating
+        const advert = this.advertRepository.create(advertDto);
+        const advertResult = await this.advertRepository.save(advert);
 
-        return this.advertRepository.save(category);
+        for (const fieldDto of advertDto.fields) {
+            const field = await this.fieldsService.getById(fieldDto.field_id);
+            const targetDto = FieldDataCreateDto.get(field.type);
+            const targetClass = FieldDataEntities.get(field.type);
+
+            if (targetDto) {
+                const createDtoClass = plainToClass(targetDto, { ...fieldDto });
+                try {
+                    await validate(createDtoClass);
+                } catch (e) {
+                    throw new BadRequestException(e);
+                }
+
+                (createDtoClass as any).advert_id = advertResult.id; // todo no any
+                const fieldData = this.connection.manager.create(targetClass as EntityTarget<FieldDataEntityType>, createDtoClass);
+                await this.connection.manager.save(fieldData);
+            }
+        }
+
+        return this.getById(advertResult.id);
     }
 
     private async loadFieldDataForAdvert(advert: Advert): Promise<Advert> {

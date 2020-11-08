@@ -9,5 +9,6 @@ import { SectionsModule } from '../sections/sections.module';
     imports: [SectionsModule, TypeOrmModule.forFeature([Field])],
     controllers: [FieldsController],
     providers: [FieldsService],
+    exports: [FieldsService],
 })
 export class FieldsModule {}

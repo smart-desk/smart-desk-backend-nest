@@ -9,6 +9,10 @@ import { SectionsService } from '../sections/sections.service';
 export class FieldsService {
     constructor(@InjectRepository(Field) private fieldRepository: Repository<Field>, private sectionsService: SectionsService) {}
 
+    getById(id: string): Promise<Field> {
+        return this.fieldRepository.findOne(id);
+    }
+
     async create(fieldDto: FieldCreateDto): Promise<Field> {
         await this.sectionsService.getById(fieldDto.section_id);
 
