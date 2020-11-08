@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Connection } from 'typeorm';
-import { Advert } from './advert.entity';
-import { AdvertsGetDto, AdvertsGetResponseDto } from './advert.dto';
+import { Advert } from './entities/advert.entity';
+import { AdvertsGetDto, AdvertsGetResponseDto } from './dto/advert.dto';
 import { SectionsService } from '../sections/sections.service';
 import { DataEntities } from './constants';
 
@@ -25,23 +25,11 @@ export class AdvertsService {
             });
 
         const adverts = await query.orderBy('created_at', 'DESC').offset(skipped).limit(options.limit).getMany();
-
-        for (const advert of adverts) {
-            advert.sections = await this.sectionsService.getByModelId(advert.model_id);
-
-            for (const section of advert.sections) {
-                for (const field of section.fields) {
-                    if (DataEntities.get(field.type)) {
-                        field.data = await this.connection.manager.findOne(DataEntities.get(field.type), { field_id: field.id });
-                    }
-                }
-            }
-        }
-
         const totalCount = await query.getCount();
+        const resolvedAdverts = await Promise.all(adverts.map(advert => this.loadFieldDataForAdvert(advert)));
 
         const response = new AdvertsGetResponseDto();
-        response.adverts = adverts;
+        response.adverts = resolvedAdverts;
         response.page = options.page;
         response.limit = options.limit;
         response.totalCount = totalCount;
@@ -54,6 +42,22 @@ export class AdvertsService {
         if (!advert) {
             throw new NotFoundException('Advert not found');
         }
+
+        return this.loadFieldDataForAdvert(advert);
+    }
+
+    private async loadFieldDataForAdvert(advert: Advert): Promise<Advert> {
+        advert.sections = await this.sectionsService.getByModelId(advert.model_id);
+
+        // todo sequential loading is not effective, replace with parallel
+        for (const section of advert.sections) {
+            for (const field of section.fields) {
+                if (DataEntities.get(field.type)) {
+                    field.data = await this.connection.manager.findOne(DataEntities.get(field.type), { field_id: field.id });
+                }
+            }
+        }
+
         return advert;
     }
 }

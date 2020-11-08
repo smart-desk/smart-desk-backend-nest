@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { Section } from '../sections/section.entity';
+import { Section } from '../../sections/section.entity';
 
 @Entity('adverts')
 export class Advert {

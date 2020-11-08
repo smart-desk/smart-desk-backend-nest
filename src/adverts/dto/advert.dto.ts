@@ -1,4 +1,4 @@
-import { Advert } from './advert.entity';
+import { Advert } from '../entities/advert.entity';
 import { IsNumber, IsOptional, IsPositive, IsString, IsUUID, Max, MaxLength } from 'class-validator';
 import { Transform } from 'class-transformer';
 

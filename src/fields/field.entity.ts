@@ -2,6 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 't
 import { Section } from '../sections/section.entity';
 import { InputText, Radio, Textarea, Text } from './field-params';
 import { FieldType } from './constants';
+import { Exclude } from 'class-transformer';
 
 @Entity('fields')
 export class Field {

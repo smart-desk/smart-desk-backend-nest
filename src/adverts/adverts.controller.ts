@@ -1,8 +1,8 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { AdvertsService } from './adverts.service';
-import { Advert } from './advert.entity';
+import { Advert } from './entities/advert.entity';
 import { ApiTags } from '@nestjs/swagger';
-import { AdvertsGetDto, AdvertsGetResponseDto } from './advert.dto';
+import { AdvertsGetDto, AdvertsGetResponseDto } from './dto/advert.dto';
 
 @Controller('adverts')
 @ApiTags('Adverts')
