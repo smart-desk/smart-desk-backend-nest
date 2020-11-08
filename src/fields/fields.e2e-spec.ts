@@ -7,11 +7,14 @@ import fn = jest.fn;
 import { createTestAppForModule } from '../../test/test.utils';
 import { FieldsModule } from './fields.module';
 import { Field } from './field.entity';
-import { FieldCreateDto, FieldUpdateDto } from './field.dto';
-import { InputText, Radio, Text, Textarea } from './field-params';
+import { FieldCreateDto, FieldUpdateDto } from './dto/field.dto';
 import { SectionsModule } from '../sections/sections.module';
 import { Section } from '../sections/section.entity';
 import { FieldType } from './constants';
+import { InputTextDto } from './dto/input-text.dto';
+import { TextareaDto } from './dto/textarea.dto';
+import { TextDto } from './dto/text.dto';
+import { RadioDto } from './dto/radio.dto';
 
 describe('Fields controller', () => {
     let app: INestApplication;
@@ -51,7 +54,7 @@ describe('Fields controller', () => {
                     section_id: uuid(),
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
-                    params: { label: 'some label' } as InputText,
+                    params: { label: 'some label' } as InputTextDto,
                 } as FieldCreateDto)
                 .expect(201);
         });
@@ -63,7 +66,7 @@ describe('Fields controller', () => {
                     section_id: uuid(),
                     title: 'some title',
                     type: 'wrong type' as FieldType,
-                    params: { label: 'some label' } as InputText,
+                    params: { label: 'some label' } as InputTextDto,
                 } as FieldCreateDto)
                 .expect(400)
                 .expect(res => {
@@ -78,7 +81,7 @@ describe('Fields controller', () => {
                     section_id: 'not id',
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
-                    params: { label: 'some label' } as InputText,
+                    params: { label: 'some label' } as InputTextDto,
                 } as FieldCreateDto)
                 .expect(400)
                 .expect(res => {
@@ -94,7 +97,7 @@ describe('Fields controller', () => {
                     section_id: uuid(),
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
-                    params: { label: 'some label' } as InputText,
+                    params: { label: 'some label' } as InputTextDto,
                 } as FieldCreateDto)
                 .expect(404)
                 .expect(res => {
@@ -114,7 +117,7 @@ describe('Fields controller', () => {
                             label: 'some label',
                             placeholder: 'some place',
                             required: true,
-                        } as InputText,
+                        } as InputTextDto,
                     } as FieldCreateDto)
                     .expect(201);
             });
@@ -130,7 +133,7 @@ describe('Fields controller', () => {
                             label: '',
                             placeholder: 'some place',
                             required: 'string' as any,
-                        } as InputText,
+                        } as InputTextDto,
                     } as FieldCreateDto)
                     .expect(400)
                     .expect(res => {
@@ -152,7 +155,7 @@ describe('Fields controller', () => {
                             label: 'some label',
                             placeholder: 'some place',
                             required: true,
-                        } as Textarea,
+                        } as TextareaDto,
                     } as FieldCreateDto)
                     .expect(201);
             });
@@ -168,7 +171,7 @@ describe('Fields controller', () => {
                             label: '',
                             placeholder: 'some place',
                             required: 'string' as any,
-                        } as Textarea,
+                        } as TextareaDto,
                     } as FieldCreateDto)
                     .expect(400)
                     .expect(res => {
@@ -186,7 +189,7 @@ describe('Fields controller', () => {
                         section_id: uuid(),
                         title: 'some title',
                         type: FieldType.TEXT,
-                        params: { value: 'some string' } as Text,
+                        params: { value: 'some string' } as TextDto,
                     } as FieldCreateDto)
                     .expect(201);
             });
@@ -198,7 +201,7 @@ describe('Fields controller', () => {
                         section_id: uuid(),
                         title: 'some title',
                         type: FieldType.TEXT,
-                        params: { value: '' } as Text,
+                        params: { value: '' } as TextDto,
                     } as FieldCreateDto)
                     .expect(400)
                     .expect(res => {
@@ -227,7 +230,7 @@ describe('Fields controller', () => {
                                     value: 'some value 1',
                                 },
                             ],
-                        } as Radio,
+                        } as RadioDto,
                     } as FieldCreateDto)
                     .expect(201);
             });
@@ -251,7 +254,7 @@ describe('Fields controller', () => {
                                     value: '',
                                 },
                             ],
-                        } as Radio,
+                        } as RadioDto,
                     } as FieldCreateDto)
                     .expect(400)
                     .expect(res => {
@@ -270,7 +273,7 @@ describe('Fields controller', () => {
                 .send({
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
-                    params: { label: 'some label' } as InputText,
+                    params: { label: 'some label' } as InputTextDto,
                 } as FieldUpdateDto)
                 .expect(200);
         });
@@ -281,7 +284,7 @@ describe('Fields controller', () => {
                 .send({
                     title: 'some title',
                     type: 'wrong type' as FieldType,
-                    params: { label: 'some label' } as InputText,
+                    params: { label: 'some label' } as InputTextDto,
                 } as FieldUpdateDto)
                 .expect(400)
                 .expect(res => {
@@ -296,7 +299,7 @@ describe('Fields controller', () => {
                 .send({
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
-                    params: { label: 'some label' } as InputText,
+                    params: { label: 'some label' } as InputTextDto,
                 } as FieldUpdateDto)
                 .expect(404)
                 .expect(res => {
@@ -315,7 +318,7 @@ describe('Fields controller', () => {
                             label: 'some label',
                             placeholder: 'some place',
                             required: true,
-                        } as InputText,
+                        } as InputTextDto,
                     } as FieldUpdateDto)
                     .expect(200);
             });
@@ -330,7 +333,7 @@ describe('Fields controller', () => {
                             label: '',
                             placeholder: 'some place',
                             required: 'string' as any,
-                        } as InputText,
+                        } as InputTextDto,
                     } as FieldUpdateDto)
                     .expect(400)
                     .expect(res => {
@@ -351,7 +354,7 @@ describe('Fields controller', () => {
                             label: 'some label',
                             placeholder: 'some place',
                             required: true,
-                        } as Textarea,
+                        } as TextareaDto,
                     } as FieldUpdateDto)
                     .expect(200);
             });
@@ -366,7 +369,7 @@ describe('Fields controller', () => {
                             label: '',
                             placeholder: 'some place',
                             required: 'string' as any,
-                        } as Textarea,
+                        } as TextareaDto,
                     } as FieldUpdateDto)
                     .expect(400)
                     .expect(res => {
@@ -383,7 +386,7 @@ describe('Fields controller', () => {
                     .send({
                         title: 'some title',
                         type: FieldType.TEXT,
-                        params: { value: 'some string' } as Text,
+                        params: { value: 'some string' } as TextDto,
                     } as FieldUpdateDto)
                     .expect(200);
             });
@@ -394,7 +397,7 @@ describe('Fields controller', () => {
                     .send({
                         title: 'some title',
                         type: FieldType.TEXT,
-                        params: { value: '' } as Text,
+                        params: { value: '' } as TextDto,
                     } as FieldUpdateDto)
                     .expect(400)
                     .expect(res => {
@@ -422,7 +425,7 @@ describe('Fields controller', () => {
                                     value: 'some value 1',
                                 },
                             ],
-                        } as Radio,
+                        } as RadioDto,
                     } as FieldUpdateDto)
                     .expect(200);
             });
@@ -445,7 +448,7 @@ describe('Fields controller', () => {
                                     value: '',
                                 },
                             ],
-                        } as Radio,
+                        } as RadioDto,
                     } as FieldUpdateDto)
                     .expect(400)
                     .expect(res => {

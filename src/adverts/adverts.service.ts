@@ -2,9 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Connection } from 'typeorm';
 import { Advert } from './entities/advert.entity';
-import { AdvertsGetDto, AdvertsGetResponseDto } from './dto/advert.dto';
+import { AdvertsGetDto, AdvertsGetResponseDto } from './dto/advert-get.dto';
 import { SectionsService } from '../sections/sections.service';
-import { DataEntities } from './constants';
+import { FieldDataEntities } from './constants';
 import { AdvertCreateDto } from './dto/advert-create.dto';
 
 @Injectable()
@@ -49,6 +49,7 @@ export class AdvertsService {
 
     async create(advertDto: AdvertCreateDto): Promise<Advert> {
         const category = this.advertRepository.create(advertDto);
+
         return this.advertRepository.save(category);
     }
 
@@ -58,8 +59,8 @@ export class AdvertsService {
         // todo sequential loading is not effective, replace with parallel
         for (const section of advert.sections) {
             for (const field of section.fields) {
-                if (DataEntities.get(field.type)) {
-                    field.data = await this.connection.manager.findOne(DataEntities.get(field.type), { field_id: field.id });
+                if (FieldDataEntities.get(field.type)) {
+                    field.data = await this.connection.manager.findOne(FieldDataEntities.get(field.type), { field_id: field.id });
                 }
             }
         }

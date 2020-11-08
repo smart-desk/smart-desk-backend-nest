@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository } from 'typeorm';
 import { Field } from './field.entity';
-import { FieldCreateDto, FieldUpdateDto } from './field.dto';
+import { FieldCreateDto, FieldUpdateDto } from './dto/field.dto';
 import { SectionsService } from '../sections/sections.service';
 
 @Injectable()

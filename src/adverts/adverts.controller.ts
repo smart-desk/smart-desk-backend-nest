@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { AdvertsService } from './adverts.service';
 import { Advert } from './entities/advert.entity';
 import { ApiTags } from '@nestjs/swagger';
-import { AdvertsGetDto, AdvertsGetResponseDto } from './dto/advert.dto';
+import { AdvertsGetDto, AdvertsGetResponseDto } from './dto/advert-get.dto';
 import { AdvertCreateDto } from './dto/advert-create.dto';
 
 @Controller('adverts')

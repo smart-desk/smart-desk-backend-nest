@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsString, IsUUID, MaxLength } from 'class-validator';
+import { IsNotEmpty, IsString, IsUUID, MaxLength, ValidateNested } from 'class-validator';
+import { AdvertFieldsDto } from '../constants';
 
 export class AdvertCreateDto {
     @IsUUID()
@@ -13,4 +14,7 @@ export class AdvertCreateDto {
     @MaxLength(255)
     @IsNotEmpty()
     title: string;
+
+    @ValidateNested()
+    fields: AdvertFieldsDto[];
 }

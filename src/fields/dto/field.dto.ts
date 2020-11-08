@@ -1,9 +1,12 @@
-import { InputText, Text, Radio, Textarea } from './field-params';
 import { IsEnum, IsNotEmpty, IsUUID, MaxLength, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { FieldType, ParamClasses } from './constants';
+import { FieldType, FieldParamDto } from '../constants';
+import { InputTextDto } from './input-text.dto';
+import { TextareaDto } from './textarea.dto';
+import { TextDto } from './text.dto';
+import { RadioDto } from './radio.dto';
 
-export type FieldParamsType = InputText | Textarea | Text | Radio;
+export type FieldParamsType = InputTextDto | TextareaDto | TextDto | RadioDto;
 
 export class FieldCreateDto {
     @MaxLength(255)
@@ -17,7 +20,7 @@ export class FieldCreateDto {
     @IsUUID()
     section_id: string;
 
-    @Type(options => ParamClasses.get(options.object.type as FieldType))
+    @Type(options => FieldParamDto.get(options.object.type as FieldType))
     @ValidateNested()
     params?: FieldParamsType;
 }
@@ -30,7 +33,7 @@ export class FieldUpdateDto {
     @IsEnum(FieldType)
     type: FieldType;
 
-    @Type(options => ParamClasses.get(options.object.type as FieldType))
+    @Type(options => FieldParamDto.get(options.object.type as FieldType))
     @ValidateNested()
     params?: FieldParamsType;
 }
