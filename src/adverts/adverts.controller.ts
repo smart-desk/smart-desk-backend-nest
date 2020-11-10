@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { AdvertsService } from './adverts.service';
 import { Advert } from './entities/advert.entity';
-import { ApiTags } from '@nestjs/swagger';
-import { AdvertsGetDto, AdvertsGetResponseDto } from './dto/advert-get.dto';
-import { AdvertCreateDto } from './dto/advert-create.dto';
+import { AdvertsGetDto, AdvertsGetResponseDto } from './dto/get-adverts.dto';
+import { CreateAdvertDto } from './dto/create-advert.dto';
 
 @Controller('adverts')
 @ApiTags('Adverts')
@@ -21,7 +21,7 @@ export class AdvertsController {
     }
 
     @Post()
-    createAdvert(@Body() body: AdvertCreateDto): Promise<Advert> {
+    createAdvert(@Body() body: CreateAdvertDto): Promise<Advert> {
         return this.advertsService.create(body);
     }
 }
