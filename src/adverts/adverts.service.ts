@@ -6,11 +6,17 @@ import { plainToClass } from 'class-transformer';
 import { Advert } from './entities/advert.entity';
 import { AdvertsGetDto, AdvertsGetResponseDto, UpdateAdvertDto } from './dto/advert.dto';
 import { SectionsService } from '../sections/sections.service';
-import { CreateFieldDataDtoTypes, FieldDataEntities, UpdateFieldDataDtoTypes } from './constants';
+import { CreateFieldDataDtoTypes, FieldDataEntities, FieldDataEntity, UpdateFieldDataDtoTypes } from './constants';
 import { CreateAdvertDto } from './dto/advert.dto';
 import { FieldsService } from '../fields/fields.service';
 import { FieldType } from '../fields/constants';
 import { getMessageFromValidationErrors } from '../utils/validation';
+import { CreateFieldDataBaseDto, UpdateFieldDataBaseDto } from './dto/field-data-base.dto';
+
+interface FieldDataDtoInstance {
+    type: FieldType;
+    instance: CreateFieldDataBaseDto | UpdateFieldDataBaseDto;
+}
 
 @Injectable()
 export class AdvertsService {
@@ -45,45 +51,29 @@ export class AdvertsService {
     }
 
     async getById(id: string): Promise<Advert> {
-        const advert = await this.advertRepository.findOne({ id });
-        if (!advert) {
-            throw new NotFoundException('Advert not found');
-        }
-
+        const advert = await this.findOneOrThrowException(id);
         return this.loadFieldDataForAdvert(advert);
     }
 
     async create(advertDto: CreateAdvertDto): Promise<Advert> {
         // todo (future) check that model belongs to category
         // todo (future) check that field belongs to model
-        const validFieldsData: Array<{ fieldType: FieldType; data: any }> = [];
-        for (const dataObject of advertDto.fields) {
-            const field = await this.fieldsService.getById(dataObject.field_id);
-            const dataType = CreateFieldDataDtoTypes.get(field.type);
+        const validDtos: Array<FieldDataDtoInstance> = [];
+        for (const fieldDataObject of advertDto.fields) {
+            const fieldDataInstance = await this.convertFieldDataDtoToClass(fieldDataObject);
 
-            if (dataType) {
-                const dataClass = plainToClass(dataType, { ...dataObject });
-                const validationErrors = await validate(dataClass);
-                if (validationErrors.length) {
-                    throw new BadRequestException(getMessageFromValidationErrors(validationErrors));
-                }
-
-                validFieldsData.push({
-                    fieldType: field.type,
-                    data: dataClass,
-                });
+            if (fieldDataInstance) {
+                await this.validateFieldDataOrThrowException(fieldDataInstance.instance);
+                validDtos.push(fieldDataInstance);
             }
         }
 
         const advert = this.advertRepository.create(advertDto);
         const advertResult = await this.advertRepository.save(advert);
 
-        for (const fieldData of validFieldsData) {
-            const targetClass = FieldDataEntities.get(fieldData.fieldType);
-            fieldData.data.advert_id = advertResult.id;
-
-            const fieldDataEntity = this.connection.manager.create(targetClass, fieldData.data);
-            await this.connection.manager.save(fieldDataEntity);
+        for (const fieldData of validDtos) {
+            (fieldData.instance as CreateFieldDataBaseDto).advert_id = advertResult.id;
+            await this.saveFieldData(fieldData);
         }
 
         return this.getById(advertResult.id);
@@ -95,37 +85,32 @@ export class AdvertsService {
             throw new NotFoundException('Advert not found');
         }
 
-        const validFieldsData: Array<{ fieldType: FieldType; data: any }> = [];
-        for (const dataObject of advertDto.fields) {
-            const field = await this.fieldsService.getById(dataObject.field_id);
-            const dataType = UpdateFieldDataDtoTypes.get(field.type);
+        const validDtos: Array<FieldDataDtoInstance> = [];
+        for (const fieldDataObject of advertDto.fields) {
+            const fieldDataInstance = await this.convertFieldDataDtoToClass(fieldDataObject, true);
 
-            // todo reuse
-            if (dataType) {
-                const dataClass = plainToClass(dataType, { ...dataObject });
-                const validationErrors = await validate(dataClass);
-                if (validationErrors.length) {
-                    throw new BadRequestException(getMessageFromValidationErrors(validationErrors));
-                }
-
-                validFieldsData.push({
-                    fieldType: field.type,
-                    data: dataClass,
-                });
+            if (fieldDataInstance) {
+                await this.validateFieldDataOrThrowException(fieldDataInstance.instance);
+                validDtos.push(fieldDataInstance);
             }
         }
 
         const updatedAdvert = await this.advertRepository.preload({ id, ...advertDto });
         const advertResult = await this.advertRepository.save(updatedAdvert);
 
-        for (const fieldData of validFieldsData) {
-            const targetClass = FieldDataEntities.get(fieldData.fieldType);
-
-            const fieldDataEntity = this.connection.manager.preload(targetClass, fieldData.data);
-            await this.connection.manager.save(fieldDataEntity);
+        for (const fieldData of validDtos) {
+            await this.saveFieldData(fieldData);
         }
 
         return this.getById(advertResult.id);
+    }
+
+    private async findOneOrThrowException(id: string): Promise<Advert> {
+        const advert = await this.advertRepository.findOne({ id });
+        if (!advert) {
+            throw new NotFoundException(`Advert ${id} not found`);
+        }
+        return advert;
     }
 
     private async loadFieldDataForAdvert(advert: Advert): Promise<Advert> {
@@ -141,5 +126,38 @@ export class AdvertsService {
         }
 
         return advert;
+    }
+
+    private async convertFieldDataDtoToClass(
+        fieldDataDto: Partial<CreateFieldDataBaseDto | UpdateFieldDataBaseDto>,
+        updateOperation?: boolean
+    ): Promise<FieldDataDtoInstance | undefined> {
+        const field = await this.fieldsService.getById(fieldDataDto.field_id);
+        const dataType = updateOperation ? UpdateFieldDataDtoTypes.get(field.type) : CreateFieldDataDtoTypes.get(field.type);
+        if (dataType) {
+            return {
+                type: field.type,
+                instance: plainToClass(dataType as any, { ...fieldDataDto }),
+            };
+        }
+    }
+
+    private async validateFieldDataOrThrowException(fieldData: CreateFieldDataBaseDto | UpdateFieldDataBaseDto): Promise<boolean> {
+        const validationErrors = await validate(fieldData);
+        if (validationErrors.length) {
+            throw new BadRequestException(getMessageFromValidationErrors(validationErrors));
+        }
+        return true;
+    }
+
+    private async saveFieldData(fieldData: FieldDataDtoInstance): Promise<FieldDataEntity> {
+        const targetEntity = FieldDataEntities.get(fieldData.type);
+        let fieldDataEntity = await this.connection.manager.preload(targetEntity, fieldData.instance);
+
+        if (!fieldDataEntity) {
+            fieldDataEntity = await this.connection.manager.create(targetEntity, fieldData.instance);
+        }
+
+        return await this.connection.manager.save(fieldDataEntity);
     }
 }
