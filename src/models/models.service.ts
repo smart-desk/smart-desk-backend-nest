@@ -33,7 +33,7 @@ export class ModelsService {
 
         await this.modelRepository.update(model.id, modelDto);
 
-        return this.modelRepository.findOne(model.id);
+        return this.modelRepository.findOne({ id: model.id });
     }
 
     async delete(id): Promise<DeleteResult> {

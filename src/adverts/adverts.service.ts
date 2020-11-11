@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Connection } from 'typeorm';
-import { validate } from 'class-validator';
+import { isUUID, validate } from 'class-validator';
 import { plainToClass } from 'class-transformer';
 import { Advert } from './entities/advert.entity';
 import { AdvertsGetDto, AdvertsGetResponseDto, UpdateAdvertDto } from './dto/advert.dto';
@@ -58,6 +58,7 @@ export class AdvertsService {
     async create(advertDto: CreateAdvertDto): Promise<Advert> {
         // todo (future) check that model belongs to category
         // todo (future) check that field belongs to model
+        // todo (future) check that field_id is unique for this advert
         const validDtos: Array<FieldDataDtoInstance> = [];
         for (const fieldDataObject of advertDto.fields) {
             const fieldDataInstance = await this.convertFieldDataDtoToClass(fieldDataObject);
@@ -80,10 +81,7 @@ export class AdvertsService {
     }
 
     async update(id: string, advertDto: UpdateAdvertDto): Promise<Advert> {
-        const advert = await this.advertRepository.findOne({ id });
-        if (!advert) {
-            throw new NotFoundException('Advert not found');
-        }
+        await this.findOneOrThrowException(id);
 
         const validDtos: Array<FieldDataDtoInstance> = [];
         for (const fieldDataObject of advertDto.fields) {
@@ -99,7 +97,7 @@ export class AdvertsService {
         const advertResult = await this.advertRepository.save(updatedAdvert);
 
         for (const fieldData of validDtos) {
-            await this.saveFieldData(fieldData);
+            await this.saveFieldData(fieldData, true);
         }
 
         return this.getById(advertResult.id);
@@ -132,7 +130,13 @@ export class AdvertsService {
         fieldDataDto: Partial<CreateFieldDataBaseDto | UpdateFieldDataBaseDto>,
         updateOperation?: boolean
     ): Promise<FieldDataDtoInstance | undefined> {
+        // additional validation here since dto validation goes after converting
+        if (!isUUID(fieldDataDto.field_id)) {
+            throw new BadRequestException('field_id must be an UUID');
+        }
+
         const field = await this.fieldsService.getById(fieldDataDto.field_id);
+
         const dataType = updateOperation ? UpdateFieldDataDtoTypes.get(field.type) : CreateFieldDataDtoTypes.get(field.type);
         if (dataType) {
             return {
@@ -150,13 +154,12 @@ export class AdvertsService {
         return true;
     }
 
-    private async saveFieldData(fieldData: FieldDataDtoInstance): Promise<FieldDataEntity> {
+    private async saveFieldData(fieldData: FieldDataDtoInstance, updateOperation?: boolean): Promise<FieldDataEntity> {
         const targetEntity = FieldDataEntities.get(fieldData.type);
-        let fieldDataEntity = await this.connection.manager.preload(targetEntity, fieldData.instance);
 
-        if (!fieldDataEntity) {
-            fieldDataEntity = await this.connection.manager.create(targetEntity, fieldData.instance);
-        }
+        const fieldDataEntity = updateOperation
+            ? await this.connection.manager.preload(targetEntity, fieldData.instance)
+            : await this.connection.manager.create(targetEntity, fieldData.instance);
 
         return await this.connection.manager.save(fieldDataEntity);
     }

@@ -9,8 +9,8 @@ import { SectionsService } from '../sections/sections.service';
 export class FieldsService {
     constructor(@InjectRepository(Field) private fieldRepository: Repository<Field>, private sectionsService: SectionsService) {}
 
-    getById(id: string): Promise<Field> {
-        return this.fieldRepository.findOne(id);
+    async getById(id: string): Promise<Field> {
+        return await this.findOneOrThrowException(id);
     }
 
     async create(fieldDto: FieldCreateDto): Promise<Field> {
@@ -21,22 +21,22 @@ export class FieldsService {
     }
 
     async update(id: string, fieldDto: FieldUpdateDto): Promise<Field> {
-        const field = await this.fieldRepository.findOne({ id });
-        if (!field) {
-            throw new NotFoundException('Field not found');
-        }
-
+        const field = await this.findOneOrThrowException(id);
         await this.fieldRepository.update(field.id, fieldDto);
 
-        return this.fieldRepository.findOne(field.id);
+        return this.fieldRepository.findOne({ id: field.id });
     }
 
     async delete(id: string): Promise<DeleteResult> {
+        const field = await this.findOneOrThrowException(id);
+        return this.fieldRepository.delete(field.id);
+    }
+
+    private async findOneOrThrowException(id: string): Promise<Field> {
         const field = await this.fieldRepository.findOne({ id });
         if (!field) {
             throw new NotFoundException('Field not found');
         }
-
-        return this.fieldRepository.delete(field.id);
+        return field;
     }
 }

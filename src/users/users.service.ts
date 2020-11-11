@@ -14,7 +14,7 @@ export class UsersService {
     }
 
     async fineOne(id: string): Promise<User> {
-        return this.userRepository.findOne(id);
+        return this.userRepository.findOne({ id });
     }
 
     async findByEmail(email: string) {
