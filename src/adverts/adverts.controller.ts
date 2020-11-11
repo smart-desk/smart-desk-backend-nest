@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { AdvertsService } from './adverts.service';
 import { Advert } from './entities/advert.entity';
@@ -28,5 +28,11 @@ export class AdvertsController {
     @Patch(':id')
     updateAdvert(@Param('id') id: string, @Body() body: UpdateAdvertDto): Promise<Advert> {
         return this.advertsService.update(id, body);
+    }
+
+    @Delete(':id')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    async deleteModel(@Param('id') id: string) {
+        await this.advertsService.delete(id);
     }
 }

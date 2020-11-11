@@ -103,6 +103,11 @@ export class AdvertsService {
         return this.getById(advertResult.id);
     }
 
+    async delete(id: string): Promise<Advert> {
+        const advert = await this.findOneOrThrowException(id);
+        return this.advertRepository.remove(advert);
+    }
+
     private async findOneOrThrowException(id: string): Promise<Advert> {
         const advert = await this.advertRepository.findOne({ id });
         if (!advert) {
