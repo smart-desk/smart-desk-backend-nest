@@ -4,10 +4,10 @@ import { Repository, Connection } from 'typeorm';
 import { validate } from 'class-validator';
 import { plainToClass } from 'class-transformer';
 import { Advert } from './entities/advert.entity';
-import { AdvertsGetDto, AdvertsGetResponseDto } from './dto/get-adverts.dto';
+import { AdvertsGetDto, AdvertsGetResponseDto, UpdateAdvertDto } from './dto/advert.dto';
 import { SectionsService } from '../sections/sections.service';
-import { CreateFieldDataDtoTypes, FieldDataEntities, FieldDataEntityType } from './constants';
-import { CreateAdvertDto } from './dto/create-advert.dto';
+import { CreateFieldDataDtoTypes, FieldDataEntities, UpdateFieldDataDtoTypes } from './constants';
+import { CreateAdvertDto } from './dto/advert.dto';
 import { FieldsService } from '../fields/fields.service';
 import { FieldType } from '../fields/constants';
 import { getMessageFromValidationErrors } from '../utils/validation';
@@ -83,6 +83,45 @@ export class AdvertsService {
             fieldData.data.advert_id = advertResult.id;
 
             const fieldDataEntity = this.connection.manager.create(targetClass, fieldData.data);
+            await this.connection.manager.save(fieldDataEntity);
+        }
+
+        return this.getById(advertResult.id);
+    }
+
+    async update(id: string, advertDto: UpdateAdvertDto): Promise<Advert> {
+        const advert = await this.advertRepository.findOne({ id });
+        if (!advert) {
+            throw new NotFoundException('Advert not found');
+        }
+
+        const validFieldsData: Array<{ fieldType: FieldType; data: any }> = [];
+        for (const dataObject of advertDto.fields) {
+            const field = await this.fieldsService.getById(dataObject.field_id);
+            const dataType = UpdateFieldDataDtoTypes.get(field.type);
+
+            // todo reuse
+            if (dataType) {
+                const dataClass = plainToClass(dataType, { ...dataObject });
+                const validationErrors = await validate(dataClass);
+                if (validationErrors.length) {
+                    throw new BadRequestException(getMessageFromValidationErrors(validationErrors));
+                }
+
+                validFieldsData.push({
+                    fieldType: field.type,
+                    data: dataClass,
+                });
+            }
+        }
+
+        const updatedAdvert = await this.advertRepository.preload({ id, ...advertDto });
+        const advertResult = await this.advertRepository.save(updatedAdvert);
+
+        for (const fieldData of validFieldsData) {
+            const targetClass = FieldDataEntities.get(fieldData.fieldType);
+
+            const fieldDataEntity = this.connection.manager.preload(targetClass, fieldData.data);
             await this.connection.manager.save(fieldDataEntity);
         }
 
