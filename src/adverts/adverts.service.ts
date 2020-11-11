@@ -166,6 +166,6 @@ export class AdvertsService {
             ? await this.connection.manager.preload(targetEntity, fieldData.instance)
             : await this.connection.manager.create(targetEntity, fieldData.instance);
 
-        return await this.connection.manager.save(fieldDataEntity);
+        return this.connection.manager.save(fieldDataEntity);
     }
 }
