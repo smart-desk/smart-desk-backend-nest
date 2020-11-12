@@ -3,7 +3,7 @@ import { Test } from '@nestjs/testing';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { v4 as uuid } from 'uuid';
-import { createTestAppForModule } from '../../test/test.utils';
+import { createRepositoryMock, createTestAppForModule } from '../../test/test.utils';
 import { Advert } from './entities/advert.entity';
 import { AdvertsModule } from './adverts.module';
 import { Connection } from 'typeorm';
@@ -12,48 +12,23 @@ import { TextareaEntity } from './entities/textarea.entity';
 import { RadioEntity } from './entities/radio.entity';
 import { Field } from '../fields/field.entity';
 import { Section, SectionType } from '../sections/section.entity';
-import fn = jest.fn;
 
 describe('Adverts controller', () => {
     let app: INestApplication;
-    const section = new Section();
-    section.id = '123123';
-    section.model_id = '123';
-    section.type = SectionType.PARAMS;
-    section.fields = [];
+    const sectionEntity = new Section();
+    sectionEntity.id = '123123';
+    sectionEntity.model_id = '123';
+    sectionEntity.type = SectionType.PARAMS;
+    sectionEntity.fields = [];
 
     const advertEntity = new Advert();
     advertEntity.id = '1234';
-    advertEntity.sections = [section, section];
+    advertEntity.sections = [sectionEntity, sectionEntity];
 
-    const anyRepositoryMock = {
-        createQueryBuilder: fn().mockReturnValue({
-            andWhere: jest.fn().mockReturnThis(),
-            orderBy: jest.fn().mockReturnThis(),
-            offset: jest.fn().mockReturnThis(),
-            limit: jest.fn().mockReturnThis(),
-            getMany: fn().mockReturnValue([{}]),
-            getCount: fn().mockReturnValue(1),
-        }),
-        find: fn().mockReturnValue({}),
-        findOne: fn().mockReturnValue({}),
-        create: fn().mockReturnValue({}),
-        preload: fn().mockReturnValue({}),
-        save: fn().mockReturnValue({}),
-        remove: fn().mockReturnValue({}),
-    };
-
-    const advertRepositoryMock = {
-        ...anyRepositoryMock,
-    };
-
-    const sectionRepositoryMock = {
-        ...anyRepositoryMock,
-        find: anyRepositoryMock.find.mockReturnValue([section]),
-    };
-
+    const advertRepositoryMock = createRepositoryMock<Advert>([advertEntity]);
+    const sectionRepositoryMock = createRepositoryMock<Section>([sectionEntity]);
     const connectionMock = {
-        manager: fn().mockReturnValue(anyRepositoryMock),
+        manager: createRepositoryMock(),
     };
 
     beforeAll(async () => {
@@ -65,13 +40,13 @@ describe('Adverts controller', () => {
             .overrideProvider(getRepositoryToken(Section))
             .useValue(sectionRepositoryMock)
             .overrideProvider(getRepositoryToken(Field))
-            .useValue(anyRepositoryMock)
+            .useValue(createRepositoryMock())
             .overrideProvider(getRepositoryToken(InputTextEntity))
-            .useValue(anyRepositoryMock)
+            .useValue(createRepositoryMock())
             .overrideProvider(getRepositoryToken(TextareaEntity))
-            .useValue(anyRepositoryMock)
+            .useValue(createRepositoryMock())
             .overrideProvider(getRepositoryToken(RadioEntity))
-            .useValue(anyRepositoryMock)
+            .useValue(createRepositoryMock())
             .overrideProvider(Connection)
             .useValue(connectionMock)
             .compile();
