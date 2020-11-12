@@ -34,7 +34,7 @@ export class AdvertsService {
             .createQueryBuilder('')
             .andWhere(options.category_id ? 'advert.category_id = :category_id' : '1=1', { category_id: options.category_id })
             .andWhere(options.search ? 'LOWER(title COLLATE "en_US") LIKE :search' : '1=1', {
-                search: `%${options.search.toLocaleLowerCase()}%`,
+                search: options.search ? `%${options.search.toLocaleLowerCase()}%` : '',
             });
 
         const adverts = await query.orderBy('created_at', 'DESC').offset(skipped).limit(options.limit).getMany();
