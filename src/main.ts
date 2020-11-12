@@ -8,7 +8,6 @@ async function bootstrap() {
 
     app.useGlobalPipes(
         new ValidationPipe({
-            whitelist: true,
             forbidNonWhitelisted: true,
             // May have impact on performance
             transform: true,
