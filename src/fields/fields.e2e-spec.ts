@@ -1,16 +1,16 @@
-import * as request from 'supertest';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import * as request from 'supertest';
 import { v4 as uuid } from 'uuid';
-import fn = jest.fn;
 import { createTestAppForModule } from '../../test/test.utils';
-import { FieldsModule } from './fields.module';
-import { Field, FieldType } from './field.entity';
-import { FieldCreateDto, FieldUpdateDto } from './field.dto';
-import { InputText, Radio, Text, Textarea } from './field-params';
-import { SectionsModule } from '../sections/sections.module';
 import { Section } from '../sections/section.entity';
+import { SectionsModule } from '../sections/sections.module';
+import { InputText, Radio, Text, Textarea } from './field-params';
+import { FieldCreateDto, FieldUpdateDto } from './field.dto';
+import { Field, FieldType } from './field.entity';
+import { FieldsModule } from './fields.module';
+import fn = jest.fn;
 
 describe('Fields controller', () => {
     let app: INestApplication;
@@ -52,7 +52,7 @@ describe('Fields controller', () => {
                     type: FieldType.INPUT_TEXT,
                     params: { label: 'some label' } as InputText,
                 } as FieldCreateDto)
-                .expect(201);
+                .expect(HttpStatus.CREATED);
         });
 
         it(`with error - wrong field type`, () => {
@@ -64,7 +64,7 @@ describe('Fields controller', () => {
                     type: 'wrong type' as FieldType,
                     params: { label: 'some label' } as InputText,
                 } as FieldCreateDto)
-                .expect(400)
+                .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('type must be a valid enum value');
                 });
@@ -79,7 +79,7 @@ describe('Fields controller', () => {
                     type: FieldType.INPUT_TEXT,
                     params: { label: 'some label' } as InputText,
                 } as FieldCreateDto)
-                .expect(400)
+                .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('section_id must be an UUID');
                 });
@@ -95,7 +95,7 @@ describe('Fields controller', () => {
                     type: FieldType.INPUT_TEXT,
                     params: { label: 'some label' } as InputText,
                 } as FieldCreateDto)
-                .expect(404)
+                .expect(HttpStatus.NOT_FOUND)
                 .expect(res => {
                     expect(res.body.message).toContain('Section not found');
                 });
@@ -115,7 +115,7 @@ describe('Fields controller', () => {
                             required: true,
                         } as InputText,
                     } as FieldCreateDto)
-                    .expect(201);
+                    .expect(HttpStatus.CREATED);
             });
 
             it(`with errors - no label provided, required must be boolean`, () => {
@@ -131,7 +131,7 @@ describe('Fields controller', () => {
                             required: 'string' as any,
                         } as InputText,
                     } as FieldCreateDto)
-                    .expect(400)
+                    .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
                         expect(res.body.message).toContain('params.label should not be empty');
                         expect(res.body.message).toContain('params.required must be a boolean value');
@@ -153,7 +153,7 @@ describe('Fields controller', () => {
                             required: true,
                         } as Textarea,
                     } as FieldCreateDto)
-                    .expect(201);
+                    .expect(HttpStatus.CREATED);
             });
 
             it(`with errors - no label provided, required must be boolean`, () => {
@@ -169,7 +169,7 @@ describe('Fields controller', () => {
                             required: 'string' as any,
                         } as Textarea,
                     } as FieldCreateDto)
-                    .expect(400)
+                    .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
                         expect(res.body.message).toContain('params.label should not be empty');
                         expect(res.body.message).toContain('params.required must be a boolean value');
@@ -187,7 +187,7 @@ describe('Fields controller', () => {
                         type: FieldType.TEXT,
                         params: { value: 'some string' } as Text,
                     } as FieldCreateDto)
-                    .expect(201);
+                    .expect(HttpStatus.CREATED);
             });
 
             it(`with error - no empty value`, () => {
@@ -199,7 +199,7 @@ describe('Fields controller', () => {
                         type: FieldType.TEXT,
                         params: { value: '' } as Text,
                     } as FieldCreateDto)
-                    .expect(400)
+                    .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
                         expect(res.body.message).toContain('params.value should not be empty');
                     });
@@ -228,7 +228,7 @@ describe('Fields controller', () => {
                             ],
                         } as Radio,
                     } as FieldCreateDto)
-                    .expect(201);
+                    .expect(HttpStatus.CREATED);
             });
 
             it(`with errors - no empty title, no empty label, no empty value`, () => {
@@ -252,7 +252,7 @@ describe('Fields controller', () => {
                             ],
                         } as Radio,
                     } as FieldCreateDto)
-                    .expect(400)
+                    .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
                         expect(res.body.message).toContain('params.title should not be empty');
                         expect(res.body.message).toContain('0.label should not be empty');
@@ -271,7 +271,7 @@ describe('Fields controller', () => {
                     type: FieldType.INPUT_TEXT,
                     params: { label: 'some label' } as InputText,
                 } as FieldUpdateDto)
-                .expect(200);
+                .expect(HttpStatus.OK);
         });
 
         it(`with error - wrong field type`, () => {
@@ -282,7 +282,7 @@ describe('Fields controller', () => {
                     type: 'wrong type' as FieldType,
                     params: { label: 'some label' } as InputText,
                 } as FieldUpdateDto)
-                .expect(400)
+                .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('type must be a valid enum value');
                 });
@@ -297,7 +297,7 @@ describe('Fields controller', () => {
                     type: FieldType.INPUT_TEXT,
                     params: { label: 'some label' } as InputText,
                 } as FieldUpdateDto)
-                .expect(404)
+                .expect(HttpStatus.NOT_FOUND)
                 .expect(res => {
                     expect(res.body.message).toContain('Field not found');
                 });
@@ -316,7 +316,7 @@ describe('Fields controller', () => {
                             required: true,
                         } as InputText,
                     } as FieldUpdateDto)
-                    .expect(200);
+                    .expect(HttpStatus.OK);
             });
 
             it(`with errors - no label provided, required must be boolean`, () => {
@@ -331,7 +331,7 @@ describe('Fields controller', () => {
                             required: 'string' as any,
                         } as InputText,
                     } as FieldUpdateDto)
-                    .expect(400)
+                    .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
                         expect(res.body.message).toContain('params.label should not be empty');
                         expect(res.body.message).toContain('params.required must be a boolean value');
@@ -352,7 +352,7 @@ describe('Fields controller', () => {
                             required: true,
                         } as Textarea,
                     } as FieldUpdateDto)
-                    .expect(200);
+                    .expect(HttpStatus.OK);
             });
 
             it(`with errors - no label provided, required must be boolean`, () => {
@@ -367,7 +367,7 @@ describe('Fields controller', () => {
                             required: 'string' as any,
                         } as Textarea,
                     } as FieldUpdateDto)
-                    .expect(400)
+                    .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
                         expect(res.body.message).toContain('params.label should not be empty');
                         expect(res.body.message).toContain('params.required must be a boolean value');
@@ -384,7 +384,7 @@ describe('Fields controller', () => {
                         type: FieldType.TEXT,
                         params: { value: 'some string' } as Text,
                     } as FieldUpdateDto)
-                    .expect(200);
+                    .expect(HttpStatus.OK);
             });
 
             it(`with error - no empty value`, () => {
@@ -395,7 +395,7 @@ describe('Fields controller', () => {
                         type: FieldType.TEXT,
                         params: { value: '' } as Text,
                     } as FieldUpdateDto)
-                    .expect(400)
+                    .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
                         expect(res.body.message).toContain('params.value should not be empty');
                     });
@@ -423,7 +423,7 @@ describe('Fields controller', () => {
                             ],
                         } as Radio,
                     } as FieldUpdateDto)
-                    .expect(200);
+                    .expect(HttpStatus.OK);
             });
 
             it(`with errors - no empty title, no empty label, no empty value`, () => {
@@ -446,7 +446,7 @@ describe('Fields controller', () => {
                             ],
                         } as Radio,
                     } as FieldUpdateDto)
-                    .expect(400)
+                    .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
                         expect(res.body.message).toContain('params.title should not be empty');
                         expect(res.body.message).toContain('0.label should not be empty');
@@ -458,12 +458,12 @@ describe('Fields controller', () => {
 
     describe('delete field by id', () => {
         it(`successfully`, () => {
-            return request(app.getHttpServer()).delete('/fields/123123').expect(204);
+            return request(app.getHttpServer()).delete('/fields/123123').expect(HttpStatus.NO_CONTENT);
         });
 
         it(`with error - not found`, () => {
             repositoryMock.findOne.mockReturnValueOnce(undefined);
-            return request(app.getHttpServer()).delete('/fields/123123').expect(404);
+            return request(app.getHttpServer()).delete('/fields/123123').expect(HttpStatus.NOT_FOUND);
         });
     });
 
