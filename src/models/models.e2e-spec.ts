@@ -27,7 +27,7 @@ describe('Models controller', () => {
         return request(app.getHttpServer()).get('/models').expect(200);
     });
 
-    describe('get modelEntity by id', () => {
+    describe('get model by id', () => {
         it(`successfully`, () => {
             return request(app.getHttpServer()).get('/models/123123').expect(200).expect({});
         });
@@ -38,7 +38,7 @@ describe('Models controller', () => {
         });
     });
 
-    describe('create modelEntity', () => {
+    describe('create model', () => {
         it(`successfully`, () => {
             return request(app.getHttpServer()).post('/models').send({ name: 'test' }).expect(201);
         });
@@ -54,7 +54,7 @@ describe('Models controller', () => {
         });
     });
 
-    describe('update modelEntity', () => {
+    describe('update model', () => {
         it(`successfully`, () => {
             return request(app.getHttpServer()).put('/models/123').send({ name: 'test' }).expect(200).expect({});
         });
@@ -75,7 +75,7 @@ describe('Models controller', () => {
         });
     });
 
-    describe('delete modelEntity by id', () => {
+    describe('delete model by id', () => {
         it(`successfully`, () => {
             return request(app.getHttpServer()).delete('/models/123123').expect(204);
         });

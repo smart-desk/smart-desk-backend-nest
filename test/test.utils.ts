@@ -7,9 +7,6 @@ export async function createTestAppForModule(moduleRef: TestingModule) {
     app.useGlobalPipes(
         new ValidationPipe({
             forbidNonWhitelisted: true,
-            transformOptions: {
-                enableImplicitConversion: true,
-            },
         })
     );
     await app.init();
@@ -28,7 +25,7 @@ export function createRepositoryMock<T>(values?: T[]) {
             getCount: fn().mockReturnValue(resultValues.length),
         }),
         find: fn().mockReturnValue(resultValues),
-        findOne: fn().mockReturnValue(resultValues),
+        findOne: fn().mockReturnValue(resultValues[0]),
         create: fn().mockReturnValue(resultValues[0]),
         preload: fn().mockReturnValue(resultValues[0]),
         save: fn().mockReturnValue(resultValues[0]),
