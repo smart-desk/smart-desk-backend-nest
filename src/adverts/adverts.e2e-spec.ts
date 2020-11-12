@@ -2,6 +2,7 @@ import * as request from 'supertest';
 import { Test } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
+import { v4 as uuid } from 'uuid';
 import { createTestAppForModule } from '../../test/test.utils';
 import { Advert } from './entities/advert.entity';
 import { AdvertsModule } from './adverts.module';
@@ -88,6 +89,74 @@ describe('Adverts controller', () => {
                     expect(res.body.limit).toEqual(20);
                     expect(res.body.totalCount).toEqual(1);
                     expect(res.body.page).toEqual(1);
+                });
+        });
+
+        it(`successfully with page, limit, search and category`, () => {
+            return request(app.getHttpServer())
+                .get('/adverts')
+                .query({
+                    page: 2,
+                    limit: 2,
+                    category_id: uuid(),
+                    search: test,
+                })
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.adverts).toBeDefined();
+                    expect(res.body.limit).toEqual(2);
+                    expect(res.body.totalCount).toEqual(1);
+                    expect(res.body.page).toEqual(2);
+                });
+        });
+
+        it(`with error - not valid page`, () => {
+            return request(app.getHttpServer())
+                .get('/adverts')
+                .query({ page: 0 })
+                .expect(400)
+                .expect(res => {
+                    expect(res.body.message).toContain('page must be a positive number');
+                });
+        });
+
+        it(`with error - not valid limit, no negative numbers`, () => {
+            return request(app.getHttpServer())
+                .get('/adverts')
+                .query({ limit: -1 })
+                .expect(400)
+                .expect(res => {
+                    expect(res.body.message).toContain('limit must be a positive number');
+                });
+        });
+
+        it(`with error - not valid limit, no greater than 100`, () => {
+            return request(app.getHttpServer())
+                .get('/adverts')
+                .query({ limit: 300 })
+                .expect(400)
+                .expect(res => {
+                    expect(res.body.message).toContain('limit must not be greater than 100');
+                });
+        });
+
+        it(`with error - not valid category`, () => {
+            return request(app.getHttpServer())
+                .get('/adverts')
+                .query({ category_id: 12333 })
+                .expect(400)
+                .expect(res => {
+                    expect(res.body.message).toContain('category_id must be an UUID');
+                });
+        });
+
+        it(`with error - not valid search`, () => {
+            return request(app.getHttpServer())
+                .get('/adverts')
+                .query({ search: Array(300).fill('a').join('') })
+                .expect(400)
+                .expect(res => {
+                    expect(res.body.message).toContain('search must be shorter than or equal to 255 characters');
                 });
         });
     });
