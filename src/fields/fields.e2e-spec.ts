@@ -4,7 +4,7 @@ import { INestApplication } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { v4 as uuid } from 'uuid';
 import fn = jest.fn;
-import { createTestAppForModule } from '../../test/test.utils';
+import { createRepositoryMock, createTestAppForModule } from '../../test/test.utils';
 import { FieldsModule } from './fields.module';
 import { Field } from './field.entity';
 import { FieldCreateDto, FieldUpdateDto } from './dto/field.dto';
@@ -21,24 +21,15 @@ describe('Fields controller', () => {
     const field = new Field();
     const section = new Section();
 
-    const repositoryMock = {
-        findOne: fn().mockReturnValue(field),
-        create: fn().mockReturnValue(field),
-        save: fn().mockReturnValue(field),
-        update: fn(),
-        delete: fn(),
-    };
-
-    const sectionRepositoryMock = {
-        findOne: fn().mockReturnValue(section),
-    };
+    const fieldsRepositoryMock = createRepositoryMock<Field>([field]);
+    const sectionRepositoryMock = createRepositoryMock<Section>([section]);
 
     beforeAll(async () => {
         const moduleRef = await Test.createTestingModule({
             imports: [FieldsModule, SectionsModule],
         })
             .overrideProvider(getRepositoryToken(Field))
-            .useValue(repositoryMock)
+            .useValue(fieldsRepositoryMock)
             .overrideProvider(getRepositoryToken(Section))
             .useValue(sectionRepositoryMock)
             .compile();
@@ -293,7 +284,7 @@ describe('Fields controller', () => {
         });
 
         it(`with error - field not found`, () => {
-            repositoryMock.findOne.mockReturnValueOnce(undefined);
+            fieldsRepositoryMock.findOne.mockReturnValueOnce(undefined);
             return request(app.getHttpServer())
                 .put('/fields/123123123')
                 .send({
@@ -466,7 +457,7 @@ describe('Fields controller', () => {
         });
 
         it(`with error - not found`, () => {
-            repositoryMock.findOne.mockReturnValueOnce(undefined);
+            fieldsRepositoryMock.findOne.mockReturnValueOnce(undefined);
             return request(app.getHttpServer()).delete('/fields/123123').expect(404);
         });
     });

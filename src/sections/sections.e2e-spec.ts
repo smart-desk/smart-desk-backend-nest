@@ -3,8 +3,7 @@ import { Test } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { v4 as uuid } from 'uuid';
-import fn = jest.fn;
-import { createTestAppForModule } from '../../test/test.utils';
+import { createRepositoryMock, createTestAppForModule } from '../../test/test.utils';
 import { Section, SectionType } from './section.entity';
 import { SectionsModule } from './sections.module';
 
@@ -12,12 +11,7 @@ describe('Sections controller', () => {
     let app: INestApplication;
     const sectionEntity = new Section();
 
-    const sectionRepositoryMock = {
-        findOne: fn().mockReturnValue(sectionEntity),
-        create: fn().mockReturnValue(sectionEntity),
-        save: fn().mockReturnValue(sectionEntity),
-        delete: fn(),
-    };
+    const sectionRepositoryMock = createRepositoryMock<Section>([sectionEntity]);
 
     beforeAll(async () => {
         const moduleRef = await Test.createTestingModule({
@@ -32,7 +26,13 @@ describe('Sections controller', () => {
 
     describe('create section', () => {
         it(`successfully`, () => {
-            return request(app.getHttpServer()).post('/sections').send({ type: SectionType.PARAMS, model_id: uuid() }).expect(201);
+            return request(app.getHttpServer())
+                .post('/sections')
+                .send({
+                    type: SectionType.PARAMS,
+                    model_id: uuid(),
+                })
+                .expect(201);
         });
 
         it(`with error - wrong type`, () => {

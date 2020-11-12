@@ -33,5 +33,7 @@ export function createRepositoryMock<T>(values?: T[]) {
         preload: fn().mockReturnValue(resultValues[0]),
         save: fn().mockReturnValue(resultValues[0]),
         remove: fn().mockReturnValue(resultValues[0]),
+        update: fn(),
+        delete: fn(),
     };
 }
