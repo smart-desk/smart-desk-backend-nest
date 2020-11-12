@@ -1,6 +1,6 @@
 import * as request from 'supertest';
 import { Test } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { v4 as uuid } from 'uuid';
 import { createTestAppForModule } from '../../test/test.utils';
@@ -83,7 +83,7 @@ describe('Adverts controller', () => {
         it(`successfully with no params`, () => {
             return request(app.getHttpServer())
                 .get('/adverts')
-                .expect(200)
+                .expect(HttpStatus.OK)
                 .expect(res => {
                     expect(res.body.adverts).toBeDefined();
                     expect(res.body.limit).toEqual(20);
@@ -101,7 +101,7 @@ describe('Adverts controller', () => {
                     category_id: uuid(),
                     search: test,
                 })
-                .expect(200)
+                .expect(HttpStatus.OK)
                 .expect(res => {
                     expect(res.body.adverts).toBeDefined();
                     expect(res.body.limit).toEqual(2);
@@ -114,7 +114,7 @@ describe('Adverts controller', () => {
             return request(app.getHttpServer())
                 .get('/adverts')
                 .query({ page: 0 })
-                .expect(400)
+                .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('page must be a positive number');
                 });
@@ -124,7 +124,7 @@ describe('Adverts controller', () => {
             return request(app.getHttpServer())
                 .get('/adverts')
                 .query({ limit: -1 })
-                .expect(400)
+                .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('limit must be a positive number');
                 });
@@ -134,7 +134,7 @@ describe('Adverts controller', () => {
             return request(app.getHttpServer())
                 .get('/adverts')
                 .query({ limit: 300 })
-                .expect(400)
+                .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('limit must not be greater than 100');
                 });
@@ -144,7 +144,7 @@ describe('Adverts controller', () => {
             return request(app.getHttpServer())
                 .get('/adverts')
                 .query({ category_id: 12333 })
-                .expect(400)
+                .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('category_id must be an UUID');
                 });
@@ -154,10 +154,32 @@ describe('Adverts controller', () => {
             return request(app.getHttpServer())
                 .get('/adverts')
                 .query({ search: Array(300).fill('a').join('') })
-                .expect(400)
+                .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('search must be shorter than or equal to 255 characters');
                 });
+        });
+    });
+
+    describe('get advert by id', () => {
+        it(`successfully`, () => {
+            return request(app.getHttpServer()).get('/adverts/123123').expect(HttpStatus.OK);
+        });
+
+        it(`with error - not found`, () => {
+            advertRepositoryMock.findOne.mockReturnValueOnce(undefined);
+            return request(app.getHttpServer()).get('/adverts/123123').expect(HttpStatus.NOT_FOUND);
+        });
+    });
+
+    describe('delete advert by id', () => {
+        it(`successfully`, () => {
+            return request(app.getHttpServer()).delete('/adverts/123123').expect(HttpStatus.NO_CONTENT);
+        });
+
+        it(`with error - not found`, () => {
+            advertRepositoryMock.findOne.mockReturnValueOnce(undefined);
+            return request(app.getHttpServer()).delete('/adverts/123123').expect(HttpStatus.NOT_FOUND);
         });
     });
 
