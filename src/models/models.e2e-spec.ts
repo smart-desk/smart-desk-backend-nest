@@ -1,10 +1,10 @@
-import * as request from 'supertest';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import { ModelsModule } from './models.module';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import * as request from 'supertest';
 import { Model } from './model.entity';
 import { createRepositoryMock, createTestAppForModule } from '../../test/test.utils';
+import { ModelsModule } from './models.module';
 
 describe('Models controller', () => {
     let app: INestApplication;
@@ -24,30 +24,30 @@ describe('Models controller', () => {
     });
 
     it(`get all models`, () => {
-        return request(app.getHttpServer()).get('/models').expect(200);
+        return request(app.getHttpServer()).get('/models').expect(HttpStatus.OK);
     });
 
     describe('get model by id', () => {
         it(`successfully`, () => {
-            return request(app.getHttpServer()).get('/models/123123').expect(200).expect({});
+            return request(app.getHttpServer()).get('/models/123123').expect(HttpStatus.OK).expect({});
         });
 
         it(`with error - not found`, () => {
             modelRepositoryMock.findOne.mockReturnValueOnce(undefined);
-            return request(app.getHttpServer()).get('/models/123123').expect(404);
+            return request(app.getHttpServer()).get('/models/123123').expect(HttpStatus.NOT_FOUND);
         });
     });
 
     describe('create model', () => {
         it(`successfully`, () => {
-            return request(app.getHttpServer()).post('/models').send({ name: 'test' }).expect(201);
+            return request(app.getHttpServer()).post('/models').send({ name: 'test' }).expect(HttpStatus.CREATED);
         });
 
         it(`with error - no name`, () => {
             return request(app.getHttpServer())
                 .post('/models')
                 .send({ name: '1' })
-                .expect(400)
+                .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('name must be longer than or equal to 3 characters');
                 });
@@ -56,14 +56,14 @@ describe('Models controller', () => {
 
     describe('update model', () => {
         it(`successfully`, () => {
-            return request(app.getHttpServer()).put('/models/123').send({ name: 'test' }).expect(200).expect({});
+            return request(app.getHttpServer()).put('/models/123').send({ name: 'test' }).expect(HttpStatus.OK).expect({});
         });
 
         it(`with error - no ID and name is to short`, () => {
             return request(app.getHttpServer())
                 .put('/models/123')
                 .send({ name: '1' })
-                .expect(400)
+                .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('name must be longer than or equal to 3 characters');
                 });
@@ -71,18 +71,18 @@ describe('Models controller', () => {
 
         it(`with error - not found`, () => {
             modelRepositoryMock.findOne.mockReturnValueOnce(undefined);
-            return request(app.getHttpServer()).put('/models/123123').send({ name: '113' }).expect(404);
+            return request(app.getHttpServer()).put('/models/123123').send({ name: '113' }).expect(HttpStatus.NOT_FOUND);
         });
     });
 
     describe('delete model by id', () => {
         it(`successfully`, () => {
-            return request(app.getHttpServer()).delete('/models/123123').expect(204);
+            return request(app.getHttpServer()).delete('/models/123123').expect(HttpStatus.NO_CONTENT);
         });
 
         it(`with error - not found`, () => {
             modelRepositoryMock.findOne.mockReturnValueOnce(undefined);
-            return request(app.getHttpServer()).delete('/models/123123').expect(404);
+            return request(app.getHttpServer()).delete('/models/123123').expect(HttpStatus.NOT_FOUND);
         });
     });
 

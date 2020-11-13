@@ -1,11 +1,12 @@
-import * as request from 'supertest';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import * as request from 'supertest';
 import { v4 as uuid } from 'uuid';
 import { createRepositoryMock, createTestAppForModule } from '../../test/test.utils';
 import { Section, SectionType } from './section.entity';
 import { SectionsModule } from './sections.module';
+import fn = jest.fn;
 
 describe('Sections controller', () => {
     let app: INestApplication;
@@ -28,18 +29,15 @@ describe('Sections controller', () => {
         it(`successfully`, () => {
             return request(app.getHttpServer())
                 .post('/sections')
-                .send({
-                    type: SectionType.PARAMS,
-                    model_id: uuid(),
-                })
-                .expect(201);
+                .send({ type: SectionType.PARAMS, model_id: uuid() })
+                .expect(HttpStatus.CREATED);
         });
 
         it(`with error - wrong type`, () => {
             return request(app.getHttpServer())
                 .post('/sections')
                 .send({ type: 'wrong_type', model_id: uuid() })
-                .expect(400)
+                .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('type must be a valid enum value');
                 });
@@ -49,7 +47,7 @@ describe('Sections controller', () => {
             return request(app.getHttpServer())
                 .post('/sections')
                 .send({ type: SectionType.PARAMS, model_id: '12312312' })
-                .expect(400)
+                .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('model_id must be an UUID');
                 });
@@ -58,12 +56,12 @@ describe('Sections controller', () => {
 
     describe('delete section by id', () => {
         it(`successfully`, () => {
-            return request(app.getHttpServer()).delete('/sections/123123').expect(204);
+            return request(app.getHttpServer()).delete('/sections/123123').expect(HttpStatus.NO_CONTENT);
         });
 
         it(`with error - not found`, () => {
             sectionRepositoryMock.findOne.mockReturnValueOnce(undefined);
-            return request(app.getHttpServer()).delete('/sections/123123').expect(404);
+            return request(app.getHttpServer()).delete('/sections/123123').expect(HttpStatus.NOT_FOUND);
         });
     });
 
