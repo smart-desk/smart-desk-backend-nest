@@ -7,8 +7,9 @@ import { FieldsModule } from './fields/fields.module';
 import { ModelsModule } from './models/models.module';
 import { SectionsModule } from './sections/sections.module';
 import { UsersModule } from './users';
+import { AdvertsModule } from './adverts/adverts.module';
 
-const app = [AuthModule, UsersModule, CategoriesModule, ModelsModule, SectionsModule, FieldsModule];
+const app = [AuthModule, UsersModule, CategoriesModule, ModelsModule, SectionsModule, FieldsModule, AdvertsModule];
 
 @Module({
     imports: [TypeOrmModule.forRoot(), ConfigModule.forRoot(), ...app],

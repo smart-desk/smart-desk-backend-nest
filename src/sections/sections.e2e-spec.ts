@@ -3,7 +3,7 @@ import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as request from 'supertest';
 import { v4 as uuid } from 'uuid';
-import { createTestAppForModule } from '../../test/test.utils';
+import { createRepositoryMock, createTestAppForModule } from '../../test/test.utils';
 import { Section, SectionType } from './section.entity';
 import { SectionsModule } from './sections.module';
 import fn = jest.fn;
@@ -12,12 +12,7 @@ describe('Sections controller', () => {
     let app: INestApplication;
     const sectionEntity = new Section();
 
-    const sectionRepositoryMock = {
-        findOne: fn().mockReturnValue(sectionEntity),
-        create: fn().mockReturnValue(sectionEntity),
-        save: fn().mockReturnValue(sectionEntity),
-        delete: fn(),
-    };
+    const sectionRepositoryMock = createRepositoryMock<Section>([sectionEntity]);
 
     beforeAll(async () => {
         const moduleRef = await Test.createTestingModule({

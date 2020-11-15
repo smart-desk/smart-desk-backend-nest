@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsString, MaxLength, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class Radio {
+export class RadioDto {
     @IsNotEmpty()
     @MaxLength(255)
     title: string;

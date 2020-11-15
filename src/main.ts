@@ -9,9 +9,8 @@ async function bootstrap() {
     app.useGlobalPipes(
         new ValidationPipe({
             forbidNonWhitelisted: true,
-            transformOptions: {
-                enableImplicitConversion: true,
-            },
+            // May have impact on performance
+            transform: true,
         })
     );
     app.setGlobalPrefix('api');
@@ -23,7 +22,6 @@ async function bootstrap() {
     });
 
     const swaggerOptions = new DocumentBuilder().setTitle('Smart Desk').setDescription('Smart Desk REST API').setVersion('1.0').build();
-
     const document = SwaggerModule.createDocument(app, swaggerOptions);
     SwaggerModule.setup('swag', app, document);
 
