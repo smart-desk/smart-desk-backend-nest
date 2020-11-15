@@ -35,6 +35,7 @@ export class FieldsService {
     private async findOneOrThrowException(id: string): Promise<Field> {
         const field = await this.fieldRepository.findOne({ id });
         if (!field) {
+            // todo error message 'Field ${id} not found'
             throw new NotFoundException('Field not found');
         }
         return field;

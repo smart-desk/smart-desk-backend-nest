@@ -1,5 +1,5 @@
 import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, IsUUID, Max, MaxLength } from 'class-validator';
-import { CreateFieldDataBaseDto } from './field-data-base.dto';
+import { CreateFieldDataBaseDto, UpdateFieldDataBaseDto } from './field-data-base.dto';
 import { Transform } from 'class-transformer';
 import { Advert } from '../entities/advert.entity';
 
@@ -30,7 +30,7 @@ export class UpdateAdvertDto {
 
     @IsNotEmpty()
     @IsArray()
-    fields: CreateFieldDataBaseDto[];
+    fields: UpdateFieldDataBaseDto[];
 }
 
 export class AdvertsGetDto {
