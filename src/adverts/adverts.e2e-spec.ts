@@ -12,14 +12,27 @@ import { TextareaEntity } from './entities/textarea.entity';
 import { RadioEntity } from './entities/radio.entity';
 import { Field } from '../fields/field.entity';
 import { Section, SectionType } from '../sections/section.entity';
+import { CreateAdvertDto } from './dto/advert.dto';
+import { CreateInputTextDto } from './dto/input-text.dto';
+import { FieldType } from '../fields/constants';
+import { CreateTextareaDto } from './dto/textarea.dto';
+import { CreateRadioDto } from './dto/radio.dto';
 
 describe('Adverts controller', () => {
     let app: INestApplication;
+
+    const fieldEntity = new Field();
+    fieldEntity.type = FieldType.INPUT_TEXT;
+    fieldEntity.id = uuid();
+    fieldEntity.section_id = uuid();
+    fieldEntity.title = 'test';
+    fieldEntity.params = { label: 'Test', placeholder: 'test', required: true };
+
     const sectionEntity = new Section();
-    sectionEntity.id = '123123';
-    sectionEntity.model_id = '123';
+    sectionEntity.id = uuid();
+    sectionEntity.model_id = uuid();
     sectionEntity.type = SectionType.PARAMS;
-    sectionEntity.fields = [];
+    sectionEntity.fields = [fieldEntity];
 
     const advertEntity = new Advert();
     advertEntity.id = '1234';
@@ -27,6 +40,7 @@ describe('Adverts controller', () => {
 
     const advertRepositoryMock = createRepositoryMock<Advert>([advertEntity]);
     const sectionRepositoryMock = createRepositoryMock<Section>([sectionEntity]);
+    const fieldRepositoryMock = createRepositoryMock<Field>([fieldEntity]);
     const connectionMock = {
         manager: createRepositoryMock(),
     };
@@ -40,7 +54,7 @@ describe('Adverts controller', () => {
             .overrideProvider(getRepositoryToken(Section))
             .useValue(sectionRepositoryMock)
             .overrideProvider(getRepositoryToken(Field))
-            .useValue(createRepositoryMock())
+            .useValue(fieldRepositoryMock)
             .overrideProvider(getRepositoryToken(InputTextEntity))
             .useValue(createRepositoryMock())
             .overrideProvider(getRepositoryToken(TextareaEntity))
@@ -138,23 +152,291 @@ describe('Adverts controller', () => {
 
     describe('get advert by id', () => {
         it(`successfully`, () => {
-            return request(app.getHttpServer()).get('/adverts/123123').expect(HttpStatus.OK);
+            return request(app.getHttpServer()).get(`/adverts/${uuid()}`).expect(HttpStatus.OK);
+        });
+
+        it(`with error - not valid uuid`, () => {
+            return request(app.getHttpServer())
+                .get('/adverts/123123')
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('Validation failed (uuid  is expected)');
+                });
         });
 
         it(`with error - not found`, () => {
             advertRepositoryMock.findOne.mockReturnValueOnce(undefined);
-            return request(app.getHttpServer()).get('/adverts/123123').expect(HttpStatus.NOT_FOUND);
+            return request(app.getHttpServer()).get(`/adverts/${uuid()}`).expect(HttpStatus.NOT_FOUND);
+        });
+    });
+
+    describe('create advert', () => {
+        it(`successfully with empty fields array`, () => {
+            return request(app.getHttpServer())
+                .post(`/adverts`)
+                .send({
+                    model_id: uuid(),
+                    category_id: uuid(),
+                    title: 'some advert',
+                    fields: [],
+                } as CreateAdvertDto)
+                .expect(HttpStatus.CREATED);
+        });
+
+        it(`with error - not valid model_id, category_id and empty title`, () => {
+            return request(app.getHttpServer())
+                .post(`/adverts`)
+                .send({
+                    model_id: '12312',
+                    category_id: '123123',
+                    title: '',
+                    fields: [],
+                } as CreateAdvertDto)
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('category_id must be an UUID');
+                    expect(res.body.message).toContain('model_id must be an UUID');
+                    expect(res.body.message).toContain('title should not be empty');
+                });
+        });
+
+        it(`with error - not valid fields property`, () => {
+            return request(app.getHttpServer())
+                .post(`/adverts`)
+                .send({
+                    model_id: '12312',
+                    category_id: '123123',
+                    title: '',
+                } as CreateAdvertDto)
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('fields must be an array');
+                    expect(res.body.message).toContain('fields should not be empty');
+                });
+        });
+
+        it(`with error - title cannot be longer than 255 characters`, () => {
+            return request(app.getHttpServer())
+                .post(`/adverts`)
+                .send({
+                    model_id: uuid(),
+                    category_id: uuid(),
+                    title: Array(300).fill('a').join(''),
+                    fields: [],
+                } as CreateAdvertDto)
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('title must be shorter than or equal to 255 characters');
+                });
+        });
+
+        describe('create advert with input_text field', () => {
+            it(`successfully`, () => {
+                return request(app.getHttpServer())
+                    .post(`/adverts`)
+                    .send({
+                        model_id: uuid(),
+                        category_id: uuid(),
+                        title: 'some advert',
+                        fields: [
+                            {
+                                field_id: uuid(),
+                                value: 'test',
+                            } as CreateInputTextDto,
+                        ],
+                    } as CreateAdvertDto)
+                    .expect(HttpStatus.CREATED);
+            });
+
+            it(`with error - not valid field_id`, () => {
+                return request(app.getHttpServer())
+                    .post(`/adverts`)
+                    .send({
+                        model_id: uuid(),
+                        category_id: uuid(),
+                        title: 'some advert',
+                        fields: [
+                            {
+                                field_id: '123',
+                                value: '',
+                            } as CreateInputTextDto,
+                        ],
+                    } as CreateAdvertDto)
+                    .expect(HttpStatus.BAD_REQUEST)
+                    .expect(res => {
+                        expect(res.body.message).toContain('field_id must be an UUID');
+                    });
+            });
+
+            it(`with error - not valid value`, () => {
+                return request(app.getHttpServer())
+                    .post(`/adverts`)
+                    .send({
+                        model_id: uuid(),
+                        category_id: uuid(),
+                        title: 'some advert',
+                        fields: [
+                            {
+                                field_id: uuid(),
+                                value: '',
+                            } as CreateInputTextDto,
+                        ],
+                    } as CreateAdvertDto)
+                    .expect(HttpStatus.BAD_REQUEST)
+                    .expect(res => {
+                        expect(res.body.message).toContain('value should not be empty');
+                    });
+            });
+        });
+
+        describe('create advert with textarea field', () => {
+            const textareaField = new Field();
+            textareaField.type = FieldType.TEXTAREA;
+
+            it(`successfully`, () => {
+                fieldRepositoryMock.findOne.mockReturnValueOnce(textareaField);
+                return request(app.getHttpServer())
+                    .post(`/adverts`)
+                    .send({
+                        model_id: uuid(),
+                        category_id: uuid(),
+                        title: 'some advert',
+                        fields: [
+                            {
+                                field_id: uuid(),
+                                value: 'test',
+                            } as CreateTextareaDto,
+                        ],
+                    } as CreateAdvertDto)
+                    .expect(HttpStatus.CREATED);
+            });
+
+            it(`with error - not valid field_id`, () => {
+                fieldRepositoryMock.findOne.mockReturnValueOnce(textareaField);
+                return request(app.getHttpServer())
+                    .post(`/adverts`)
+                    .send({
+                        model_id: uuid(),
+                        category_id: uuid(),
+                        title: 'some advert',
+                        fields: [
+                            {
+                                field_id: '123',
+                                value: 'test',
+                            } as CreateTextareaDto,
+                        ],
+                    } as CreateAdvertDto)
+                    .expect(HttpStatus.BAD_REQUEST)
+                    .expect(res => {
+                        expect(res.body.message).toContain('field_id must be an UUID');
+                    });
+            });
+
+            it(`with error - not valid value`, () => {
+                fieldRepositoryMock.findOne.mockReturnValueOnce(textareaField);
+                return request(app.getHttpServer())
+                    .post(`/adverts`)
+                    .send({
+                        model_id: uuid(),
+                        category_id: uuid(),
+                        title: 'some advert',
+                        fields: [
+                            {
+                                field_id: uuid(),
+                                value: Array(1001).fill('a').join(''),
+                            } as CreateTextareaDto,
+                        ],
+                    } as CreateAdvertDto)
+                    .expect(HttpStatus.BAD_REQUEST)
+                    .expect(res => {
+                        expect(res.body.message).toContain('value must be shorter than or equal to 1000 characters');
+                    });
+            });
+        });
+
+        describe('create advert with radio field', () => {
+            const radioField = new Field();
+            radioField.type = FieldType.RADIO;
+
+            it(`successfully`, () => {
+                fieldRepositoryMock.findOne.mockReturnValueOnce(radioField);
+                return request(app.getHttpServer())
+                    .post(`/adverts`)
+                    .send({
+                        model_id: uuid(),
+                        category_id: uuid(),
+                        title: 'some advert',
+                        fields: [
+                            {
+                                field_id: uuid(),
+                                value: 'test',
+                            } as CreateRadioDto,
+                        ],
+                    } as CreateAdvertDto)
+                    .expect(HttpStatus.CREATED);
+            });
+
+            it(`with error - not valid field_id`, () => {
+                fieldRepositoryMock.findOne.mockReturnValueOnce(radioField);
+                return request(app.getHttpServer())
+                    .post(`/adverts`)
+                    .send({
+                        model_id: uuid(),
+                        category_id: uuid(),
+                        title: 'some advert',
+                        fields: [
+                            {
+                                field_id: '123',
+                                value: 'test',
+                            } as CreateRadioDto,
+                        ],
+                    } as CreateAdvertDto)
+                    .expect(HttpStatus.BAD_REQUEST)
+                    .expect(res => {
+                        expect(res.body.message).toContain('field_id must be an UUID');
+                    });
+            });
+
+            it(`with error - not valid value`, () => {
+                fieldRepositoryMock.findOne.mockReturnValueOnce(radioField);
+                return request(app.getHttpServer())
+                    .post(`/adverts`)
+                    .send({
+                        model_id: uuid(),
+                        category_id: uuid(),
+                        title: 'some advert',
+                        fields: [
+                            {
+                                field_id: uuid(),
+                                value: Array(256).fill('a').join(''),
+                            } as CreateRadioDto,
+                        ],
+                    } as CreateAdvertDto)
+                    .expect(HttpStatus.BAD_REQUEST)
+                    .expect(res => {
+                        expect(res.body.message).toContain('value must be shorter than or equal to 255 characters');
+                    });
+            });
         });
     });
 
     describe('delete advert by id', () => {
         it(`successfully`, () => {
-            return request(app.getHttpServer()).delete('/adverts/123123').expect(HttpStatus.NO_CONTENT);
+            return request(app.getHttpServer()).delete(`/adverts/${uuid()}`).expect(HttpStatus.NO_CONTENT);
+        });
+
+        it(`with error - not valid uuid`, () => {
+            return request(app.getHttpServer())
+                .delete('/adverts/123123')
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('Validation failed (uuid  is expected)');
+                });
         });
 
         it(`with error - not found`, () => {
             advertRepositoryMock.findOne.mockReturnValueOnce(undefined);
-            return request(app.getHttpServer()).delete('/adverts/123123').expect(HttpStatus.NOT_FOUND);
+            return request(app.getHttpServer()).delete(`/adverts/${uuid()}`).expect(HttpStatus.NOT_FOUND);
         });
     });
 
