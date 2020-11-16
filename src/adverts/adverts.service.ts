@@ -31,9 +31,9 @@ export class AdvertsService {
         const skipped = (options.page - 1) * options.limit;
 
         const query = await this.advertRepository
-            .createQueryBuilder('')
+            .createQueryBuilder('advert')
             .andWhere(options.category_id ? 'advert.category_id = :category_id' : '1=1', { category_id: options.category_id })
-            .andWhere(options.search ? 'LOWER(title COLLATE "en_US") LIKE :search' : '1=1', {
+            .andWhere(options.search ? 'LOWER(advert.title COLLATE "en_US") LIKE :search' : '1=1', {
                 search: options.search ? `%${options.search.toLocaleLowerCase()}%` : '',
             });
 
