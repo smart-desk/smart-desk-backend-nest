@@ -8,7 +8,13 @@ import { SectionCreateDto } from './section.dto';
 export class SectionsService {
     constructor(@InjectRepository(Section) private sectionRepository: Repository<Section>) {}
 
-    async getById(id: string) {
+    getByModelId(modelId: string): Promise<Section[]> {
+        return this.sectionRepository.find({
+            where: { model_id: modelId },
+        });
+    }
+
+    async getById(id: string): Promise<Section> {
         const section = await this.sectionRepository.findOne({ id });
         if (!section) {
             throw new NotFoundException('Section not found');

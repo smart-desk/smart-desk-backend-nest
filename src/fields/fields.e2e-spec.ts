@@ -3,38 +3,32 @@ import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as request from 'supertest';
 import { v4 as uuid } from 'uuid';
-import { createTestAppForModule } from '../../test/test.utils';
-import { Section } from '../sections/section.entity';
-import { SectionsModule } from '../sections/sections.module';
-import { InputText, Radio, Text, Textarea } from './field-params';
-import { FieldCreateDto, FieldUpdateDto } from './field.dto';
-import { Field, FieldType } from './field.entity';
+import { createRepositoryMock, createTestAppForModule } from '../../test/test.utils';
 import { FieldsModule } from './fields.module';
-import fn = jest.fn;
+import { Field } from './field.entity';
+import { FieldCreateDto, FieldUpdateDto } from './dto/field.dto';
+import { SectionsModule } from '../sections/sections.module';
+import { Section } from '../sections/section.entity';
+import { FieldType } from './constants';
+import { InputTextDto } from './dto/input-text.dto';
+import { TextareaDto } from './dto/textarea.dto';
+import { TextDto } from './dto/text.dto';
+import { RadioDto } from './dto/radio.dto';
 
 describe('Fields controller', () => {
     let app: INestApplication;
     const field = new Field();
     const section = new Section();
 
-    const repositoryMock = {
-        findOne: fn().mockReturnValue(field),
-        create: fn().mockReturnValue(field),
-        save: fn().mockReturnValue(field),
-        update: fn(),
-        delete: fn(),
-    };
-
-    const sectionRepositoryMock = {
-        findOne: fn().mockReturnValue(section),
-    };
+    const fieldsRepositoryMock = createRepositoryMock<Field>([field]);
+    const sectionRepositoryMock = createRepositoryMock<Section>([section]);
 
     beforeAll(async () => {
         const moduleRef = await Test.createTestingModule({
             imports: [FieldsModule, SectionsModule],
         })
             .overrideProvider(getRepositoryToken(Field))
-            .useValue(repositoryMock)
+            .useValue(fieldsRepositoryMock)
             .overrideProvider(getRepositoryToken(Section))
             .useValue(sectionRepositoryMock)
             .compile();
@@ -50,7 +44,7 @@ describe('Fields controller', () => {
                     section_id: uuid(),
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
-                    params: { label: 'some label' } as InputText,
+                    params: { label: 'some label' } as InputTextDto,
                 } as FieldCreateDto)
                 .expect(HttpStatus.CREATED);
         });
@@ -62,7 +56,7 @@ describe('Fields controller', () => {
                     section_id: uuid(),
                     title: 'some title',
                     type: 'wrong type' as FieldType,
-                    params: { label: 'some label' } as InputText,
+                    params: { label: 'some label' } as InputTextDto,
                 } as FieldCreateDto)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
@@ -77,7 +71,7 @@ describe('Fields controller', () => {
                     section_id: 'not id',
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
-                    params: { label: 'some label' } as InputText,
+                    params: { label: 'some label' } as InputTextDto,
                 } as FieldCreateDto)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
@@ -93,7 +87,7 @@ describe('Fields controller', () => {
                     section_id: uuid(),
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
-                    params: { label: 'some label' } as InputText,
+                    params: { label: 'some label' } as InputTextDto,
                 } as FieldCreateDto)
                 .expect(HttpStatus.NOT_FOUND)
                 .expect(res => {
@@ -113,7 +107,7 @@ describe('Fields controller', () => {
                             label: 'some label',
                             placeholder: 'some place',
                             required: true,
-                        } as InputText,
+                        } as InputTextDto,
                     } as FieldCreateDto)
                     .expect(HttpStatus.CREATED);
             });
@@ -129,7 +123,7 @@ describe('Fields controller', () => {
                             label: '',
                             placeholder: 'some place',
                             required: 'string' as any,
-                        } as InputText,
+                        } as InputTextDto,
                     } as FieldCreateDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
@@ -151,7 +145,7 @@ describe('Fields controller', () => {
                             label: 'some label',
                             placeholder: 'some place',
                             required: true,
-                        } as Textarea,
+                        } as TextareaDto,
                     } as FieldCreateDto)
                     .expect(HttpStatus.CREATED);
             });
@@ -167,7 +161,7 @@ describe('Fields controller', () => {
                             label: '',
                             placeholder: 'some place',
                             required: 'string' as any,
-                        } as Textarea,
+                        } as TextareaDto,
                     } as FieldCreateDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
@@ -185,7 +179,7 @@ describe('Fields controller', () => {
                         section_id: uuid(),
                         title: 'some title',
                         type: FieldType.TEXT,
-                        params: { value: 'some string' } as Text,
+                        params: { value: 'some string' } as TextDto,
                     } as FieldCreateDto)
                     .expect(HttpStatus.CREATED);
             });
@@ -197,7 +191,7 @@ describe('Fields controller', () => {
                         section_id: uuid(),
                         title: 'some title',
                         type: FieldType.TEXT,
-                        params: { value: '' } as Text,
+                        params: { value: '' } as TextDto,
                     } as FieldCreateDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
@@ -226,7 +220,7 @@ describe('Fields controller', () => {
                                     value: 'some value 1',
                                 },
                             ],
-                        } as Radio,
+                        } as RadioDto,
                     } as FieldCreateDto)
                     .expect(HttpStatus.CREATED);
             });
@@ -250,7 +244,7 @@ describe('Fields controller', () => {
                                     value: '',
                                 },
                             ],
-                        } as Radio,
+                        } as RadioDto,
                     } as FieldCreateDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
@@ -269,7 +263,7 @@ describe('Fields controller', () => {
                 .send({
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
-                    params: { label: 'some label' } as InputText,
+                    params: { label: 'some label' } as InputTextDto,
                 } as FieldUpdateDto)
                 .expect(HttpStatus.OK);
         });
@@ -280,7 +274,7 @@ describe('Fields controller', () => {
                 .send({
                     title: 'some title',
                     type: 'wrong type' as FieldType,
-                    params: { label: 'some label' } as InputText,
+                    params: { label: 'some label' } as InputTextDto,
                 } as FieldUpdateDto)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
@@ -289,13 +283,13 @@ describe('Fields controller', () => {
         });
 
         it(`with error - field not found`, () => {
-            repositoryMock.findOne.mockReturnValueOnce(undefined);
+            fieldsRepositoryMock.findOne.mockReturnValueOnce(undefined);
             return request(app.getHttpServer())
                 .put('/fields/123123123')
                 .send({
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
-                    params: { label: 'some label' } as InputText,
+                    params: { label: 'some label' } as InputTextDto,
                 } as FieldUpdateDto)
                 .expect(HttpStatus.NOT_FOUND)
                 .expect(res => {
@@ -314,7 +308,7 @@ describe('Fields controller', () => {
                             label: 'some label',
                             placeholder: 'some place',
                             required: true,
-                        } as InputText,
+                        } as InputTextDto,
                     } as FieldUpdateDto)
                     .expect(HttpStatus.OK);
             });
@@ -329,7 +323,7 @@ describe('Fields controller', () => {
                             label: '',
                             placeholder: 'some place',
                             required: 'string' as any,
-                        } as InputText,
+                        } as InputTextDto,
                     } as FieldUpdateDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
@@ -350,7 +344,7 @@ describe('Fields controller', () => {
                             label: 'some label',
                             placeholder: 'some place',
                             required: true,
-                        } as Textarea,
+                        } as TextareaDto,
                     } as FieldUpdateDto)
                     .expect(HttpStatus.OK);
             });
@@ -365,7 +359,7 @@ describe('Fields controller', () => {
                             label: '',
                             placeholder: 'some place',
                             required: 'string' as any,
-                        } as Textarea,
+                        } as TextareaDto,
                     } as FieldUpdateDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
@@ -382,7 +376,7 @@ describe('Fields controller', () => {
                     .send({
                         title: 'some title',
                         type: FieldType.TEXT,
-                        params: { value: 'some string' } as Text,
+                        params: { value: 'some string' } as TextDto,
                     } as FieldUpdateDto)
                     .expect(HttpStatus.OK);
             });
@@ -393,7 +387,7 @@ describe('Fields controller', () => {
                     .send({
                         title: 'some title',
                         type: FieldType.TEXT,
-                        params: { value: '' } as Text,
+                        params: { value: '' } as TextDto,
                     } as FieldUpdateDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
@@ -421,7 +415,7 @@ describe('Fields controller', () => {
                                     value: 'some value 1',
                                 },
                             ],
-                        } as Radio,
+                        } as RadioDto,
                     } as FieldUpdateDto)
                     .expect(HttpStatus.OK);
             });
@@ -444,7 +438,7 @@ describe('Fields controller', () => {
                                     value: '',
                                 },
                             ],
-                        } as Radio,
+                        } as RadioDto,
                     } as FieldUpdateDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
@@ -462,7 +456,7 @@ describe('Fields controller', () => {
         });
 
         it(`with error - not found`, () => {
-            repositoryMock.findOne.mockReturnValueOnce(undefined);
+            fieldsRepositoryMock.findOne.mockReturnValueOnce(undefined);
             return request(app.getHttpServer()).delete('/fields/123123').expect(HttpStatus.NOT_FOUND);
         });
     });

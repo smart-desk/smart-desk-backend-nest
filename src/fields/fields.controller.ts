@@ -2,7 +2,7 @@ import { Body, Controller, Delete, HttpCode, HttpStatus, Param, Post, Put } from
 import { Field } from './field.entity';
 import { FieldsService } from './fields.service';
 import { ApiTags } from '@nestjs/swagger';
-import { FieldCreateDto, FieldUpdateDto } from './field.dto';
+import { FieldCreateDto, FieldUpdateDto } from './dto/field.dto';
 
 @Controller('fields')
 @ApiTags('Fields')
