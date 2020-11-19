@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsUUID, MaxLength, ValidateNested } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsUUID, MaxLength, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { FieldType, FieldParamDto } from '../constants';
 import { InputTextDto } from './input-text.dto';
@@ -9,6 +9,7 @@ import { RadioDto } from './radio.dto';
 export type FieldParamsType = InputTextDto | TextareaDto | TextDto | RadioDto;
 
 export class FieldCreateDto {
+    @IsOptional()
     @MaxLength(255)
     title?: string;
 

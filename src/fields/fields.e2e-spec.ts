@@ -233,7 +233,6 @@ describe('Fields controller', () => {
                         title: 'some title',
                         type: FieldType.RADIO,
                         params: {
-                            title: '',
                             radios: [
                                 {
                                     label: '',
@@ -248,7 +247,6 @@ describe('Fields controller', () => {
                     } as FieldCreateDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('params.title should not be empty');
                         expect(res.body.message).toContain('0.label should not be empty');
                         expect(res.body.message).toContain('1.value should not be empty');
                     });
@@ -427,7 +425,6 @@ describe('Fields controller', () => {
                         title: 'some title',
                         type: FieldType.RADIO,
                         params: {
-                            title: '',
                             radios: [
                                 {
                                     label: '',
@@ -442,7 +439,6 @@ describe('Fields controller', () => {
                     } as FieldUpdateDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('params.title should not be empty');
                         expect(res.body.message).toContain('0.label should not be empty');
                         expect(res.body.message).toContain('1.value should not be empty');
                     });
