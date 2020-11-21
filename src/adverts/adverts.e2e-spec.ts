@@ -7,9 +7,9 @@ import { createRepositoryMock, createTestAppForModule } from '../../test/test.ut
 import { Advert } from './entities/advert.entity';
 import { AdvertsModule } from './adverts.module';
 import { Connection } from 'typeorm';
-import { InputTextEntity } from './entities/input-text.entity';
-import { TextareaEntity } from './entities/textarea.entity';
-import { RadioEntity } from './entities/radio.entity';
+import { InputTextEntity } from '../dynamic-fields/input-text/input-text.entity';
+import { TextareaEntity } from '../dynamic-fields/textarea/textarea.entity';
+import { RadioEntity } from '../dynamic-fields/radio/radio.entity';
 import { Field } from '../fields/field.entity';
 import { Section, SectionType } from '../sections/section.entity';
 import { CreateAdvertDto, UpdateAdvertDto } from './dto/advert.dto';
@@ -41,6 +41,10 @@ describe('Adverts controller', () => {
     const advertRepositoryMock = createRepositoryMock<Advert>([advertEntity]);
     const sectionRepositoryMock = createRepositoryMock<Section>([sectionEntity]);
     const fieldRepositoryMock = createRepositoryMock<Field>([fieldEntity]);
+    const inputTextRepositoryMock = createRepositoryMock<InputTextEntity>([new InputTextEntity()]);
+    const textareaRepositoryMock = createRepositoryMock<TextareaEntity>([new TextareaEntity()]);
+    const radioRepositoryMock = createRepositoryMock<RadioEntity>([new RadioEntity()]);
+
     const connectionMock = {
         manager: createRepositoryMock(),
     };
@@ -56,11 +60,11 @@ describe('Adverts controller', () => {
             .overrideProvider(getRepositoryToken(Field))
             .useValue(fieldRepositoryMock)
             .overrideProvider(getRepositoryToken(InputTextEntity))
-            .useValue(createRepositoryMock())
+            .useValue(inputTextRepositoryMock)
             .overrideProvider(getRepositoryToken(TextareaEntity))
-            .useValue(createRepositoryMock())
+            .useValue(textareaRepositoryMock)
             .overrideProvider(getRepositoryToken(RadioEntity))
-            .useValue(createRepositoryMock())
+            .useValue(radioRepositoryMock)
             .overrideProvider(Connection)
             .useValue(connectionMock)
             .compile();

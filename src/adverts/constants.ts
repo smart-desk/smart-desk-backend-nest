@@ -1,7 +1,7 @@
 import { FieldType } from '../fields/constants';
-import { RadioEntity } from './entities/radio.entity';
-import { InputTextEntity } from './entities/input-text.entity';
-import { TextareaEntity } from './entities/textarea.entity';
+import { RadioEntity } from '../dynamic-fields/radio/radio.entity';
+import { InputTextEntity } from '../dynamic-fields/input-text/input-text.entity';
+import { TextareaEntity } from '../dynamic-fields/textarea/textarea.entity';
 import { CreateInputTextDto, UpdateInputTextDto } from './dto/input-text.dto';
 import { CreateRadioDto, UpdateRadioDto } from './dto/radio.dto';
 import { CreateTextareaDto, UpdateTextareaDto } from './dto/textarea.dto';

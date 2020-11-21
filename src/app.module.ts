@@ -8,8 +8,9 @@ import { ModelsModule } from './models/models.module';
 import { SectionsModule } from './sections/sections.module';
 import { UsersModule } from './users';
 import { AdvertsModule } from './adverts/adverts.module';
+import { DynamicFieldsModule } from './dynamic-fields/dynamic-fields.module';
 
-const app = [AuthModule, UsersModule, CategoriesModule, ModelsModule, SectionsModule, FieldsModule, AdvertsModule];
+const app = [AuthModule, UsersModule, CategoriesModule, ModelsModule, SectionsModule, FieldsModule, AdvertsModule, DynamicFieldsModule];
 
 @Module({
     imports: [TypeOrmModule.forRoot(), ConfigModule.forRoot(), ...app],

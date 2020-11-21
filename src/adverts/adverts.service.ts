@@ -12,6 +12,7 @@ import { FieldsService } from '../fields/fields.service';
 import { FieldType } from '../fields/constants';
 import { getMessageFromValidationErrors } from '../utils/validation';
 import { CreateFieldDataBaseDto, UpdateFieldDataBaseDto } from './dto/field-data-base.dto';
+import { DynamicFieldsService } from '../dynamic-fields/dynamic-fields.service';
 
 interface FieldDataDtoInstance {
     type: FieldType;
@@ -24,7 +25,8 @@ export class AdvertsService {
         @InjectRepository(Advert) private advertRepository: Repository<Advert>,
         private sectionsService: SectionsService,
         private fieldsService: FieldsService,
-        private connection: Connection
+        private connection: Connection,
+        private dynamicFieldsService: DynamicFieldsService
     ) {}
 
     async getAll(options: AdvertsGetDto): Promise<AdvertsGetResponseDto> {
@@ -122,9 +124,12 @@ export class AdvertsService {
         // todo sequential loading is not effective, replace with parallel
         for (const section of advert.sections) {
             for (const field of section.fields) {
-                if (FieldDataEntities.get(field.type)) {
-                    field.data = await this.connection.manager.findOne(FieldDataEntities.get(field.type), { field_id: field.id });
+                const service = this.dynamicFieldsService.getService(field.type);
+                if (!service) {
+                    continue;
                 }
+                const repository = service.getRepository();
+                field.data = await repository.findOne({ where: { field_id: field.id } });
             }
         }
 
