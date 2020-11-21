@@ -13,10 +13,13 @@ import { RadioEntity } from '../dynamic-fields/radio/radio.entity';
 import { Field } from '../fields/field.entity';
 import { Section, SectionType } from '../sections/section.entity';
 import { CreateAdvertDto, UpdateAdvertDto } from './dto/advert.dto';
-import { CreateInputTextDto, UpdateInputTextDto } from './dto/input-text.dto';
+import { UpdateInputTextDto } from '../dynamic-fields/input-text/dto/update-input-text.dto';
 import { FieldType } from '../fields/constants';
-import { CreateTextareaDto, UpdateTextareaDto } from './dto/textarea.dto';
-import { CreateRadioDto, UpdateRadioDto } from './dto/radio.dto';
+import { UpdateTextareaDto } from '../dynamic-fields/textarea/dto/update-textarea.dto';
+import { UpdateRadioDto } from '../dynamic-fields/radio/dto/update-radio.dto';
+import { CreateInputTextDto } from '../dynamic-fields/input-text/dto/create-input-text.dto';
+import { CreateTextareaDto } from '../dynamic-fields/textarea/dto/create-textarea.dto';
+import { CreateRadioDto } from '../dynamic-fields/radio/dto/create-radio.dto';
 
 describe('Adverts controller', () => {
     let app: INestApplication;

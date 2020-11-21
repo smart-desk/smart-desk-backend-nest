@@ -16,7 +16,7 @@ import { DynamicFieldsService } from '../dynamic-fields/dynamic-fields.service';
 
 interface FieldDataDtoInstance {
     type: FieldType;
-    instance: CreateFieldDataBaseDto | UpdateFieldDataBaseDto;
+    dto: any; // todo not any
 }
 
 @Injectable()
@@ -63,20 +63,37 @@ export class AdvertsService {
         // todo (future) check that field_id is unique for this advert
         const validDtos: Array<FieldDataDtoInstance> = [];
         for (const fieldDataObject of advertDto.fields) {
-            const fieldDataInstance = await this.convertFieldDataDtoToClass(fieldDataObject);
-
-            if (fieldDataInstance) {
-                await this.validateFieldDataOrThrowException(fieldDataInstance.instance);
-                validDtos.push(fieldDataInstance);
+            if (!isUUID(fieldDataObject.field_id)) {
+                throw new BadRequestException('field_id must be an UUID');
             }
+
+            const field = await this.fieldsService.getById(fieldDataObject.field_id);
+            const service = this.dynamicFieldsService.getService(field.type);
+            if (!service) {
+                continue;
+            }
+
+            const errors = await service.validateBeforeCreate(fieldDataObject);
+            if (errors.length) {
+                throw new BadRequestException(getMessageFromValidationErrors(errors));
+            }
+
+            validDtos.push({
+                type: field.type,
+                dto: fieldDataObject,
+            });
         }
 
         const advert = this.advertRepository.create(advertDto);
         const advertResult = await this.advertRepository.save(advert);
 
         for (const fieldData of validDtos) {
-            (fieldData.instance as CreateFieldDataBaseDto).advert_id = advertResult.id;
-            await this.saveFieldData(fieldData);
+            const service = this.dynamicFieldsService.getService(fieldData.type);
+            if (!service) {
+                continue;
+            }
+            fieldData.dto.advert_id = advertResult.id;
+            await service.validateAndCreate(fieldData.dto);
         }
 
         return this.getById(advertResult.id);
@@ -90,7 +107,7 @@ export class AdvertsService {
             const fieldDataInstance = await this.convertFieldDataDtoToClass(fieldDataObject, true);
 
             if (fieldDataInstance) {
-                await this.validateFieldDataOrThrowException(fieldDataInstance.instance);
+                await this.validateFieldDataOrThrowException(fieldDataInstance.dto);
                 validDtos.push(fieldDataInstance);
             }
         }
@@ -146,12 +163,11 @@ export class AdvertsService {
         }
 
         const field = await this.fieldsService.getById(fieldDataDto.field_id);
-
         const dataType = updateOperation ? UpdateFieldDataDtoTypes.get(field.type) : CreateFieldDataDtoTypes.get(field.type);
         if (dataType) {
             return {
                 type: field.type,
-                instance: plainToClass(dataType as any, { ...fieldDataDto }),
+                dto: plainToClass(dataType as any, { ...fieldDataDto }),
             };
         }
     }
@@ -168,8 +184,8 @@ export class AdvertsService {
         const targetEntity = FieldDataEntities.get(fieldData.type);
 
         const fieldDataEntity = updateOperation
-            ? await this.connection.manager.preload(targetEntity, fieldData.instance)
-            : await this.connection.manager.create(targetEntity, fieldData.instance);
+            ? await this.connection.manager.preload(targetEntity, fieldData.dto)
+            : await this.connection.manager.create(targetEntity, fieldData.dto);
 
         return this.connection.manager.save(fieldDataEntity);
     }

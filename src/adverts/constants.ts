@@ -2,10 +2,13 @@ import { FieldType } from '../fields/constants';
 import { RadioEntity } from '../dynamic-fields/radio/radio.entity';
 import { InputTextEntity } from '../dynamic-fields/input-text/input-text.entity';
 import { TextareaEntity } from '../dynamic-fields/textarea/textarea.entity';
-import { CreateInputTextDto, UpdateInputTextDto } from './dto/input-text.dto';
-import { CreateRadioDto, UpdateRadioDto } from './dto/radio.dto';
-import { CreateTextareaDto, UpdateTextareaDto } from './dto/textarea.dto';
+import { CreateInputTextDto } from '../dynamic-fields/input-text/dto/create-input-text.dto';
+import { UpdateInputTextDto } from '../dynamic-fields/input-text/dto/update-input-text.dto';
+import { CreateRadioDto } from '../dynamic-fields/radio/dto/create-radio.dto';
+import { UpdateRadioDto } from '../dynamic-fields/radio/dto/update-radio.dto';
+import { UpdateTextareaDto } from '../dynamic-fields/textarea/dto/update-textarea.dto';
 import { Type } from '@nestjs/common';
+import { CreateTextareaDto } from '../dynamic-fields/textarea/dto/create-textarea.dto';
 
 export type CreateFieldDataDto = CreateInputTextDto | CreateRadioDto | CreateTextareaDto;
 export type UpdateFieldDataDto = UpdateInputTextDto | UpdateRadioDto | UpdateTextareaDto;
