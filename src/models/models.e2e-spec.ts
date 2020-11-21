@@ -5,12 +5,15 @@ import * as request from 'supertest';
 import { Model } from './model.entity';
 import { createRepositoryMock, createTestAppForModule } from '../../test/test.utils';
 import { ModelsModule } from './models.module';
+import { Section } from '../sections/section.entity';
 
 describe('Models controller', () => {
     let app: INestApplication;
     const modelEntity = new Model();
+    const sectionEntity = new Section();
 
     const modelRepositoryMock = createRepositoryMock<Model>([modelEntity]);
+    const sectionRepository = createRepositoryMock<Section>([sectionEntity]);
 
     beforeAll(async () => {
         const moduleRef = await Test.createTestingModule({
@@ -18,6 +21,8 @@ describe('Models controller', () => {
         })
             .overrideProvider(getRepositoryToken(Model))
             .useValue(modelRepositoryMock)
+            .overrideProvider(getRepositoryToken(Section))
+            .useValue(sectionRepository)
             .compile();
 
         app = await createTestAppForModule(moduleRef);
