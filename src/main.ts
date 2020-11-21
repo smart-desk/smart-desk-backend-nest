@@ -9,8 +9,6 @@ async function bootstrap() {
     app.useGlobalPipes(
         new ValidationPipe({
             forbidNonWhitelisted: true,
-            // May have impact on performance
-            transform: true,
         })
     );
     app.setGlobalPrefix('api');
