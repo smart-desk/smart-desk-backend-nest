@@ -41,9 +41,6 @@ describe('Adverts controller', () => {
     const advertRepositoryMock = createRepositoryMock<Advert>([advertEntity]);
     const sectionRepositoryMock = createRepositoryMock<Section>([sectionEntity]);
     const fieldRepositoryMock = createRepositoryMock<Field>([fieldEntity]);
-    const inputTextRepositoryMock = createRepositoryMock<InputTextEntity>([new InputTextEntity()]);
-    const textareaRepositoryMock = createRepositoryMock<TextareaEntity>([new TextareaEntity()]);
-    const radioRepositoryMock = createRepositoryMock<RadioEntity>([new RadioEntity()]);
 
     const connectionMock = {
         manager: createRepositoryMock(),
@@ -60,11 +57,11 @@ describe('Adverts controller', () => {
             .overrideProvider(getRepositoryToken(Field))
             .useValue(fieldRepositoryMock)
             .overrideProvider(getRepositoryToken(InputTextEntity))
-            .useValue(inputTextRepositoryMock)
+            .useValue(createRepositoryMock())
             .overrideProvider(getRepositoryToken(TextareaEntity))
-            .useValue(textareaRepositoryMock)
+            .useValue(createRepositoryMock())
             .overrideProvider(getRepositoryToken(RadioEntity))
-            .useValue(radioRepositoryMock)
+            .useValue(createRepositoryMock())
             .overrideProvider(Connection)
             .useValue(connectionMock)
             .compile();
