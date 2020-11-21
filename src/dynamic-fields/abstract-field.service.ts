@@ -1,25 +1,27 @@
 import { Repository } from 'typeorm';
 import { ValidationError } from 'class-validator';
+import { DynamicFieldsBaseCreateDto } from './dynamic-fields-base-create.dto';
+import { DynamicFieldsBaseUpdateDto } from './dynamic-fields-base-update.dto';
 
 export abstract class AbstractFieldService {
     // todo abstract class for field entity
     abstract getRepository(): Repository<any>;
 
     // todo some abstract class
-    abstract transformCreateObjectToClass(createDtoObject: Record<string, any>): any;
+    abstract transformCreateObjectToClass(dtoObject: Partial<DynamicFieldsBaseCreateDto>): DynamicFieldsBaseCreateDto;
 
     // todo base field
-    abstract validateBeforeCreate(createDtoObject: Record<string, any>): Promise<ValidationError[]>;
+    abstract validateBeforeCreate(dtoObject: Partial<DynamicFieldsBaseCreateDto>): Promise<ValidationError[]>;
 
     // todo return entity
-    abstract validateAndCreate(createDtoObject: Record<string, any>): Promise<any>;
+    abstract validateAndCreate(dtoObject: Partial<DynamicFieldsBaseUpdateDto>): Promise<any>;
 
     // todo some abstract class
-    abstract transformUpdateObjectToClass(updateDtoObject: Record<string, any>): any;
+    abstract transformUpdateObjectToClass(dtoObject: Partial<DynamicFieldsBaseUpdateDto>): DynamicFieldsBaseUpdateDto;
 
     // todo base field
-    abstract validateBeforeUpdate(updateDtoObject: Record<string, any>): Promise<ValidationError[]>;
+    abstract validateBeforeUpdate(dtoObject: Partial<DynamicFieldsBaseUpdateDto>): Promise<ValidationError[]>;
 
     // todo return entity
-    abstract validateAndUpdate(updateDtoObject: Record<string, any>): Promise<any>;
+    abstract validateAndUpdate(dtoObject: Partial<DynamicFieldsBaseUpdateDto>): Promise<any>;
 }

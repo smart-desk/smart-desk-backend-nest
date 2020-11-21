@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
-import { CreateFieldDataBaseDto } from '../../../adverts/dto/field-data-base.dto';
+import { DynamicFieldsBaseCreateDto } from '../../dynamic-fields-base-create.dto';
 
-export class CreateRadioDto extends CreateFieldDataBaseDto {
+export class CreateRadioDto extends DynamicFieldsBaseCreateDto {
     @IsString()
     @MaxLength(255)
     @IsNotEmpty()
