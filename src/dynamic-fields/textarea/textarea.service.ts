@@ -7,6 +7,7 @@ import { plainToClass } from 'class-transformer';
 import { TextareaEntity } from './textarea.entity';
 import { CreateTextareaDto } from './dto/create-textarea.dto';
 import { getMessageFromValidationErrors } from '../../utils/validation';
+import { UpdateTextareaDto } from './dto/update-textarea.dto';
 
 @Injectable()
 export class TextareaService extends AbstractFieldService {
@@ -18,24 +19,45 @@ export class TextareaService extends AbstractFieldService {
         return this.repository;
     }
 
-    transformCreateObjectToClass(createDtoObject: Partial<CreateTextareaDto>): CreateTextareaDto {
-        return plainToClass(CreateTextareaDto, createDtoObject);
+    transformCreateObjectToClass(dtoObject: Partial<CreateTextareaDto>): CreateTextareaDto {
+        return plainToClass(CreateTextareaDto, dtoObject);
     }
 
-    async validateBeforeCreate(createDtoObject: Partial<CreateTextareaDto>): Promise<ValidationError[]> {
-        const createDtoClass = this.transformCreateObjectToClass(createDtoObject);
-        return await validate(createDtoClass);
+    async validateBeforeCreate(dtoObject: Partial<CreateTextareaDto>): Promise<ValidationError[]> {
+        const dtoClass = this.transformCreateObjectToClass(dtoObject);
+        return await validate(dtoClass);
     }
 
     // todo think one more time about api, maybe return { error, instance }
-    async validateAndCreate(createDtoObject: Partial<CreateTextareaDto>): Promise<TextareaEntity> {
-        const createDtoClass = this.transformCreateObjectToClass(createDtoObject);
-        const errors = await validate(createDtoClass);
+    async validateAndCreate(dtoObject: Partial<CreateTextareaDto>): Promise<TextareaEntity> {
+        const dtoClass = this.transformCreateObjectToClass(dtoObject);
+        const errors = await validate(dtoClass);
         if (errors.length) {
             throw getMessageFromValidationErrors(errors);
         }
 
-        const instance = this.repository.create(createDtoClass);
+        const instance = this.repository.create(dtoClass);
+        return this.repository.save(instance);
+    }
+
+    transformUpdateObjectToClass(dtoObject: Partial<UpdateTextareaDto>): UpdateTextareaDto {
+        return plainToClass(UpdateTextareaDto, dtoObject);
+    }
+
+    async validateBeforeUpdate(dtoObject: Partial<UpdateTextareaDto>): Promise<ValidationError[]> {
+        const dtoClass = this.transformUpdateObjectToClass(dtoObject);
+        return await validate(dtoClass);
+    }
+
+    // todo think one more time about api, maybe return { error, instance }
+    async validateAndUpdate(dtoObject: Partial<UpdateTextareaDto>): Promise<TextareaEntity> {
+        const dtoClass = this.transformUpdateObjectToClass(dtoObject);
+        const errors = await validate(dtoClass);
+        if (errors.length) {
+            throw getMessageFromValidationErrors(errors);
+        }
+
+        const instance = this.repository.create(dtoClass);
         return this.repository.save(instance);
     }
 }

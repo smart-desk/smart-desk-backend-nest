@@ -13,4 +13,13 @@ export abstract class AbstractFieldService {
 
     // todo return entity
     abstract validateAndCreate(createDtoObject: Record<string, any>): Promise<any>;
+
+    // todo some abstract class
+    abstract transformUpdateObjectToClass(updateDtoObject: Record<string, any>): any;
+
+    // todo base field
+    abstract validateBeforeUpdate(updateDtoObject: Record<string, any>): Promise<ValidationError[]>;
+
+    // todo return entity
+    abstract validateAndUpdate(updateDtoObject: Record<string, any>): Promise<any>;
 }

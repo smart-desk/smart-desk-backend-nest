@@ -7,6 +7,7 @@ import { validate, ValidationError } from 'class-validator';
 import { plainToClass } from 'class-transformer';
 import { CreateRadioDto } from './dto/create-radio.dto';
 import { getMessageFromValidationErrors } from '../../utils/validation';
+import { UpdateRadioDto } from './dto/update-radio.dto';
 
 @Injectable()
 export class RadioService extends AbstractFieldService {
@@ -18,23 +19,44 @@ export class RadioService extends AbstractFieldService {
         return this.repository;
     }
 
-    transformCreateObjectToClass(createDtoObject: Partial<CreateRadioDto>): CreateRadioDto {
-        return plainToClass(CreateRadioDto, createDtoObject);
+    transformCreateObjectToClass(dtoObject: Partial<CreateRadioDto>): CreateRadioDto {
+        return plainToClass(CreateRadioDto, dtoObject);
     }
 
-    async validateBeforeCreate(createDtoObject: Partial<CreateRadioDto>): Promise<ValidationError[]> {
-        const createDtoClass = plainToClass(CreateRadioDto, createDtoObject);
-        return await validate(createDtoClass);
+    async validateBeforeCreate(dtoObject: Partial<CreateRadioDto>): Promise<ValidationError[]> {
+        const dtoClass = plainToClass(CreateRadioDto, dtoObject);
+        return await validate(dtoClass);
     }
 
-    async validateAndCreate(createDtoObject: Partial<CreateRadioDto>): Promise<RadioEntity> {
-        const createDtoClass = plainToClass(CreateRadioDto, createDtoObject);
-        const errors = await validate(createDtoClass);
+    async validateAndCreate(dtoObject: Partial<CreateRadioDto>): Promise<RadioEntity> {
+        const dtoClass = plainToClass(CreateRadioDto, dtoObject);
+        const errors = await validate(dtoClass);
         if (errors.length) {
             throw getMessageFromValidationErrors(errors);
         }
 
-        const instance = this.repository.create(createDtoClass);
+        const instance = this.repository.create(dtoClass);
+        return this.repository.save(instance);
+    }
+
+    transformUpdateObjectToClass(dtoObject: Partial<UpdateRadioDto>): UpdateRadioDto {
+        return plainToClass(UpdateRadioDto, dtoObject);
+    }
+
+    async validateBeforeUpdate(dtoObject: Partial<UpdateRadioDto>): Promise<ValidationError[]> {
+        const dtoClass = this.transformUpdateObjectToClass(dtoObject);
+        return await validate(dtoClass);
+    }
+
+    // todo think one more time about api, maybe return { error, instance }
+    async validateAndUpdate(dtoObject: Partial<UpdateRadioDto>): Promise<RadioEntity> {
+        const dtoClass = this.transformUpdateObjectToClass(dtoObject);
+        const errors = await validate(dtoClass);
+        if (errors.length) {
+            throw getMessageFromValidationErrors(errors);
+        }
+
+        const instance = this.repository.create(dtoClass);
         return this.repository.save(instance);
     }
 }
