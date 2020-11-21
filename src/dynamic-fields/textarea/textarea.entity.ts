@@ -1,16 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity } from 'typeorm';
+import { DynamicFieldsBaseEntity } from '../dynamic-fields-base.entity';
 
 @Entity('data_textareas')
-export class TextareaEntity {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
-
-    @Column('uuid')
-    advert_id: string;
-
-    @Column('uuid')
-    field_id: string;
-
+export class TextareaEntity extends DynamicFieldsBaseEntity {
     @Column('varchar', { length: 1000 })
     value: string;
 }

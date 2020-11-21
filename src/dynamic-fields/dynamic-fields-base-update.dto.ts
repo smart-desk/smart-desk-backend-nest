@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsUUID } from 'class-validator';
 
-export class DynamicFieldsBaseUpdateDto {
+export abstract class DynamicFieldsBaseUpdateDto {
     @IsUUID()
     @IsNotEmpty()
     id: string;

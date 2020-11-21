@@ -1,16 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity } from 'typeorm';
+import { DynamicFieldsBaseEntity } from '../dynamic-fields-base.entity';
 
 @Entity('data_radios')
-export class RadioEntity {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
-
-    @Column('uuid')
-    advert_id: string;
-
-    @Column('uuid')
-    field_id: string;
-
+export class RadioEntity extends DynamicFieldsBaseEntity {
     @Column('varchar', { length: 255 })
     value: string;
 }
