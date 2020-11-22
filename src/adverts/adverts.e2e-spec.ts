@@ -20,6 +20,7 @@ import { CreateInputTextDto } from '../dynamic-fields/input-text/dto/create-inpu
 import { CreateTextareaDto } from '../dynamic-fields/textarea/dto/create-textarea.dto';
 import { CreateRadioDto } from '../dynamic-fields/radio/dto/create-radio.dto';
 import { FieldType } from '../dynamic-fields/dynamic-fields.module';
+import { PhotoEntity } from '../dynamic-fields/photo/photo.entity';
 
 describe('Adverts controller', () => {
     let app: INestApplication;
@@ -64,6 +65,8 @@ describe('Adverts controller', () => {
             .overrideProvider(getRepositoryToken(TextareaEntity))
             .useValue(createRepositoryMock())
             .overrideProvider(getRepositoryToken(RadioEntity))
+            .useValue(createRepositoryMock())
+            .overrideProvider(getRepositoryToken(PhotoEntity))
             .useValue(createRepositoryMock())
             .overrideProvider(Connection)
             .useValue(connectionMock)

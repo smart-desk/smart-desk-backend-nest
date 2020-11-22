@@ -17,6 +17,7 @@ import { InputTextEntity } from '../dynamic-fields/input-text/input-text.entity'
 import { TextareaEntity } from '../dynamic-fields/textarea/textarea.entity';
 import { RadioEntity } from '../dynamic-fields/radio/radio.entity';
 import { FieldType } from '../dynamic-fields/dynamic-fields.module';
+import { PhotoEntity } from '../dynamic-fields/photo/photo.entity';
 
 describe('Fields controller', () => {
     let app: INestApplication;
@@ -39,6 +40,8 @@ describe('Fields controller', () => {
             .overrideProvider(getRepositoryToken(TextareaEntity))
             .useValue(createRepositoryMock())
             .overrideProvider(getRepositoryToken(RadioEntity))
+            .useValue(createRepositoryMock())
+            .overrideProvider(getRepositoryToken(PhotoEntity))
             .useValue(createRepositoryMock())
             .compile();
 
