@@ -3,10 +3,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository } from 'typeorm';
 import { Model } from './model.entity';
 import { ModelCreateDto, ModelUpdateDto } from './model.dto';
+import { SectionsService } from '../sections/sections.service';
+import { SectionType } from '../sections/section.entity';
 
 @Injectable()
 export class ModelsService {
-    constructor(@InjectRepository(Model) private modelRepository: Repository<Model>) {}
+    constructor(@InjectRepository(Model) private modelRepository: Repository<Model>, private sectionsService: SectionsService) {}
 
     getAll(): Promise<Model[]> {
         return this.modelRepository.find();
@@ -20,9 +22,16 @@ export class ModelsService {
         return model;
     }
 
-    create(modelDto: ModelCreateDto): Promise<Model> {
+    async create(modelDto: ModelCreateDto): Promise<Model> {
         const model = this.modelRepository.create(modelDto);
-        return this.modelRepository.save(model);
+        const resultModel = await this.modelRepository.save(model);
+
+        const sectionTypesArray = Object.values(SectionType);
+        for (const type of sectionTypesArray) {
+            await this.sectionsService.create({ type, model_id: resultModel.id });
+        }
+
+        return resultModel;
     }
 
     async update(id: string, modelDto: ModelUpdateDto): Promise<Model> {
