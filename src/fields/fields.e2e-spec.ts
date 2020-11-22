@@ -9,7 +9,6 @@ import { Field } from './field.entity';
 import { FieldCreateDto, FieldUpdateDto } from './dto/field.dto';
 import { SectionsModule } from '../sections/sections.module';
 import { Section } from '../sections/section.entity';
-import { FieldType } from './constants';
 import { InputTextParamsDto } from '../dynamic-fields/input-text/dto/input-text-params.dto';
 import { TextareaParamsDto } from '../dynamic-fields/textarea/dto/textarea-params.dto';
 import { TextParamsDto } from '../dynamic-fields/text/dto/text-params.dto';
@@ -17,6 +16,7 @@ import { RadioParamsDto } from '../dynamic-fields/radio/dto/radio-params.dto';
 import { InputTextEntity } from '../dynamic-fields/input-text/input-text.entity';
 import { TextareaEntity } from '../dynamic-fields/textarea/textarea.entity';
 import { RadioEntity } from '../dynamic-fields/radio/radio.entity';
+import { FieldType } from '../dynamic-fields/dynamic-fields.module';
 
 describe('Fields controller', () => {
     let app: INestApplication;

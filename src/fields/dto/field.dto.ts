@@ -1,5 +1,5 @@
 import { IsEnum, IsNotEmpty, IsOptional, IsUUID, MaxLength } from 'class-validator';
-import { FieldType } from '../constants';
+import { FieldType } from '../../dynamic-fields/dynamic-fields.module';
 
 export class FieldCreateDto {
     @IsOptional()

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
-import { FieldType } from '../fields/constants';
 import { AbstractFieldService } from './abstract-field.service';
+import { FieldType } from './dynamic-fields.module';
 
 @Injectable()
 export class DynamicFieldsService {

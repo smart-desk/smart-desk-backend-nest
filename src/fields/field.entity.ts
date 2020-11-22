@@ -1,10 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Section } from '../sections/section.entity';
-import { FieldType } from './constants';
-import { TextParamsDto } from '../dynamic-fields/text/dto/text-params.dto';
-import { TextareaParamsDto } from '../dynamic-fields/textarea/dto/textarea-params.dto';
-import { RadioParamsDto } from '../dynamic-fields/radio/dto/radio-params.dto';
-import { InputTextParamsDto } from '../dynamic-fields/input-text/dto/input-text-params.dto';
+import { FieldType } from '../dynamic-fields/dynamic-fields.module';
 
 @Entity('fields')
 export class Field {

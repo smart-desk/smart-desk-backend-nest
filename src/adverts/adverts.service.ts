@@ -7,9 +7,9 @@ import { AdvertsGetDto, AdvertsGetResponseDto, UpdateAdvertDto } from './dto/adv
 import { SectionsService } from '../sections/sections.service';
 import { CreateAdvertDto } from './dto/advert.dto';
 import { FieldsService } from '../fields/fields.service';
-import { FieldType } from '../fields/constants';
 import { getMessageFromValidationErrors } from '../utils/validation';
 import { DynamicFieldsService } from '../dynamic-fields/dynamic-fields.service';
+import { FieldType } from '../dynamic-fields/dynamic-fields.module';
 
 interface FieldDataDtoInstance {
     type: FieldType;

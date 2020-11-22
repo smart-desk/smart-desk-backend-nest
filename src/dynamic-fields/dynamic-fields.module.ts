@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { DynamicFieldsService } from './dynamic-fields.service';
 import { InputTextModule } from './input-text/input-text.module';
-import { FieldType } from '../fields/constants';
 import { InputTextService } from './input-text/input-text.service';
 import { TextareaModule } from './textarea/textarea.module';
 import { TextareaService } from './textarea/textarea.service';
@@ -9,6 +8,13 @@ import { RadioModule } from './radio/radio.module';
 import { RadioService } from './radio/radio.service';
 import { TextModule } from './text/text.module';
 import { TextService } from './text/text.service';
+
+export enum FieldType {
+    INPUT_TEXT = 'input_text',
+    TEXTAREA = 'textarea',
+    TEXT = 'text',
+    RADIO = 'radio',
+}
 
 @Module({
     providers: [
