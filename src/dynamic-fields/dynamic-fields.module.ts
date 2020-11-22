@@ -7,6 +7,8 @@ import { TextareaModule } from './textarea/textarea.module';
 import { TextareaService } from './textarea/textarea.service';
 import { RadioModule } from './radio/radio.module';
 import { RadioService } from './radio/radio.service';
+import { TextModule } from './text/text.module';
+import { TextService } from './text/text.service';
 
 @Module({
     providers: [
@@ -23,8 +25,12 @@ import { RadioService } from './radio/radio.service';
             provide: FieldType.RADIO,
             useExisting: RadioService,
         },
+        {
+            provide: FieldType.TEXT,
+            useExisting: TextService,
+        },
     ],
-    imports: [InputTextModule, TextareaModule, RadioModule],
+    imports: [InputTextModule, TextareaModule, RadioModule, TextModule],
     exports: [DynamicFieldsService],
 })
 export class DynamicFieldsModule {}

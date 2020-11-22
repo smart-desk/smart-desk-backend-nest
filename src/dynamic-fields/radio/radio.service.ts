@@ -8,6 +8,7 @@ import { plainToClass } from 'class-transformer';
 import { CreateRadioDto } from './dto/create-radio.dto';
 import { getMessageFromValidationErrors } from '../../utils/validation';
 import { UpdateRadioDto } from './dto/update-radio.dto';
+import { RadioParamsDto } from './dto/radio-params.dto';
 
 @Injectable()
 export class RadioService extends AbstractFieldService {
@@ -58,5 +59,10 @@ export class RadioService extends AbstractFieldService {
 
         const instance = this.repository.create(dtoClass);
         return this.repository.save(instance);
+    }
+
+    async validateParams(dtoObject: Partial<RadioParamsDto>): Promise<ValidationError[]> {
+        const dtoClass = plainToClass(RadioParamsDto, dtoObject);
+        return await validate(dtoClass);
     }
 }

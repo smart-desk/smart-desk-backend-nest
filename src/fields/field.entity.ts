@@ -1,10 +1,10 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Section } from '../sections/section.entity';
 import { FieldType } from './constants';
-import { TextDto } from './dto/text.dto';
-import { TextareaDto } from './dto/textarea.dto';
-import { RadioDto } from './dto/radio.dto';
-import { InputTextDto } from './dto/input-text.dto';
+import { TextParamsDto } from '../dynamic-fields/text/dto/text-params.dto';
+import { TextareaParamsDto } from '../dynamic-fields/textarea/dto/textarea-params.dto';
+import { RadioParamsDto } from '../dynamic-fields/radio/dto/radio-params.dto';
+import { InputTextParamsDto } from '../dynamic-fields/input-text/dto/input-text-params.dto';
 
 @Entity('fields')
 export class Field {
@@ -21,7 +21,7 @@ export class Field {
     section_id: string;
 
     @Column('json')
-    params: InputTextDto | TextareaDto | TextDto | RadioDto;
+    params: unknown;
 
     data: unknown;
 

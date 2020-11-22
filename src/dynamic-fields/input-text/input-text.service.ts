@@ -8,6 +8,7 @@ import { InputTextEntity } from './input-text.entity';
 import { CreateInputTextDto } from './dto/create-input-text.dto';
 import { getMessageFromValidationErrors } from '../../utils/validation';
 import { UpdateInputTextDto } from './dto/update-input-text.dto';
+import { InputTextParamsDto } from './dto/input-text-params.dto';
 
 @Injectable()
 export class InputTextService extends AbstractFieldService {
@@ -58,5 +59,10 @@ export class InputTextService extends AbstractFieldService {
 
         const instance = this.repository.create(dtoClass);
         return this.repository.save(instance);
+    }
+
+    async validateParams(dtoObject: Partial<InputTextParamsDto>): Promise<ValidationError[]> {
+        const dtoClass = plainToClass(InputTextParamsDto, dtoObject);
+        return await validate(dtoClass);
     }
 }

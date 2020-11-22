@@ -8,6 +8,7 @@ import { TextareaEntity } from './textarea.entity';
 import { CreateTextareaDto } from './dto/create-textarea.dto';
 import { getMessageFromValidationErrors } from '../../utils/validation';
 import { UpdateTextareaDto } from './dto/update-textarea.dto';
+import { TextareaParamsDto } from './dto/textarea-params.dto';
 
 @Injectable()
 export class TextareaService extends AbstractFieldService {
@@ -59,5 +60,10 @@ export class TextareaService extends AbstractFieldService {
 
         const instance = this.repository.create(dtoClass);
         return this.repository.save(instance);
+    }
+
+    async validateParams(dtoObject: Partial<TextareaParamsDto>): Promise<ValidationError[]> {
+        const dtoClass = plainToClass(TextareaParamsDto, dtoObject);
+        return await validate(dtoClass);
     }
 }

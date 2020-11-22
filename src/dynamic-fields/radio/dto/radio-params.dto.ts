@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsString, MaxLength, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class RadioDto {
+export class RadioParamsDto {
     @Type(() => RadioItem)
     @ValidateNested()
     radios: RadioItem[];

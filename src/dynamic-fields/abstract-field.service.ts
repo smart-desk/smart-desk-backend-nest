@@ -18,4 +18,6 @@ export abstract class AbstractFieldService {
     abstract validateBeforeUpdate(dtoObject: Partial<DynamicFieldsBaseUpdateDto>): Promise<ValidationError[]>;
 
     abstract validateAndUpdate(dtoObject: Partial<DynamicFieldsBaseUpdateDto>): Promise<DynamicFieldsBaseEntity>;
+
+    abstract validateParams(dtoObject: Record<any, any>): Promise<ValidationError[]>;
 }

@@ -1,13 +1,20 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository } from 'typeorm';
 import { Field } from './field.entity';
 import { FieldCreateDto, FieldUpdateDto } from './dto/field.dto';
 import { SectionsService } from '../sections/sections.service';
+import { ValidationError } from 'class-validator';
+import { getMessageFromValidationErrors } from '../utils/validation';
+import { DynamicFieldsService } from '../dynamic-fields/dynamic-fields.service';
 
 @Injectable()
 export class FieldsService {
-    constructor(@InjectRepository(Field) private fieldRepository: Repository<Field>, private sectionsService: SectionsService) {}
+    constructor(
+        @InjectRepository(Field) private fieldRepository: Repository<Field>,
+        private sectionsService: SectionsService,
+        private dynamicFieldsService: DynamicFieldsService
+    ) {}
 
     async getById(id: string): Promise<Field> {
         return await this.findOneOrThrowException(id);
@@ -16,6 +23,11 @@ export class FieldsService {
     async create(fieldDto: FieldCreateDto): Promise<Field> {
         await this.sectionsService.getById(fieldDto.section_id);
 
+        const errors = await this.validateParams(fieldDto);
+        if (errors.length) {
+            throw new BadRequestException(getMessageFromValidationErrors(errors));
+        }
+
         const field = this.fieldRepository.create(fieldDto);
         return this.fieldRepository.save(field);
     }
@@ -23,6 +35,11 @@ export class FieldsService {
     async update(id: string, fieldDto: FieldUpdateDto): Promise<Field> {
         const field = await this.findOneOrThrowException(id);
         await this.fieldRepository.update(field.id, fieldDto);
+
+        const errors = await this.validateParams(fieldDto);
+        if (errors.length) {
+            throw new BadRequestException(getMessageFromValidationErrors(errors));
+        }
 
         return this.fieldRepository.findOne({ id: field.id });
     }
@@ -39,5 +56,13 @@ export class FieldsService {
             throw new NotFoundException('Field not found');
         }
         return field;
+    }
+
+    private validateParams(field: FieldCreateDto | FieldUpdateDto): Promise<ValidationError[]> {
+        const service = this.dynamicFieldsService.getService(field.type);
+        if (!service) {
+            return;
+        }
+        return service.validateParams(field.params);
     }
 }
