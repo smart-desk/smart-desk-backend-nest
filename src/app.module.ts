@@ -9,9 +9,10 @@ import { FieldsModule } from './fields/fields.module';
 import { ModelsModule } from './models/models.module';
 import { SectionsModule } from './sections/sections.module';
 import { UsersModule } from './users';
+import { DynamicFieldsModule } from './dynamic-fields/dynamic-fields.module';
 import { DataPipe } from './utils/data.pipe';
 
-const app = [AuthModule, UsersModule, CategoriesModule, ModelsModule, SectionsModule, FieldsModule, AdvertsModule];
+const app = [AuthModule, UsersModule, CategoriesModule, ModelsModule, SectionsModule, FieldsModule, AdvertsModule, DynamicFieldsModule];
 
 @Module({
     imports: [TypeOrmModule.forRoot(), ConfigModule.forRoot(), ...app],

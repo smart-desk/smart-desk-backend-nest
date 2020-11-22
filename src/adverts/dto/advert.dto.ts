@@ -1,7 +1,8 @@
 import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, IsUUID, Max, MaxLength } from 'class-validator';
-import { CreateFieldDataBaseDto, UpdateFieldDataBaseDto } from './field-data-base.dto';
+import { DynamicFieldsBaseCreateDto } from '../../dynamic-fields/dynamic-fields-base-create.dto';
 import { Transform } from 'class-transformer';
 import { Advert } from '../entities/advert.entity';
+import { DynamicFieldsBaseUpdateDto } from '../../dynamic-fields/dynamic-fields-base-update.dto';
 
 export class CreateAdvertDto {
     @IsUUID()
@@ -19,7 +20,7 @@ export class CreateAdvertDto {
 
     @IsNotEmpty()
     @IsArray()
-    fields: CreateFieldDataBaseDto[];
+    fields: DynamicFieldsBaseCreateDto[];
 }
 
 export class UpdateAdvertDto {
@@ -30,7 +31,7 @@ export class UpdateAdvertDto {
 
     @IsNotEmpty()
     @IsArray()
-    fields: UpdateFieldDataBaseDto[];
+    fields: DynamicFieldsBaseUpdateDto[];
 }
 
 export class AdvertsGetDto {

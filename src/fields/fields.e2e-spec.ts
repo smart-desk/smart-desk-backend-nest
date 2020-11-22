@@ -9,11 +9,14 @@ import { Field } from './field.entity';
 import { FieldCreateDto, FieldUpdateDto } from './dto/field.dto';
 import { SectionsModule } from '../sections/sections.module';
 import { Section } from '../sections/section.entity';
-import { FieldType } from './constants';
-import { InputTextDto } from './dto/input-text.dto';
-import { TextareaDto } from './dto/textarea.dto';
-import { TextDto } from './dto/text.dto';
-import { RadioDto } from './dto/radio.dto';
+import { InputTextParamsDto } from '../dynamic-fields/input-text/dto/input-text-params.dto';
+import { TextareaParamsDto } from '../dynamic-fields/textarea/dto/textarea-params.dto';
+import { TextParamsDto } from '../dynamic-fields/text/dto/text-params.dto';
+import { RadioParamsDto } from '../dynamic-fields/radio/dto/radio-params.dto';
+import { InputTextEntity } from '../dynamic-fields/input-text/input-text.entity';
+import { TextareaEntity } from '../dynamic-fields/textarea/textarea.entity';
+import { RadioEntity } from '../dynamic-fields/radio/radio.entity';
+import { FieldType } from '../dynamic-fields/dynamic-fields.module';
 
 describe('Fields controller', () => {
     let app: INestApplication;
@@ -31,6 +34,12 @@ describe('Fields controller', () => {
             .useValue(fieldsRepositoryMock)
             .overrideProvider(getRepositoryToken(Section))
             .useValue(sectionRepositoryMock)
+            .overrideProvider(getRepositoryToken(InputTextEntity))
+            .useValue(createRepositoryMock())
+            .overrideProvider(getRepositoryToken(TextareaEntity))
+            .useValue(createRepositoryMock())
+            .overrideProvider(getRepositoryToken(RadioEntity))
+            .useValue(createRepositoryMock())
             .compile();
 
         app = await createTestAppForModule(moduleRef);
@@ -44,7 +53,7 @@ describe('Fields controller', () => {
                     section_id: uuid(),
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
-                    params: { label: 'some label' } as InputTextDto,
+                    params: { label: 'some label' } as InputTextParamsDto,
                 } as FieldCreateDto)
                 .expect(HttpStatus.CREATED);
         });
@@ -56,7 +65,7 @@ describe('Fields controller', () => {
                     section_id: uuid(),
                     title: 'some title',
                     type: 'wrong type' as FieldType,
-                    params: { label: 'some label' } as InputTextDto,
+                    params: { label: 'some label' } as InputTextParamsDto,
                 } as FieldCreateDto)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
@@ -71,7 +80,7 @@ describe('Fields controller', () => {
                     section_id: 'not id',
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
-                    params: { label: 'some label' } as InputTextDto,
+                    params: { label: 'some label' } as InputTextParamsDto,
                 } as FieldCreateDto)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
@@ -87,7 +96,7 @@ describe('Fields controller', () => {
                     section_id: uuid(),
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
-                    params: { label: 'some label' } as InputTextDto,
+                    params: { label: 'some label' } as InputTextParamsDto,
                 } as FieldCreateDto)
                 .expect(HttpStatus.NOT_FOUND)
                 .expect(res => {
@@ -107,7 +116,7 @@ describe('Fields controller', () => {
                             label: 'some label',
                             placeholder: 'some place',
                             required: true,
-                        } as InputTextDto,
+                        } as InputTextParamsDto,
                     } as FieldCreateDto)
                     .expect(HttpStatus.CREATED);
             });
@@ -123,12 +132,12 @@ describe('Fields controller', () => {
                             label: '',
                             placeholder: 'some place',
                             required: 'string' as any,
-                        } as InputTextDto,
+                        } as InputTextParamsDto,
                     } as FieldCreateDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('params.label should not be empty');
-                        expect(res.body.message).toContain('params.required must be a boolean value');
+                        expect(res.body.message).toContain('label should not be empty');
+                        expect(res.body.message).toContain('required must be a boolean value');
                     });
             });
         });
@@ -145,7 +154,7 @@ describe('Fields controller', () => {
                             label: 'some label',
                             placeholder: 'some place',
                             required: true,
-                        } as TextareaDto,
+                        } as TextareaParamsDto,
                     } as FieldCreateDto)
                     .expect(HttpStatus.CREATED);
             });
@@ -161,12 +170,12 @@ describe('Fields controller', () => {
                             label: '',
                             placeholder: 'some place',
                             required: 'string' as any,
-                        } as TextareaDto,
+                        } as TextareaParamsDto,
                     } as FieldCreateDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('params.label should not be empty');
-                        expect(res.body.message).toContain('params.required must be a boolean value');
+                        expect(res.body.message).toContain('label should not be empty');
+                        expect(res.body.message).toContain('required must be a boolean value');
                     });
             });
         });
@@ -179,7 +188,7 @@ describe('Fields controller', () => {
                         section_id: uuid(),
                         title: 'some title',
                         type: FieldType.TEXT,
-                        params: { value: 'some string' } as TextDto,
+                        params: { value: 'some string' } as TextParamsDto,
                     } as FieldCreateDto)
                     .expect(HttpStatus.CREATED);
             });
@@ -191,11 +200,11 @@ describe('Fields controller', () => {
                         section_id: uuid(),
                         title: 'some title',
                         type: FieldType.TEXT,
-                        params: { value: '' } as TextDto,
+                        params: { value: '' } as TextParamsDto,
                     } as FieldCreateDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('params.value should not be empty');
+                        expect(res.body.message).toContain('value should not be empty');
                     });
             });
         });
@@ -209,7 +218,6 @@ describe('Fields controller', () => {
                         title: 'some title',
                         type: FieldType.RADIO,
                         params: {
-                            title: 'some title',
                             radios: [
                                 {
                                     label: 'some label',
@@ -220,7 +228,7 @@ describe('Fields controller', () => {
                                     value: 'some value 1',
                                 },
                             ],
-                        } as RadioDto,
+                        } as RadioParamsDto,
                     } as FieldCreateDto)
                     .expect(HttpStatus.CREATED);
             });
@@ -243,12 +251,12 @@ describe('Fields controller', () => {
                                     value: '',
                                 },
                             ],
-                        } as RadioDto,
+                        } as RadioParamsDto,
                     } as FieldCreateDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('0.label should not be empty');
-                        expect(res.body.message).toContain('1.value should not be empty');
+                        expect(res.body.message).toContain('label should not be empty');
+                        expect(res.body.message).toContain('value should not be empty');
                     });
             });
         });
@@ -261,7 +269,7 @@ describe('Fields controller', () => {
                 .send({
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
-                    params: { label: 'some label' } as InputTextDto,
+                    params: { label: 'some label' } as InputTextParamsDto,
                 } as FieldUpdateDto)
                 .expect(HttpStatus.OK);
         });
@@ -272,7 +280,7 @@ describe('Fields controller', () => {
                 .send({
                     title: 'some title',
                     type: 'wrong type' as FieldType,
-                    params: { label: 'some label' } as InputTextDto,
+                    params: { label: 'some label' } as InputTextParamsDto,
                 } as FieldUpdateDto)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
@@ -287,7 +295,7 @@ describe('Fields controller', () => {
                 .send({
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
-                    params: { label: 'some label' } as InputTextDto,
+                    params: { label: 'some label' } as InputTextParamsDto,
                 } as FieldUpdateDto)
                 .expect(HttpStatus.NOT_FOUND)
                 .expect(res => {
@@ -306,7 +314,7 @@ describe('Fields controller', () => {
                             label: 'some label',
                             placeholder: 'some place',
                             required: true,
-                        } as InputTextDto,
+                        } as InputTextParamsDto,
                     } as FieldUpdateDto)
                     .expect(HttpStatus.OK);
             });
@@ -321,12 +329,12 @@ describe('Fields controller', () => {
                             label: '',
                             placeholder: 'some place',
                             required: 'string' as any,
-                        } as InputTextDto,
+                        } as InputTextParamsDto,
                     } as FieldUpdateDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('params.label should not be empty');
-                        expect(res.body.message).toContain('params.required must be a boolean value');
+                        expect(res.body.message).toContain('label should not be empty');
+                        expect(res.body.message).toContain('required must be a boolean value');
                     });
             });
         });
@@ -342,7 +350,7 @@ describe('Fields controller', () => {
                             label: 'some label',
                             placeholder: 'some place',
                             required: true,
-                        } as TextareaDto,
+                        } as TextareaParamsDto,
                     } as FieldUpdateDto)
                     .expect(HttpStatus.OK);
             });
@@ -357,12 +365,12 @@ describe('Fields controller', () => {
                             label: '',
                             placeholder: 'some place',
                             required: 'string' as any,
-                        } as TextareaDto,
+                        } as TextareaParamsDto,
                     } as FieldUpdateDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('params.label should not be empty');
-                        expect(res.body.message).toContain('params.required must be a boolean value');
+                        expect(res.body.message).toContain('label should not be empty');
+                        expect(res.body.message).toContain('required must be a boolean value');
                     });
             });
         });
@@ -374,7 +382,7 @@ describe('Fields controller', () => {
                     .send({
                         title: 'some title',
                         type: FieldType.TEXT,
-                        params: { value: 'some string' } as TextDto,
+                        params: { value: 'some string' } as TextParamsDto,
                     } as FieldUpdateDto)
                     .expect(HttpStatus.OK);
             });
@@ -385,11 +393,11 @@ describe('Fields controller', () => {
                     .send({
                         title: 'some title',
                         type: FieldType.TEXT,
-                        params: { value: '' } as TextDto,
+                        params: { value: '' } as TextParamsDto,
                     } as FieldUpdateDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('params.value should not be empty');
+                        expect(res.body.message).toContain('value should not be empty');
                     });
             });
         });
@@ -413,7 +421,7 @@ describe('Fields controller', () => {
                                     value: 'some value 1',
                                 },
                             ],
-                        } as RadioDto,
+                        } as RadioParamsDto,
                     } as FieldUpdateDto)
                     .expect(HttpStatus.OK);
             });
@@ -435,12 +443,12 @@ describe('Fields controller', () => {
                                     value: '',
                                 },
                             ],
-                        } as RadioDto,
+                        } as RadioParamsDto,
                     } as FieldUpdateDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('0.label should not be empty');
-                        expect(res.body.message).toContain('1.value should not be empty');
+                        expect(res.body.message).toContain('label should not be empty');
+                        expect(res.body.message).toContain('value should not be empty');
                     });
             });
         });

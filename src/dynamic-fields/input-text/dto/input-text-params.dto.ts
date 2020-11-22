@@ -1,6 +1,6 @@
 import { IsBoolean, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
-export class InputTextDto {
+export class InputTextParamsDto {
     @IsNotEmpty()
     @MaxLength(255)
     @IsString()

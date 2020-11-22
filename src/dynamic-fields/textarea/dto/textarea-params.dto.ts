@@ -1,6 +1,6 @@
 import { IsBoolean, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
-export class TextareaDto {
+export class TextareaParamsDto {
     @IsNotEmpty()
     @MaxLength(255)
     @IsString()

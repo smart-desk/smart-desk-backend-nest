@@ -1,21 +1,19 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Connection } from 'typeorm';
-import { isUUID, validate } from 'class-validator';
-import { plainToClass } from 'class-transformer';
+import { Repository } from 'typeorm';
+import { isUUID } from 'class-validator';
 import { Advert } from './entities/advert.entity';
 import { AdvertsGetDto, AdvertsGetResponseDto, UpdateAdvertDto } from './dto/advert.dto';
 import { SectionsService } from '../sections/sections.service';
-import { CreateFieldDataDtoTypes, FieldDataEntities, FieldDataEntity, UpdateFieldDataDtoTypes } from './constants';
 import { CreateAdvertDto } from './dto/advert.dto';
 import { FieldsService } from '../fields/fields.service';
-import { FieldType } from '../fields/constants';
 import { getMessageFromValidationErrors } from '../utils/validation';
-import { CreateFieldDataBaseDto, UpdateFieldDataBaseDto } from './dto/field-data-base.dto';
+import { DynamicFieldsService } from '../dynamic-fields/dynamic-fields.service';
+import { FieldType } from '../dynamic-fields/dynamic-fields.module';
 
 interface FieldDataDtoInstance {
     type: FieldType;
-    instance: CreateFieldDataBaseDto | UpdateFieldDataBaseDto;
+    dto: any; // todo not any
 }
 
 @Injectable()
@@ -24,7 +22,7 @@ export class AdvertsService {
         @InjectRepository(Advert) private advertRepository: Repository<Advert>,
         private sectionsService: SectionsService,
         private fieldsService: FieldsService,
-        private connection: Connection
+        private dynamicFieldsService: DynamicFieldsService
     ) {}
 
     async getAll(options: AdvertsGetDto): Promise<AdvertsGetResponseDto> {
@@ -61,20 +59,37 @@ export class AdvertsService {
         // todo (future) check that field_id is unique for this advert
         const validDtos: Array<FieldDataDtoInstance> = [];
         for (const fieldDataObject of advertDto.fields) {
-            const fieldDataInstance = await this.convertFieldDataDtoToClass(fieldDataObject);
-
-            if (fieldDataInstance) {
-                await this.validateFieldDataOrThrowException(fieldDataInstance.instance);
-                validDtos.push(fieldDataInstance);
+            if (!isUUID(fieldDataObject.field_id)) {
+                throw new BadRequestException('field_id must be an UUID');
             }
+
+            const field = await this.fieldsService.getById(fieldDataObject.field_id);
+            const service = this.dynamicFieldsService.getService(field.type);
+            if (!service) {
+                continue;
+            }
+
+            const errors = await service.validateBeforeCreate(fieldDataObject);
+            if (errors.length) {
+                throw new BadRequestException(getMessageFromValidationErrors(errors));
+            }
+
+            validDtos.push({
+                type: field.type,
+                dto: fieldDataObject,
+            });
         }
 
         const advert = this.advertRepository.create(advertDto);
         const advertResult = await this.advertRepository.save(advert);
 
         for (const fieldData of validDtos) {
-            (fieldData.instance as CreateFieldDataBaseDto).advert_id = advertResult.id;
-            await this.saveFieldData(fieldData);
+            const service = this.dynamicFieldsService.getService(fieldData.type);
+            if (!service) {
+                continue;
+            }
+            fieldData.dto.advert_id = advertResult.id;
+            await service.validateAndCreate(fieldData.dto);
         }
 
         return this.getById(advertResult.id);
@@ -85,19 +100,36 @@ export class AdvertsService {
 
         const validDtos: Array<FieldDataDtoInstance> = [];
         for (const fieldDataObject of advertDto.fields) {
-            const fieldDataInstance = await this.convertFieldDataDtoToClass(fieldDataObject, true);
-
-            if (fieldDataInstance) {
-                await this.validateFieldDataOrThrowException(fieldDataInstance.instance);
-                validDtos.push(fieldDataInstance);
+            if (!isUUID(fieldDataObject.field_id)) {
+                throw new BadRequestException('field_id must be an UUID');
             }
+
+            const field = await this.fieldsService.getById(fieldDataObject.field_id);
+            const service = this.dynamicFieldsService.getService(field.type);
+            if (!service) {
+                continue;
+            }
+
+            const errors = await service.validateBeforeUpdate(fieldDataObject);
+            if (errors.length) {
+                throw new BadRequestException(getMessageFromValidationErrors(errors));
+            }
+
+            validDtos.push({
+                type: field.type,
+                dto: fieldDataObject,
+            });
         }
 
         const updatedAdvert = await this.advertRepository.preload({ id, ...advertDto });
         const advertResult = await this.advertRepository.save(updatedAdvert);
 
         for (const fieldData of validDtos) {
-            await this.saveFieldData(fieldData, true);
+            const service = this.dynamicFieldsService.getService(fieldData.type);
+            if (!service) {
+                continue;
+            }
+            await service.validateAndUpdate(fieldData.dto);
         }
 
         return this.getById(advertResult.id);
@@ -122,50 +154,15 @@ export class AdvertsService {
         // todo sequential loading is not effective, replace with parallel
         for (const section of advert.sections) {
             for (const field of section.fields) {
-                if (FieldDataEntities.get(field.type)) {
-                    field.data = await this.connection.manager.findOne(FieldDataEntities.get(field.type), { field_id: field.id });
+                const service = this.dynamicFieldsService.getService(field.type);
+                if (!service) {
+                    continue;
                 }
+                const repository = service.getRepository();
+                field.data = await repository.findOne({ where: { field_id: field.id } });
             }
         }
 
         return advert;
-    }
-
-    private async convertFieldDataDtoToClass(
-        fieldDataDto: Partial<CreateFieldDataBaseDto | UpdateFieldDataBaseDto>,
-        updateOperation?: boolean
-    ): Promise<FieldDataDtoInstance | undefined> {
-        // additional validation here since dto validation goes after converting
-        if (!isUUID(fieldDataDto.field_id)) {
-            throw new BadRequestException('field_id must be an UUID');
-        }
-
-        const field = await this.fieldsService.getById(fieldDataDto.field_id);
-
-        const dataType = updateOperation ? UpdateFieldDataDtoTypes.get(field.type) : CreateFieldDataDtoTypes.get(field.type);
-        if (dataType) {
-            return {
-                type: field.type,
-                instance: plainToClass(dataType as any, { ...fieldDataDto }),
-            };
-        }
-    }
-
-    private async validateFieldDataOrThrowException(fieldData: CreateFieldDataBaseDto | UpdateFieldDataBaseDto): Promise<boolean> {
-        const validationErrors = await validate(fieldData);
-        if (validationErrors.length) {
-            throw new BadRequestException(getMessageFromValidationErrors(validationErrors));
-        }
-        return true;
-    }
-
-    private async saveFieldData(fieldData: FieldDataDtoInstance, updateOperation?: boolean): Promise<FieldDataEntity> {
-        const targetEntity = FieldDataEntities.get(fieldData.type);
-
-        const fieldDataEntity = updateOperation
-            ? await this.connection.manager.preload(targetEntity, fieldData.instance)
-            : await this.connection.manager.create(targetEntity, fieldData.instance);
-
-        return this.connection.manager.save(fieldDataEntity);
     }
 }
