@@ -240,7 +240,7 @@ describe('Adverts controller with photo field', () => {
                     title: 'some advert',
                     fields: [
                         {
-                            // todo check id is not empty
+                            id: uuid(),
                             field_id: uuid(),
                             value: ['http://domain.com/' + Array(1001).fill('a').join('') + '.png'],
                         } as UpdatePhotoDto,
@@ -249,6 +249,27 @@ describe('Adverts controller with photo field', () => {
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('each value in value must be shorter than or equal to 1000 characters');
+                });
+        });
+
+        it(`with error - uuid must not be empty`, () => {
+            fieldRepositoryMock.findOne.mockReturnValueOnce(field);
+            return request(app.getHttpServer())
+                .patch(`/adverts/${uuid()}`)
+                .send({
+                    title: 'some advert',
+                    fields: [
+                        {
+                            id: null,
+                            field_id: uuid(),
+                            value: ['http://domain.com/ssdsds.png'],
+                        } as UpdatePhotoDto,
+                    ],
+                } as UpdateAdvertDto)
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('id should not be empty');
+                    expect(res.body.message).toContain('id must be an UUID');
                 });
         });
     });
