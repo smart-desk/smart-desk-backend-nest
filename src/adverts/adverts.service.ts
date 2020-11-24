@@ -159,7 +159,9 @@ export class AdvertsService {
                     continue;
                 }
                 const repository = service.getRepository();
-                field.data = await repository.findOne({ where: { field_id: field.id } });
+                if (repository) {
+                    field.data = await repository.findOne({ where: { field_id: field.id } });
+                }
             }
         }
 

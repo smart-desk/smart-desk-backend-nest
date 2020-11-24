@@ -8,12 +8,15 @@ import { RadioModule } from './radio/radio.module';
 import { RadioService } from './radio/radio.service';
 import { TextModule } from './text/text.module';
 import { TextService } from './text/text.service';
+import { PhotoService } from './photo/photo.service';
+import { PhotoModule } from './photo/photo.module';
 
 export enum FieldType {
     INPUT_TEXT = 'input_text',
     TEXTAREA = 'textarea',
     TEXT = 'text',
     RADIO = 'radio',
+    PHOTO = 'photo',
 }
 
 @Module({
@@ -35,8 +38,12 @@ export enum FieldType {
             provide: FieldType.TEXT,
             useExisting: TextService,
         },
+        {
+            provide: FieldType.PHOTO,
+            useExisting: PhotoService,
+        },
     ],
-    imports: [InputTextModule, TextareaModule, RadioModule, TextModule],
+    imports: [InputTextModule, TextareaModule, RadioModule, TextModule, PhotoModule],
     exports: [DynamicFieldsService],
 })
 export class DynamicFieldsModule {}
