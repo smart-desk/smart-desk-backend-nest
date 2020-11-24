@@ -6,6 +6,7 @@ import { v4 as uuid } from 'uuid';
 import { createRepositoryMock, createTestAppForModule } from '../../test/test.utils';
 import { Advert } from './entities/advert.entity';
 import { AdvertsModule } from './adverts.module';
+import { Connection } from 'typeorm';
 import { InputTextEntity } from '../dynamic-fields/input-text/input-text.entity';
 import { TextareaEntity } from '../dynamic-fields/textarea/textarea.entity';
 import { RadioEntity } from '../dynamic-fields/radio/radio.entity';
@@ -46,6 +47,9 @@ describe('Adverts controller', () => {
     const advertRepositoryMock = createRepositoryMock<Advert>([advertEntity]);
     const sectionRepositoryMock = createRepositoryMock<Section>([sectionEntity]);
     const fieldRepositoryMock = createRepositoryMock<Field>([fieldEntity]);
+    const connectionMock = {
+        manager: createRepositoryMock(),
+    };
 
     beforeAll(async () => {
         const moduleRef = await Test.createTestingModule({
@@ -65,6 +69,8 @@ describe('Adverts controller', () => {
             .useValue(createRepositoryMock())
             .overrideProvider(getRepositoryToken(PhotoEntity))
             .useValue(createRepositoryMock())
+            .overrideProvider(Connection)
+            .useValue(connectionMock)
             .compile();
 
         app = await createTestAppForModule(moduleRef);
@@ -712,7 +718,6 @@ describe('Adverts controller', () => {
             });
 
             it(`with error - not valid field_id`, () => {
-                // fieldRepositoryMock.findOne.mockReturnValueOnce(textareaField);
                 return request(app.getHttpServer())
                     .patch(`/adverts/${uuid()}`)
                     .send({
