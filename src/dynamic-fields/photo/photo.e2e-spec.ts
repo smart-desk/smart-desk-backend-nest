@@ -4,7 +4,7 @@ import { HttpStatus, INestApplication } from '@nestjs/common';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { v4 as uuid } from 'uuid';
 import { Field } from '../../fields/field.entity';
-import { FieldType } from '../dynamic-fields.module';
+import { DynamicFieldsModule, FieldType } from '../dynamic-fields.module';
 import { Section, SectionType } from '../../sections/section.entity';
 import { Advert } from '../../adverts/entities/advert.entity';
 import { createRepositoryMock, createTestAppForModule } from '../../../test/test.utils';
@@ -43,7 +43,7 @@ describe('Adverts controller with photo field', () => {
 
     beforeAll(async () => {
         const moduleRef = await Test.createTestingModule({
-            imports: [AdvertsModule, TypeOrmModule.forRoot()],
+            imports: [AdvertsModule, TypeOrmModule.forRoot(), DynamicFieldsModule],
         })
             .overrideProvider(getRepositoryToken(Advert))
             .useValue(advertRepositoryMock)
