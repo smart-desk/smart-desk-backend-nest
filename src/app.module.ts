@@ -11,8 +11,19 @@ import { SectionsModule } from './sections/sections.module';
 import { UsersModule } from './users';
 import { DynamicFieldsModule } from './dynamic-fields/dynamic-fields.module';
 import { DataPipe } from './utils/data.pipe';
+import { S3Module } from './s3/s3.module';
 
-const app = [AuthModule, UsersModule, CategoriesModule, ModelsModule, SectionsModule, FieldsModule, AdvertsModule, DynamicFieldsModule];
+const app = [
+    AuthModule,
+    UsersModule,
+    CategoriesModule,
+    ModelsModule,
+    SectionsModule,
+    FieldsModule,
+    AdvertsModule,
+    DynamicFieldsModule,
+    S3Module,
+];
 
 @Module({
     imports: [TypeOrmModule.forRoot(), ConfigModule.forRoot(), ...app],
