@@ -2,6 +2,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { config as awsConfig } from 'aws-sdk';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
@@ -22,6 +23,12 @@ async function bootstrap() {
     const swaggerOptions = new DocumentBuilder().setTitle('Smart Desk').setDescription('Smart Desk REST API').setVersion('1.0').build();
     const document = SwaggerModule.createDocument(app, swaggerOptions);
     SwaggerModule.setup('swag', app, document);
+
+    awsConfig.update({
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        region: process.env.AWS_REGION,
+    });
 
     await app.listen(3001);
 }
