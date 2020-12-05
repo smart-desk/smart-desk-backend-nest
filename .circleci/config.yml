@@ -17,14 +17,14 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Connect via SSH
+          name: Connect via SSH and run deploy script
           command: ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP “./deploy_backend.sh”
           
 workflows:
   version: 2
-  build-and-deploy:
+  test-and-deploy:
     jobs:
       - test
       - deploy:
           requires:
-            - build
+            - test
