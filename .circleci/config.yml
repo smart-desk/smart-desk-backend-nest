@@ -18,7 +18,7 @@ jobs:
       - checkout
       - run:
           name: Connect via SSH and run deploy script
-          command: ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP “cd /var/www; ./deploy_backend.sh”
+          command: ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP "cd /var/www; ./deploy_backend.sh;"
           
 workflows:
   version: 2
