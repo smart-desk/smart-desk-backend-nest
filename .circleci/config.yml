@@ -1,6 +1,6 @@
 version: 2.1
 jobs:
-  build:
+  test:
     docker:
       - image: circleci/node:14.14.0
     steps:
@@ -19,3 +19,12 @@ jobs:
       - run:
           name: Connect via SSH
           command: ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP “./deploy_backend.sh”
+          
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - test
+      - deploy:
+          requires:
+            - build
