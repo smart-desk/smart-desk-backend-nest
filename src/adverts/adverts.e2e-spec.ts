@@ -1036,7 +1036,7 @@ describe('Adverts controller', () => {
                     });
             });
 
-            it(`with error - uuid must not be empty`, () => {
+            it(`successfully with new photo field`, () => {
                 fieldRepositoryMock.findOne.mockReturnValueOnce(field);
                 return request(app.getHttpServer())
                     .patch(`/adverts/${uuid()}`)
@@ -1050,11 +1050,7 @@ describe('Adverts controller', () => {
                             } as UpdatePhotoDto,
                         ],
                     } as UpdateAdvertDto)
-                    .expect(HttpStatus.BAD_REQUEST)
-                    .expect(res => {
-                        expect(res.body.message).toContain('id should not be empty');
-                        expect(res.body.message).toContain('id must be an UUID');
-                    });
+                    .expect(HttpStatus.OK);
             });
         });
     });

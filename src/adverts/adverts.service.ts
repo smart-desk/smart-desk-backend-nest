@@ -110,7 +110,10 @@ export class AdvertsService {
                 continue;
             }
 
-            const errors = await service.validateBeforeUpdate(fieldDataObject);
+            const errors = fieldDataObject.id
+                ? await service.validateBeforeUpdate(fieldDataObject)
+                : await service.validateBeforeCreate(fieldDataObject);
+
             if (errors.length) {
                 throw new BadRequestException(getMessageFromValidationErrors(errors));
             }
@@ -129,7 +132,13 @@ export class AdvertsService {
             if (!service) {
                 continue;
             }
-            await service.validateAndUpdate(fieldData.dto);
+
+            if (fieldData.dto.id) {
+                await service.validateAndUpdate(fieldData.dto);
+            } else {
+                fieldData.dto.advert_id = id;
+                await service.validateAndCreate(fieldData.dto);
+            }
         }
 
         return this.getById(advertResult.id);
