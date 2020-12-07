@@ -1,0 +1,37 @@
+name: Build Staging
+on:
+    push:
+        branches: [feature/ci]
+
+jobs:
+    deploy:
+        name: Build Staging
+
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v1
+
+            - name: Install NodeJS
+              uses: actions/setup-node@v1
+              with:
+                  node-version: 14.x
+
+            - name: Install Yarn
+              run: npm install -g yarn
+
+            - name: Install dependencies
+              run: yarn
+
+            - name: Run unit tests
+              run: yarn test
+
+            - name: Connect to Server via SSH
+              uses: appleboy/ssh-action@master
+              with:
+                  host: ${{ secrets.SSH_HOST }}
+                  username: ${{ secrets.SSH_USERNAME }}
+                  key: ${{ secrets.SSH_KEY }}
+                  script: |
+                      cd /var/www
+                      ./deploy_backend.sh
