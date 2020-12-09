@@ -23,6 +23,9 @@ import { FieldType } from '../dynamic-fields/dynamic-fields.module';
 import { PhotoEntity } from '../dynamic-fields/photo/photo.entity';
 import { CreatePhotoDto } from '../dynamic-fields/photo/dto/create-photo.dto';
 import { UpdatePhotoDto } from '../dynamic-fields/photo/dto/update-photo.dto';
+import { PriceEntity } from '../dynamic-fields/price/price.entity';
+import { CreatePriceDto } from '../dynamic-fields/price/dto/create-price.dto';
+import { UpdatePriceDto } from '../dynamic-fields/price/dto/update-price.dto';
 
 describe('Adverts controller', () => {
     let app: INestApplication;
@@ -68,6 +71,8 @@ describe('Adverts controller', () => {
             .overrideProvider(getRepositoryToken(RadioEntity))
             .useValue(createRepositoryMock())
             .overrideProvider(getRepositoryToken(PhotoEntity))
+            .useValue(createRepositoryMock())
+            .overrideProvider(getRepositoryToken(PriceEntity))
             .useValue(createRepositoryMock())
             .overrideProvider(Connection)
             .useValue(connectionMock)
@@ -507,6 +512,70 @@ describe('Adverts controller', () => {
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
                         expect(res.body.message).toContain('each value in value must be shorter than or equal to 1000 characters');
+                    });
+            });
+        });
+
+        describe('create advert with price field', () => {
+            const photoField = new Field();
+            photoField.type = FieldType.PRICE;
+
+            it(`successfully`, () => {
+                fieldRepositoryMock.findOne.mockReturnValueOnce(photoField);
+                return request(app.getHttpServer())
+                    .post(`/adverts`)
+                    .send({
+                        model_id: uuid(),
+                        category_id: uuid(),
+                        title: 'some advert',
+                        fields: [
+                            {
+                                field_id: uuid(),
+                                value: 1000,
+                            } as CreatePriceDto,
+                        ],
+                    } as CreateAdvertDto)
+                    .expect(HttpStatus.CREATED);
+            });
+
+            it(`with error - not valid field_id`, () => {
+                return request(app.getHttpServer())
+                    .post(`/adverts`)
+                    .send({
+                        model_id: uuid(),
+                        category_id: uuid(),
+                        title: 'some advert',
+                        fields: [
+                            {
+                                field_id: '123',
+                                value: 1000,
+                            } as CreatePriceDto,
+                        ],
+                    } as CreateAdvertDto)
+                    .expect(HttpStatus.BAD_REQUEST)
+                    .expect(res => {
+                        expect(res.body.message).toContain('field_id must be an UUID');
+                    });
+            });
+
+            it(`with error - not valid value`, () => {
+                fieldRepositoryMock.findOne.mockReturnValueOnce(photoField);
+                return request(app.getHttpServer())
+                    .post(`/adverts`)
+                    .send({
+                        model_id: uuid(),
+                        category_id: uuid(),
+                        title: 'some advert',
+                        fields: [
+                            {
+                                field_id: uuid(),
+                                value: -100,
+                            } as CreatePriceDto,
+                        ],
+                    } as CreateAdvertDto)
+                    .expect(HttpStatus.BAD_REQUEST)
+                    .expect(res => {
+                        expect(res.body.message).toContain('value must be a positive number');
                     });
             });
         });
@@ -1048,6 +1117,103 @@ describe('Adverts controller', () => {
                                 field_id: uuid(),
                                 value: ['http://domain.com/ssdsds.png'],
                             } as UpdatePhotoDto,
+                        ],
+                    } as UpdateAdvertDto)
+                    .expect(HttpStatus.OK);
+            });
+        });
+
+        describe('update advert with price field', () => {
+            const field = new Field();
+            field.type = FieldType.PRICE;
+
+            it(`successfully`, () => {
+                fieldRepositoryMock.findOne.mockReturnValueOnce(field);
+                return request(app.getHttpServer())
+                    .patch(`/adverts/${uuid()}`)
+                    .send({
+                        title: 'some advert',
+                        fields: [
+                            {
+                                id: uuid(),
+                                field_id: uuid(),
+                                value: 1000,
+                            } as UpdatePriceDto,
+                        ],
+                    } as UpdateAdvertDto)
+                    .expect(HttpStatus.OK);
+            });
+
+            it(`with error - not valid id`, () => {
+                fieldRepositoryMock.findOne.mockReturnValueOnce(field);
+                return request(app.getHttpServer())
+                    .patch(`/adverts/${uuid()}`)
+                    .send({
+                        title: 'some advert',
+                        fields: [
+                            {
+                                id: '12312312',
+                                field_id: uuid(),
+                                value: 1000,
+                            } as UpdatePriceDto,
+                        ],
+                    } as UpdateAdvertDto)
+                    .expect(HttpStatus.BAD_REQUEST)
+                    .expect(res => {
+                        expect(res.body.message).toContain('id must be an UUID');
+                    });
+            });
+
+            it(`with error - not valid field_id`, () => {
+                return request(app.getHttpServer())
+                    .patch(`/adverts/${uuid()}`)
+                    .send({
+                        title: 'some advert',
+                        fields: [
+                            {
+                                id: uuid(),
+                                field_id: '123',
+                                value: 1000,
+                            } as UpdatePriceDto,
+                        ],
+                    } as UpdateAdvertDto)
+                    .expect(HttpStatus.BAD_REQUEST)
+                    .expect(res => {
+                        expect(res.body.message).toContain('field_id must be an UUID');
+                    });
+            });
+
+            it(`with error - not valid value`, () => {
+                fieldRepositoryMock.findOne.mockReturnValueOnce(field);
+                return request(app.getHttpServer())
+                    .patch(`/adverts/${uuid()}`)
+                    .send({
+                        title: 'some advert',
+                        fields: [
+                            {
+                                field_id: uuid(),
+                                value: -1000,
+                            } as UpdatePriceDto,
+                        ],
+                    } as UpdateAdvertDto)
+                    .expect(HttpStatus.BAD_REQUEST)
+                    .expect(res => {
+                        expect(res.body.message).toContain('value must be a positive number');
+                    });
+            });
+
+            it(`successfully with new photo field`, () => {
+                fieldRepositoryMock.findOne.mockReturnValueOnce(field);
+                return request(app.getHttpServer())
+                    .patch(`/adverts/${uuid()}`)
+                    .send({
+                        title: 'some advert',
+                        fields: [
+                            {
+                                id: null,
+                                field_id: uuid(),
+                                value: 1000,
+                            } as UpdatePriceDto,
                         ],
                     } as UpdateAdvertDto)
                     .expect(HttpStatus.OK);
