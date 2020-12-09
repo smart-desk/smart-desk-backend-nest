@@ -18,6 +18,8 @@ import { TextareaEntity } from '../dynamic-fields/textarea/textarea.entity';
 import { RadioEntity } from '../dynamic-fields/radio/radio.entity';
 import { FieldType } from '../dynamic-fields/dynamic-fields.module';
 import { PhotoEntity } from '../dynamic-fields/photo/photo.entity';
+import { PriceEntity } from '../dynamic-fields/price/price.entity';
+import { PriceParamsDto } from '../dynamic-fields/price/dto/price-params.dto';
 
 describe('Fields controller', () => {
     let app: INestApplication;
@@ -42,6 +44,8 @@ describe('Fields controller', () => {
             .overrideProvider(getRepositoryToken(RadioEntity))
             .useValue(createRepositoryMock())
             .overrideProvider(getRepositoryToken(PhotoEntity))
+            .useValue(createRepositoryMock())
+            .overrideProvider(getRepositoryToken(PriceEntity))
             .useValue(createRepositoryMock())
             .compile();
 
@@ -263,6 +267,41 @@ describe('Fields controller', () => {
                     });
             });
         });
+
+        describe('type price', () => {
+            it(`successfully`, () => {
+                return request(app.getHttpServer())
+                    .post('/fields')
+                    .send({
+                        section_id: uuid(),
+                        title: 'some title',
+                        type: FieldType.PRICE,
+                        params: {
+                            currency: 'USD',
+                        } as PriceParamsDto,
+                    } as FieldCreateDto)
+                    .expect(HttpStatus.CREATED);
+            });
+
+            it(`with errors - not empty, must be a string and shorter then 10`, () => {
+                return request(app.getHttpServer())
+                    .post('/fields')
+                    .send({
+                        section_id: uuid(),
+                        title: 'some title',
+                        type: FieldType.PRICE,
+                        params: {
+                            currency: null,
+                        } as PriceParamsDto,
+                    } as FieldCreateDto)
+                    .expect(HttpStatus.BAD_REQUEST)
+                    .expect(res => {
+                        expect(res.body.message).toContain('currency must be a string');
+                        expect(res.body.message).toContain('currency should not be empty');
+                        expect(res.body.message).toContain('currency must be shorter than or equal to 10 characters');
+                    });
+            });
+        });
     });
 
     describe('update field', () => {
@@ -452,6 +491,35 @@ describe('Fields controller', () => {
                     .expect(res => {
                         expect(res.body.message).toContain('label should not be empty');
                         expect(res.body.message).toContain('value should not be empty');
+                    });
+            });
+        });
+
+        describe('type price', () => {
+            it(`successfully`, () => {
+                return request(app.getHttpServer())
+                    .put('/fields/1231231')
+                    .send({
+                        title: 'some title',
+                        type: FieldType.PRICE,
+                        params: { currency: 'USD' } as PriceParamsDto,
+                    } as FieldUpdateDto)
+                    .expect(HttpStatus.OK);
+            });
+
+            it(`with errors - not empty, must be a string and shorter then 10`, () => {
+                return request(app.getHttpServer())
+                    .put('/fields/123123')
+                    .send({
+                        title: 'some title',
+                        type: FieldType.PRICE,
+                        params: { currency: null } as PriceParamsDto,
+                    } as FieldUpdateDto)
+                    .expect(HttpStatus.BAD_REQUEST)
+                    .expect(res => {
+                        expect(res.body.message).toContain('currency must be a string');
+                        expect(res.body.message).toContain('currency should not be empty');
+                        expect(res.body.message).toContain('currency must be shorter than or equal to 10 characters');
                     });
             });
         });
