@@ -1,9 +1,26 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpCode,
+    HttpStatus,
+    Param,
+    ParseUUIDPipe,
+    Patch,
+    Post,
+    Query,
+    Req,
+    UseGuards,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { Request } from 'express';
 import { AdvertsService } from './adverts.service';
 import { Advert } from './entities/advert.entity';
 import { AdvertsGetDto, AdvertsGetResponseDto, UpdateAdvertDto } from './dto/advert.dto';
 import { CreateAdvertDto } from './dto/advert.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JWTUserPayload } from '../auth/jwt.strategy';
 
 @Controller('adverts')
 @ApiTags('Adverts')
@@ -21,17 +38,20 @@ export class AdvertsController {
     }
 
     @Post()
-    createAdvert(@Body() body: CreateAdvertDto): Promise<Advert> {
-        return this.advertsService.create(body);
+    @UseGuards(JwtAuthGuard)
+    createAdvert(@Body() body: CreateAdvertDto, @Req() req: Request & JWTUserPayload): Promise<Advert> {
+        return this.advertsService.create(req.user.id, body);
     }
 
     @Patch(':id')
+    @UseGuards(JwtAuthGuard)
     updateAdvert(@Param('id', ParseUUIDPipe) id: string, @Body() body: UpdateAdvertDto): Promise<Advert> {
         return this.advertsService.update(id, body);
     }
 
     @Delete(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
+    @UseGuards(JwtAuthGuard)
     async deleteModel(@Param('id', ParseUUIDPipe) id: string) {
         await this.advertsService.delete(id);
     }
