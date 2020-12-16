@@ -53,7 +53,7 @@ export class AdvertsService {
         return this.loadFieldDataForAdvert(advert);
     }
 
-    async create(advertDto: CreateAdvertDto): Promise<Advert> {
+    async create(userId: string, advertDto: CreateAdvertDto): Promise<Advert> {
         // todo (future) check that model belongs to category
         // todo (future) check that field belongs to model
         // todo (future) check that field_id is unique for this advert
@@ -80,7 +80,7 @@ export class AdvertsService {
             });
         }
 
-        const advert = this.advertRepository.create(advertDto);
+        const advert = this.advertRepository.create({ ...advertDto, userId });
         const advertResult = await this.advertRepository.save(advert);
 
         for (const fieldData of validDtos) {

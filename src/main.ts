@@ -1,5 +1,5 @@
-import { ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { config as awsConfig } from 'aws-sdk';
@@ -12,6 +12,7 @@ async function bootstrap() {
             forbidNonWhitelisted: true,
         })
     );
+    app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
     app.setGlobalPrefix('api');
     app.enableCors({
         origin: 'http://localhost:4200',

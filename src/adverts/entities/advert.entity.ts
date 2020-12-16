@@ -15,6 +15,9 @@ export class Advert {
     @Column('varchar', { length: 255 })
     title: string;
 
+    @Column('uuid', { name: 'user_id' })
+    userId: string;
+
     @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })
     createdAt: Date;
 

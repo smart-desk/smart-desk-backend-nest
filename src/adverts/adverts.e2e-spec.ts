@@ -26,6 +26,8 @@ import { UpdatePhotoDto } from '../dynamic-fields/photo/dto/update-photo.dto';
 import { PriceEntity } from '../dynamic-fields/price/price.entity';
 import { CreatePriceDto } from '../dynamic-fields/price/dto/create-price.dto';
 import { UpdatePriceDto } from '../dynamic-fields/price/dto/update-price.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuardMock } from '../auth/mocks/jwt-auth.guard.mock';
 
 describe('Adverts controller', () => {
     let app: INestApplication;
@@ -76,6 +78,8 @@ describe('Adverts controller', () => {
             .useValue(createRepositoryMock())
             .overrideProvider(Connection)
             .useValue(connectionMock)
+            .overrideGuard(JwtAuthGuard)
+            .useValue(new JwtAuthGuardMock())
             .compile();
 
         app = await createTestAppForModule(moduleRef);
