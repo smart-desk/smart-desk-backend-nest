@@ -14,6 +14,7 @@ import {
     UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { ACGuard } from 'nest-access-control';
 import { Request } from 'express';
 import { AdvertsService } from './adverts.service';
 import { Advert } from './entities/advert.entity';
@@ -38,20 +39,18 @@ export class AdvertsController {
     }
 
     @Post()
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard, ACGuard)
     createAdvert(@Body() body: CreateAdvertDto, @Req() req: Request & JWTUserPayload): Promise<Advert> {
         return this.advertsService.create(req.user.id, body);
     }
 
     @Patch(':id')
-    @UseGuards(JwtAuthGuard)
     updateAdvert(@Param('id', ParseUUIDPipe) id: string, @Body() body: UpdateAdvertDto): Promise<Advert> {
         return this.advertsService.update(id, body);
     }
 
     @Delete(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
-    @UseGuards(JwtAuthGuard)
     async deleteModel(@Param('id', ParseUUIDPipe) id: string) {
         await this.advertsService.delete(id);
     }
