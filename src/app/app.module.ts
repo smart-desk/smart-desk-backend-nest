@@ -4,7 +4,7 @@ import { APP_PIPE } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AccessControlModule } from 'nest-access-control';
 import { AdvertsModule } from '../adverts/adverts.module';
-import { AuthModule } from '../auth';
+import { AuthModule } from '../auth/auth.module';
 import { CategoriesModule } from '../categories/categories.module';
 import { FieldsModule } from '../fields/fields.module';
 import { ModelsModule } from '../models/models.module';
