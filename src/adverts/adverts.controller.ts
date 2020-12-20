@@ -44,6 +44,7 @@ export class AdvertsController {
     @UseRoles({
         resource: ResourceEnum.ADVERT,
         action: 'create',
+        possession: 'own',
     })
     createAdvert(@Body() body: CreateAdvertDto, @Req() req: Request & JWTUserPayload): Promise<Advert> {
         return this.advertsService.create(req.user.id, body);
