@@ -61,9 +61,8 @@ export class AdvertsController {
         @Body() body: UpdateAdvertDto,
         @Req() req: Request & JWTUserPayload,
     ): Promise<Advert> {
-        if (!(await this.isAdminOrOwner(id, req.user))) {
-            throw new ForbiddenException();
-        }
+        const isAdminOrOwner = await this.isAdminOrOwner(id, req.user)
+        if (!isAdminOrOwner) throw new ForbiddenException();
         return this.advertsService.update(id, body);
     }
 
@@ -75,9 +74,8 @@ export class AdvertsController {
         action: 'delete',
     })
     async deleteAdvert(@Param('id', ParseUUIDPipe) id: string, @Req() req: Request & JWTUserPayload): Promise<Advert> {
-        if (!(await this.isAdminOrOwner(id, req.user))) {
-            throw new ForbiddenException();
-        }
+        const isAdminOrOwner = await this.isAdminOrOwner(id, req.user)
+        if (!isAdminOrOwner) throw new ForbiddenException();
         return await this.advertsService.delete(id);
     }
 
