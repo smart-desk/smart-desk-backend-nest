@@ -327,7 +327,7 @@ describe('Fields controller', () => {
 
         it(`with error - wrong field type`, () => {
             return request(app.getHttpServer())
-                .put('/fields/12345')
+                .put(`/fields/${uuid()}`)
                 .send({
                     title: 'some title',
                     type: 'wrong type' as FieldType,

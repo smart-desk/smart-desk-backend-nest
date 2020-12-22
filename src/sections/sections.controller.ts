@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, UseGuards } from '@nestjs/common';
 import { SectionsService } from './sections.service';
 import { SectionCreateDto } from './section.dto';
 import { Section } from './section.entity';
@@ -29,7 +29,7 @@ export class SectionsController {
         resource: ResourceEnum.SECTION,
         action: 'delete',
     })
-    async deleteSection(@Param('id') id: string) {
+    async deleteSection(@Param('id', ParseUUIDPipe) id: string) {
         await this.sectionsService.delete(id);
     }
 }
