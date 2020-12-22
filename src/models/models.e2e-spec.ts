@@ -6,6 +6,10 @@ import { Model } from './model.entity';
 import { createRepositoryMock, createTestAppForModule } from '../../test/test.utils';
 import { ModelsModule } from './models.module';
 import { Section } from '../sections/section.entity';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuardMock } from '../../test/mocks/jwt-auth.guard.mock';
+import { ACGuard } from 'nest-access-control';
+import { AcGuardMock } from '../../test/mocks/ac.guard.mock';
 
 describe('Models controller', () => {
     let app: INestApplication;
@@ -23,6 +27,10 @@ describe('Models controller', () => {
             .useValue(modelRepositoryMock)
             .overrideProvider(getRepositoryToken(Section))
             .useValue(sectionRepository)
+            .overrideGuard(JwtAuthGuard)
+            .useClass(JwtAuthGuardMock)
+            .overrideGuard(ACGuard)
+            .useClass(AcGuardMock)
             .compile();
 
         app = await createTestAppForModule(moduleRef);

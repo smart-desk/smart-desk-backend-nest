@@ -45,7 +45,6 @@ export class AdvertsController {
     @UseRoles({
         resource: ResourceEnum.ADVERT,
         action: 'create',
-        possession: 'own',
     })
     createAdvert(@Body() body: CreateAdvertDto, @Req() req: Request & JWTUserPayload): Promise<Advert> {
         return this.advertsService.create(req.user.id, body);
@@ -56,12 +55,11 @@ export class AdvertsController {
     @UseRoles({
         resource: ResourceEnum.ADVERT,
         action: 'update',
-        possession: 'own',
     })
     async updateAdvert(
         @Param('id', ParseUUIDPipe) id: string,
         @Body() body: UpdateAdvertDto,
-        @Req() req: Request & JWTUserPayload
+        @Req() req: Request & JWTUserPayload,
     ): Promise<Advert> {
         if (!(await this.isAdminOrOwner(id, req.user))) {
             throw new ForbiddenException();
@@ -75,7 +73,6 @@ export class AdvertsController {
     @UseRoles({
         resource: ResourceEnum.ADVERT,
         action: 'delete',
-        possession: 'own',
     })
     async deleteAdvert(@Param('id', ParseUUIDPipe) id: string, @Req() req: Request & JWTUserPayload): Promise<Advert> {
         if (!(await this.isAdminOrOwner(id, req.user))) {

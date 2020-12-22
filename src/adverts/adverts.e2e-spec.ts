@@ -3,10 +3,11 @@ import { Test } from '@nestjs/testing';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { v4 as uuid } from 'uuid';
+import { Connection } from 'typeorm';
+import { ACGuard } from 'nest-access-control';
 import { createRepositoryMock, createTestAppForModule } from '../../test/test.utils';
 import { Advert } from './entities/advert.entity';
 import { AdvertsModule } from './adverts.module';
-import { Connection } from 'typeorm';
 import { InputTextEntity } from '../dynamic-fields/input-text/input-text.entity';
 import { TextareaEntity } from '../dynamic-fields/textarea/textarea.entity';
 import { RadioEntity } from '../dynamic-fields/radio/radio.entity';
@@ -27,8 +28,8 @@ import { PriceEntity } from '../dynamic-fields/price/price.entity';
 import { CreatePriceDto } from '../dynamic-fields/price/dto/create-price.dto';
 import { UpdatePriceDto } from '../dynamic-fields/price/dto/update-price.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { JwtAuthGuardMock } from '../auth/mocks/jwt-auth.guard.mock';
-import { ACGuard } from 'nest-access-control';
+import { JwtAuthGuardMock } from '../../test/mocks/jwt-auth.guard.mock';
+import { AcGuardMock } from '../../test/mocks/ac.guard.mock';
 
 describe('Adverts controller', () => {
     let app: INestApplication;
@@ -81,9 +82,9 @@ describe('Adverts controller', () => {
             .overrideProvider(Connection)
             .useValue(connectionMock)
             .overrideGuard(JwtAuthGuard)
-            .useValue(new JwtAuthGuardMock())
+            .useClass(JwtAuthGuardMock)
             .overrideGuard(ACGuard)
-            .useValue({ canActivate: () => true })
+            .useClass(AcGuardMock)
             .compile();
 
         app = await createTestAppForModule(moduleRef);

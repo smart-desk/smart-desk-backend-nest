@@ -3,10 +3,13 @@ import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as request from 'supertest';
 import { v4 as uuid } from 'uuid';
+import { ACGuard } from 'nest-access-control';
 import { createRepositoryMock, createTestAppForModule } from '../../test/test.utils';
 import { Section, SectionType } from './section.entity';
 import { SectionsModule } from './sections.module';
-import fn = jest.fn;
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuardMock } from '../../test/mocks/jwt-auth.guard.mock';
+import { AcGuardMock } from '../../test/mocks/ac.guard.mock';
 
 describe('Sections controller', () => {
     let app: INestApplication;
@@ -20,6 +23,10 @@ describe('Sections controller', () => {
         })
             .overrideProvider(getRepositoryToken(Section))
             .useValue(sectionRepositoryMock)
+            .overrideGuard(JwtAuthGuard)
+            .useClass(JwtAuthGuardMock)
+            .overrideGuard(ACGuard)
+            .useClass(AcGuardMock)
             .compile();
 
         app = await createTestAppForModule(moduleRef);

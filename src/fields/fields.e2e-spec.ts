@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as request from 'supertest';
 import { v4 as uuid } from 'uuid';
+import { ACGuard } from 'nest-access-control';
 import { createRepositoryMock, createTestAppForModule } from '../../test/test.utils';
 import { FieldsModule } from './fields.module';
 import { Field } from './field.entity';
@@ -20,6 +21,9 @@ import { FieldType } from '../dynamic-fields/dynamic-fields.module';
 import { PhotoEntity } from '../dynamic-fields/photo/photo.entity';
 import { PriceEntity } from '../dynamic-fields/price/price.entity';
 import { PriceParamsDto } from '../dynamic-fields/price/dto/price-params.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuardMock } from '../../test/mocks/jwt-auth.guard.mock';
+import { AcGuardMock } from '../../test/mocks/ac.guard.mock';
 
 describe('Fields controller', () => {
     let app: INestApplication;
@@ -47,6 +51,10 @@ describe('Fields controller', () => {
             .useValue(createRepositoryMock())
             .overrideProvider(getRepositoryToken(PriceEntity))
             .useValue(createRepositoryMock())
+            .overrideGuard(JwtAuthGuard)
+            .useClass(JwtAuthGuardMock)
+            .overrideGuard(ACGuard)
+            .useClass(AcGuardMock)
             .compile();
 
         app = await createTestAppForModule(moduleRef);
