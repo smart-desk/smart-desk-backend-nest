@@ -1,9 +1,9 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
+import { ExecutionContext, HttpStatus, INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as request from 'supertest';
 import { v4 as uuid } from 'uuid';
-import { ACGuard } from 'nest-access-control';
+import { AccessControlModule, ACGuard } from 'nest-access-control';
 import { createRepositoryMock, createTestAppForModule } from '../../test/test.utils';
 import { FieldsModule } from './fields.module';
 import { Field } from './field.entity';
@@ -24,6 +24,7 @@ import { PriceParamsDto } from '../dynamic-fields/price/dto/price-params.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { JwtAuthGuardMock } from '../../test/mocks/jwt-auth.guard.mock';
 import { AcGuardMock } from '../../test/mocks/ac.guard.mock';
+import { roles, RolesEnum } from '../app/app.roles';
 
 describe('Fields controller', () => {
     let app: INestApplication;
@@ -315,7 +316,7 @@ describe('Fields controller', () => {
     describe('update field', () => {
         it(`successfully`, () => {
             return request(app.getHttpServer())
-                .put('/fields/12345')
+                .put(`/fields/${uuid()}`)
                 .send({
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
@@ -341,7 +342,7 @@ describe('Fields controller', () => {
         it(`with error - field not found`, () => {
             fieldsRepositoryMock.findOne.mockReturnValueOnce(undefined);
             return request(app.getHttpServer())
-                .put('/fields/123123123')
+                .put(`/fields/${uuid()}`)
                 .send({
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
@@ -356,7 +357,7 @@ describe('Fields controller', () => {
         describe('type input_text', () => {
             it(`successfully`, () => {
                 return request(app.getHttpServer())
-                    .put('/fields/12312323')
+                    .put(`/fields/${uuid()}`)
                     .send({
                         title: 'some title',
                         type: FieldType.INPUT_TEXT,
@@ -371,7 +372,7 @@ describe('Fields controller', () => {
 
             it(`with errors - no label provided, required must be boolean`, () => {
                 return request(app.getHttpServer())
-                    .put('/fields/123321323')
+                    .put(`/fields/${uuid()}`)
                     .send({
                         title: 'some title',
                         type: FieldType.INPUT_TEXT,
@@ -392,7 +393,7 @@ describe('Fields controller', () => {
         describe('type textarea', () => {
             it(`successfully`, () => {
                 return request(app.getHttpServer())
-                    .put('/fields/1231231')
+                    .put(`/fields/${uuid()}`)
                     .send({
                         title: 'some title',
                         type: FieldType.TEXTAREA,
@@ -407,7 +408,7 @@ describe('Fields controller', () => {
 
             it(`with errors - no label provided, required must be boolean`, () => {
                 return request(app.getHttpServer())
-                    .put('/fields/123123123')
+                    .put(`/fields/${uuid()}`)
                     .send({
                         title: 'some title',
                         type: FieldType.TEXTAREA,
@@ -428,7 +429,7 @@ describe('Fields controller', () => {
         describe('type text', () => {
             it(`successfully`, () => {
                 return request(app.getHttpServer())
-                    .put('/fields/12312312')
+                    .put(`/fields/${uuid()}`)
                     .send({
                         title: 'some title',
                         type: FieldType.TEXT,
@@ -439,7 +440,7 @@ describe('Fields controller', () => {
 
             it(`with error - no empty value`, () => {
                 return request(app.getHttpServer())
-                    .put('/fields/123123')
+                    .put(`/fields/${uuid()}`)
                     .send({
                         title: 'some title',
                         type: FieldType.TEXT,
@@ -455,7 +456,7 @@ describe('Fields controller', () => {
         describe('type radio', () => {
             it(`successfully`, () => {
                 return request(app.getHttpServer())
-                    .put('/fields/1231231')
+                    .put(`/fields/${uuid()}`)
                     .send({
                         title: 'some title',
                         type: FieldType.RADIO,
@@ -478,7 +479,7 @@ describe('Fields controller', () => {
 
             it(`with errors - no empty title, no empty label, no empty value`, () => {
                 return request(app.getHttpServer())
-                    .put('/fields/123123')
+                    .put(`/fields/${uuid()}`)
                     .send({
                         title: 'some title',
                         type: FieldType.RADIO,
@@ -506,7 +507,7 @@ describe('Fields controller', () => {
         describe('type price', () => {
             it(`successfully`, () => {
                 return request(app.getHttpServer())
-                    .put('/fields/1231231')
+                    .put(`/fields/${uuid()}`)
                     .send({
                         title: 'some title',
                         type: FieldType.PRICE,
@@ -517,7 +518,7 @@ describe('Fields controller', () => {
 
             it(`with errors - not empty, must be a string and shorter then 10`, () => {
                 return request(app.getHttpServer())
-                    .put('/fields/123123')
+                    .put(`/fields/${uuid()}`)
                     .send({
                         title: 'some title',
                         type: FieldType.PRICE,
@@ -535,12 +536,158 @@ describe('Fields controller', () => {
 
     describe('delete field by id', () => {
         it(`successfully`, () => {
-            return request(app.getHttpServer()).delete('/fields/123123').expect(HttpStatus.NO_CONTENT);
+            return request(app.getHttpServer()).delete(`/fields/${uuid()}`).expect(HttpStatus.NO_CONTENT);
         });
 
         it(`with error - not found`, () => {
             fieldsRepositoryMock.findOne.mockReturnValueOnce(undefined);
-            return request(app.getHttpServer()).delete('/fields/123123').expect(HttpStatus.NOT_FOUND);
+            return request(app.getHttpServer()).delete(`/fields/${uuid()}`).expect(HttpStatus.NOT_FOUND);
+        });
+    });
+
+    afterAll(async () => {
+        await app.close();
+    });
+});
+
+
+describe('Fields controller with ACL enabled', () => {
+    let app: INestApplication;
+    const field = new Field();
+    const section = new Section();
+    const JwtGuard = JwtAuthGuardMock;
+
+    beforeAll(async () => {
+        const moduleRef = await Test.createTestingModule({
+            imports: [FieldsModule, SectionsModule, AccessControlModule.forRoles(roles)],
+        })
+            .overrideProvider(getRepositoryToken(Field))
+            .useValue(createRepositoryMock([field]))
+            .overrideProvider(getRepositoryToken(Section))
+            .useValue(createRepositoryMock<Section>([section]))
+            .overrideProvider(getRepositoryToken(InputTextEntity))
+            .useValue(createRepositoryMock())
+            .overrideProvider(getRepositoryToken(TextareaEntity))
+            .useValue(createRepositoryMock())
+            .overrideProvider(getRepositoryToken(RadioEntity))
+            .useValue(createRepositoryMock())
+            .overrideProvider(getRepositoryToken(PhotoEntity))
+            .useValue(createRepositoryMock())
+            .overrideProvider(getRepositoryToken(PriceEntity))
+            .useValue(createRepositoryMock())
+            .overrideGuard(JwtAuthGuard)
+            .useValue(JwtGuard)
+            .compile();
+
+        app = await createTestAppForModule(moduleRef);
+    });
+
+    describe('create field', () => {
+        it(`successfully as admin`, () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: [RolesEnum.USER, RolesEnum.ADMIN] };
+                return true;
+            });
+
+            return request(app.getHttpServer())
+                .post('/fields')
+                .send({
+                    section_id: uuid(),
+                    title: 'some title',
+                    type: FieldType.INPUT_TEXT,
+                    params: { label: 'some label' } as InputTextParamsDto,
+                } as FieldCreateDto)
+                .expect(HttpStatus.CREATED);
+        });
+
+        it(`with error for not logged in user`, () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+            return request(app.getHttpServer())
+                .post('/fields')
+                .send({
+                    section_id: uuid(),
+                    title: 'some title',
+                    type: FieldType.INPUT_TEXT,
+                    params: { label: 'some label' } as InputTextParamsDto,
+                } as FieldCreateDto)
+                .expect(HttpStatus.FORBIDDEN);
+        });
+
+        it(`with error not an admin`, () => {
+            return request(app.getHttpServer())
+                .post('/fields')
+                .send({
+                    section_id: uuid(),
+                    title: 'some title',
+                    type: FieldType.INPUT_TEXT,
+                    params: { label: 'some label' } as InputTextParamsDto,
+                } as FieldCreateDto)
+                .expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
+    describe('update field', () => {
+        it(`successfully`, () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: [RolesEnum.USER, RolesEnum.ADMIN] };
+                return true;
+            });
+
+            return request(app.getHttpServer())
+                .put(`/fields/${uuid()}`)
+                .send({
+                    title: 'some title',
+                    type: FieldType.INPUT_TEXT,
+                    params: { label: 'some label' } as InputTextParamsDto,
+                } as FieldUpdateDto)
+                .expect(HttpStatus.OK);
+        });
+
+        it(`with error for not logged in user`, () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+
+            return request(app.getHttpServer())
+                .put('/fields/12345')
+                .send({
+                    title: 'some title',
+                    type: FieldType.INPUT_TEXT,
+                    params: { label: 'some label' } as InputTextParamsDto,
+                } as FieldUpdateDto)
+                .expect(HttpStatus.FORBIDDEN);
+        });
+
+        it(`with error not an admin`, () => {
+            return request(app.getHttpServer())
+                .put('/fields/12345')
+                .send({
+                    title: 'some title',
+                    type: FieldType.INPUT_TEXT,
+                    params: { label: 'some label' } as InputTextParamsDto,
+                } as FieldUpdateDto)
+                .expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
+    describe('delete field by id', () => {
+        it(`successfully`, () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: [RolesEnum.USER, RolesEnum.ADMIN] };
+                return true;
+            });
+
+            return request(app.getHttpServer()).delete(`/fields/${uuid()}`).expect(HttpStatus.NO_CONTENT);
+        });
+
+        it(`with error for not logged in user`, () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+            return request(app.getHttpServer()).delete(`/fields/${uuid()}`).expect(HttpStatus.FORBIDDEN);
+        });
+
+        it(`with error not an admin`, () => {
+            return request(app.getHttpServer()).delete(`/fields/${uuid()}`).expect(HttpStatus.FORBIDDEN);
         });
     });
 

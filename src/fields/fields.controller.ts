@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, HttpCode, HttpStatus, Param, Post, Put, UseGuards } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    HttpCode,
+    HttpStatus,
+    Param,
+    ParseUUIDPipe,
+    Post,
+    Put,
+    UseGuards,
+} from '@nestjs/common';
 import { Field } from './field.entity';
 import { FieldsService } from './fields.service';
 import { ApiTags } from '@nestjs/swagger';
@@ -28,7 +39,7 @@ export class FieldsController {
         resource: ResourceEnum.FIELD,
         action: 'update',
     })
-    updateField(@Param('id') id: string, @Body() body: FieldUpdateDto): Promise<Field> {
+    updateField(@Param('id', ParseUUIDPipe) id: string, @Body() body: FieldUpdateDto): Promise<Field> {
         return this.fieldsService.update(id, body);
     }
 
@@ -39,7 +50,7 @@ export class FieldsController {
         resource: ResourceEnum.FIELD,
         action: 'delete',
     })
-    async deleteField(@Param('id') id: string) {
+    async deleteField(@Param('id', ParseUUIDPipe) id: string) {
         await this.fieldsService.delete(id);
     }
 }
