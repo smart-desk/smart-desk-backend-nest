@@ -1,15 +1,17 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
+import { ExecutionContext, HttpStatus, INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as request from 'supertest';
+import { v4 as uuid } from 'uuid';
+import { AccessControlModule, ACGuard } from 'nest-access-control';
 import { Model } from './model.entity';
 import { createRepositoryMock, createTestAppForModule } from '../../test/test.utils';
 import { ModelsModule } from './models.module';
 import { Section } from '../sections/section.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { JwtAuthGuardMock } from '../../test/mocks/jwt-auth.guard.mock';
-import { ACGuard } from 'nest-access-control';
 import { AcGuardMock } from '../../test/mocks/ac.guard.mock';
+import { roles, RolesEnum } from '../app/app.roles';
 
 describe('Models controller', () => {
     let app: INestApplication;
@@ -42,12 +44,12 @@ describe('Models controller', () => {
 
     describe('get model by id', () => {
         it(`successfully`, () => {
-            return request(app.getHttpServer()).get('/models/123123').expect(HttpStatus.OK).expect({});
+            return request(app.getHttpServer()).get(`/models/${uuid()}`).expect(HttpStatus.OK).expect({});
         });
 
         it(`with error - not found`, () => {
             modelRepositoryMock.findOne.mockReturnValueOnce(undefined);
-            return request(app.getHttpServer()).get('/models/123123').expect(HttpStatus.NOT_FOUND);
+            return request(app.getHttpServer()).get(`/models/${uuid()}`).expect(HttpStatus.NOT_FOUND);
         });
     });
 
@@ -69,7 +71,7 @@ describe('Models controller', () => {
 
     describe('update model', () => {
         it(`successfully`, () => {
-            return request(app.getHttpServer()).put('/models/123').send({ name: 'test' }).expect(HttpStatus.OK).expect({});
+            return request(app.getHttpServer()).put(`/models/${uuid()}`).send({ name: 'test' }).expect(HttpStatus.OK).expect({});
         });
 
         it(`with error - no ID and name is to short`, () => {
@@ -84,18 +86,114 @@ describe('Models controller', () => {
 
         it(`with error - not found`, () => {
             modelRepositoryMock.findOne.mockReturnValueOnce(undefined);
-            return request(app.getHttpServer()).put('/models/123123').send({ name: '113' }).expect(HttpStatus.NOT_FOUND);
+            return request(app.getHttpServer()).put(`/models/${uuid()}`).send({ name: '113' }).expect(HttpStatus.NOT_FOUND);
         });
     });
 
     describe('delete model by id', () => {
         it(`successfully`, () => {
-            return request(app.getHttpServer()).delete('/models/123123').expect(HttpStatus.NO_CONTENT);
+            return request(app.getHttpServer()).delete(`/models/${uuid()}`).expect(HttpStatus.NO_CONTENT);
         });
 
         it(`with error - not found`, () => {
             modelRepositoryMock.findOne.mockReturnValueOnce(undefined);
-            return request(app.getHttpServer()).delete('/models/123123').expect(HttpStatus.NOT_FOUND);
+            return request(app.getHttpServer()).delete(`/models/${uuid()}`).expect(HttpStatus.NOT_FOUND);
+        });
+    });
+
+    afterAll(async () => {
+        await app.close();
+    });
+});
+
+describe('Models controller with ACL enabled', () => {
+    let app: INestApplication;
+    const modelEntity = new Model();
+    const sectionEntity = new Section();
+    const JwtGuard = JwtAuthGuardMock;
+
+    beforeAll(async () => {
+        const moduleRef = await Test.createTestingModule({
+            imports: [ModelsModule, AccessControlModule.forRoles(roles)],
+        })
+            .overrideProvider(getRepositoryToken(Model))
+            .useValue(createRepositoryMock([modelEntity]))
+            .overrideProvider(getRepositoryToken(Section))
+            .useValue(createRepositoryMock([sectionEntity]))
+            .overrideGuard(JwtAuthGuard)
+            .useValue(JwtGuard)
+            .compile();
+
+        app = await createTestAppForModule(moduleRef);
+    });
+
+    it(`get all models`, () => {
+        return request(app.getHttpServer()).get('/models').expect(HttpStatus.OK);
+    });
+
+    it(`get model by id`, () => {
+        return request(app.getHttpServer()).get(`/models/${uuid()}`).expect(HttpStatus.OK).expect({});
+    });
+
+    describe('create model', () => {
+        it(`successfully`, () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: [RolesEnum.USER, RolesEnum.ADMIN] };
+                return true;
+            });
+
+            return request(app.getHttpServer()).post('/models').send({ name: 'test' }).expect(HttpStatus.CREATED);
+        });
+
+        it(`with error unauthorized`, () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+            return request(app.getHttpServer()).post('/models').send({ name: 'test' }).expect(HttpStatus.FORBIDDEN);
+        });
+
+        it(`with error not an admin`, () => {
+            return request(app.getHttpServer()).post('/models').send({ name: 'test' }).expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
+    describe('update model', () => {
+        it(`successfully`, () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: [RolesEnum.USER, RolesEnum.ADMIN] };
+                return true;
+            });
+
+            return request(app.getHttpServer()).put(`/models/${uuid()}`).send({ name: 'test' }).expect(HttpStatus.OK);
+        });
+
+        it(`with error unauthorized`, () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+            return request(app.getHttpServer()).put(`/models/${uuid()}`).send({ name: 'test' }).expect(HttpStatus.FORBIDDEN);
+        });
+
+        it(`with error not an admin`, () => {
+            return request(app.getHttpServer()).put(`/models/${uuid()}`).send({ name: 'test' }).expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
+    describe('delete model by id', () => {
+        it(`successfully`, () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: [RolesEnum.USER, RolesEnum.ADMIN] };
+                return true;
+            });
+            return request(app.getHttpServer()).delete(`/models/${uuid()}`).expect(HttpStatus.NO_CONTENT);
+        });
+
+        it(`with error unauthorized`, () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+            return request(app.getHttpServer()).delete(`/models/${uuid()}`).expect(HttpStatus.FORBIDDEN);
+        });
+
+        it(`with error not an admin`, () => {
+            return request(app.getHttpServer()).delete(`/models/${uuid()}`).expect(HttpStatus.FORBIDDEN);
         });
     });
 

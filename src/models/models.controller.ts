@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put, UseGuards } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpCode,
+    HttpStatus,
+    Param,
+    ParseUUIDPipe,
+    Post,
+    Put,
+    UseGuards,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Model } from './model.entity';
 import { ModelsService } from './models.service';
@@ -38,7 +50,7 @@ export class ModelsController {
         resource: ResourceEnum.MODEL,
         action: 'update',
     })
-    updateModel(@Param('id') id: string, @Body() model: ModelUpdateDto): Promise<Model> {
+    updateModel(@Param('id', ParseUUIDPipe) id: string, @Body() model: ModelUpdateDto): Promise<Model> {
         return this.modelsService.update(id, model);
     }
 
@@ -49,7 +61,7 @@ export class ModelsController {
         resource: ResourceEnum.MODEL,
         action: 'delete',
     })
-    async deleteModel(@Param('id') id: string) {
+    async deleteModel(@Param('id', ParseUUIDPipe) id: string) {
         await this.modelsService.delete(id);
     }
 }
