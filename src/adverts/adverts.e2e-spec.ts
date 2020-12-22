@@ -28,6 +28,7 @@ import { CreatePriceDto } from '../dynamic-fields/price/dto/create-price.dto';
 import { UpdatePriceDto } from '../dynamic-fields/price/dto/update-price.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { JwtAuthGuardMock } from '../auth/mocks/jwt-auth.guard.mock';
+import { ACGuard } from 'nest-access-control';
 
 describe('Adverts controller', () => {
     let app: INestApplication;
@@ -48,6 +49,7 @@ describe('Adverts controller', () => {
     const advertEntity = new Advert();
     advertEntity.id = '1234';
     advertEntity.sections = [sectionEntity, sectionEntity];
+    advertEntity.userId = '123'; // todo maybe we should test it separately
 
     const advertRepositoryMock = createRepositoryMock<Advert>([advertEntity]);
     const sectionRepositoryMock = createRepositoryMock<Section>([sectionEntity]);
@@ -80,6 +82,8 @@ describe('Adverts controller', () => {
             .useValue(connectionMock)
             .overrideGuard(JwtAuthGuard)
             .useValue(new JwtAuthGuardMock())
+            .overrideGuard(ACGuard)
+            .useValue({ canActivate: () => true })
             .compile();
 
         app = await createTestAppForModule(moduleRef);
