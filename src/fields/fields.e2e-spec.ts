@@ -52,9 +52,9 @@ describe('Fields controller', () => {
             .overrideProvider(getRepositoryToken(PriceEntity))
             .useValue(createRepositoryMock())
             .overrideGuard(JwtAuthGuard)
-            .useClass(JwtAuthGuardMock)
+            .useValue(JwtAuthGuardMock)
             .overrideGuard(ACGuard)
-            .useClass(AcGuardMock)
+            .useValue(AcGuardMock)
             .compile();
 
         app = await createTestAppForModule(moduleRef);

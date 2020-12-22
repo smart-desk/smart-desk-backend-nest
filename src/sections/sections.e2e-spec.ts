@@ -24,9 +24,9 @@ describe('Sections controller', () => {
             .overrideProvider(getRepositoryToken(Section))
             .useValue(sectionRepositoryMock)
             .overrideGuard(JwtAuthGuard)
-            .useClass(JwtAuthGuardMock)
+            .useValue(JwtAuthGuardMock)
             .overrideGuard(ACGuard)
-            .useClass(AcGuardMock)
+            .useValue(AcGuardMock)
             .compile();
 
         app = await createTestAppForModule(moduleRef);

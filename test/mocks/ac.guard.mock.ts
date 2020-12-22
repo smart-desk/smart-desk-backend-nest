@@ -1,9 +1,5 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import fn = jest.fn;
 
-@Injectable()
-export class AcGuardMock {
-    canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-        return true;
-    }
-}
+export const AcGuardMock = {
+    canActivate: fn().mockReturnValue(true),
+};

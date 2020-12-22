@@ -1,10 +1,10 @@
 import * as request from 'supertest';
 import { Test } from '@nestjs/testing';
-import { HttpStatus, INestApplication } from '@nestjs/common';
+import { ExecutionContext, HttpStatus, INestApplication, Inject } from '@nestjs/common';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { v4 as uuid } from 'uuid';
 import { Connection } from 'typeorm';
-import { ACGuard } from 'nest-access-control';
+import { AccessControlModule, ACGuard } from 'nest-access-control';
 import { createRepositoryMock, createTestAppForModule } from '../../test/test.utils';
 import { Advert } from './entities/advert.entity';
 import { AdvertsModule } from './adverts.module';
@@ -30,6 +30,7 @@ import { UpdatePriceDto } from '../dynamic-fields/price/dto/update-price.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { JwtAuthGuardMock } from '../../test/mocks/jwt-auth.guard.mock';
 import { AcGuardMock } from '../../test/mocks/ac.guard.mock';
+import { roles } from '../app/app.roles';
 
 describe('Adverts controller', () => {
     let app: INestApplication;
@@ -50,7 +51,7 @@ describe('Adverts controller', () => {
     const advertEntity = new Advert();
     advertEntity.id = '1234';
     advertEntity.sections = [sectionEntity, sectionEntity];
-    advertEntity.userId = '123'; // todo maybe we should test it separately
+    advertEntity.userId = '123';
 
     const advertRepositoryMock = createRepositoryMock<Advert>([advertEntity]);
     const sectionRepositoryMock = createRepositoryMock<Section>([sectionEntity]);
@@ -82,9 +83,9 @@ describe('Adverts controller', () => {
             .overrideProvider(Connection)
             .useValue(connectionMock)
             .overrideGuard(JwtAuthGuard)
-            .useClass(JwtAuthGuardMock)
+            .useValue(JwtAuthGuardMock)
             .overrideGuard(ACGuard)
-            .useClass(AcGuardMock)
+            .useValue(AcGuardMock)
             .compile();
 
         app = await createTestAppForModule(moduleRef);
@@ -1248,6 +1249,184 @@ describe('Adverts controller', () => {
             advertRepositoryMock.findOne.mockReturnValueOnce(undefined);
             return request(app.getHttpServer()).delete(`/adverts/${uuid()}`).expect(HttpStatus.NOT_FOUND);
         });
+    });
+
+    afterAll(async () => {
+        await app.close();
+    });
+});
+
+describe('Adverts controller with ACL enabled', () => {
+    let app: INestApplication;
+
+    const fieldEntity = new Field();
+    fieldEntity.type = FieldType.INPUT_TEXT;
+    fieldEntity.id = uuid();
+    fieldEntity.section_id = uuid();
+    fieldEntity.title = 'test';
+    fieldEntity.params = { label: 'Test', placeholder: 'test', required: true };
+
+    const sectionEntity = new Section();
+    sectionEntity.id = uuid();
+    sectionEntity.model_id = uuid();
+    sectionEntity.type = SectionType.PARAMS;
+    sectionEntity.fields = [fieldEntity];
+
+    const advertEntity = new Advert();
+    advertEntity.id = '1234';
+    advertEntity.sections = [sectionEntity, sectionEntity];
+    advertEntity.userId = '123';
+
+    const advertRepositoryMock = createRepositoryMock<Advert>([advertEntity]);
+    const sectionRepositoryMock = createRepositoryMock<Section>([sectionEntity]);
+    const fieldRepositoryMock = createRepositoryMock<Field>([fieldEntity]);
+    const connectionMock = {
+        manager: createRepositoryMock(),
+    };
+    const JwtGuard = JwtAuthGuardMock;
+
+    beforeAll(async () => {
+        const moduleRef = await Test.createTestingModule({
+            imports: [AdvertsModule, TypeOrmModule.forRoot(), AccessControlModule.forRoles(roles)],
+        })
+            .overrideProvider(getRepositoryToken(Advert))
+            .useValue(advertRepositoryMock)
+            .overrideProvider(getRepositoryToken(Section))
+            .useValue(sectionRepositoryMock)
+            .overrideProvider(getRepositoryToken(Field))
+            .useValue(fieldRepositoryMock)
+            .overrideProvider(getRepositoryToken(InputTextEntity))
+            .useValue(createRepositoryMock())
+            .overrideProvider(getRepositoryToken(TextareaEntity))
+            .useValue(createRepositoryMock())
+            .overrideProvider(getRepositoryToken(RadioEntity))
+            .useValue(createRepositoryMock())
+            .overrideProvider(getRepositoryToken(PhotoEntity))
+            .useValue(createRepositoryMock())
+            .overrideProvider(getRepositoryToken(PriceEntity))
+            .useValue(createRepositoryMock())
+            .overrideProvider(Connection)
+            .useValue(connectionMock)
+            .overrideGuard(JwtAuthGuard)
+            .useValue(JwtGuard)
+            .compile();
+
+        app = await createTestAppForModule(moduleRef);
+    });
+
+    describe('get adverts', () => {
+        it(`successfully`, () => {
+            return request(app.getHttpServer()).get('/adverts').expect(HttpStatus.OK);
+        });
+    });
+
+    describe('get advert by id', () => {
+        it(`successfully`, () => {
+            return request(app.getHttpServer()).get(`/adverts/${uuid()}`).expect(HttpStatus.OK);
+        });
+    });
+
+    describe('create advert', () => {
+        it(`successfully `, () => {
+            return request(app.getHttpServer())
+                .post(`/adverts`)
+                .send({
+                    model_id: uuid(),
+                    category_id: uuid(),
+                    title: 'some advert',
+                    fields: [],
+                } as CreateAdvertDto)
+                .expect(HttpStatus.CREATED);
+        });
+
+        it(`with error - not owner of advert`, () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+
+            return request(app.getHttpServer())
+                .post(`/adverts`)
+                .send({
+                    model_id: '12312',
+                    category_id: '123123',
+                    title: '',
+                    fields: [],
+                } as CreateAdvertDto)
+                .expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
+    describe('update advert', () => {
+        it(`successfully`, () => {
+            return request(app.getHttpServer())
+                .patch(`/adverts/${uuid()}`)
+                .send({
+                    title: 'some advert',
+                    fields: [],
+                } as UpdateAdvertDto)
+                .expect(HttpStatus.OK);
+        });
+
+        it(`with error - not owner of advert`, () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: ['user'] };
+                return true;
+            });
+
+            return request(app.getHttpServer())
+                .patch(`/adverts/${uuid()}`)
+                .send({
+                    title: '123123',
+                    fields: [],
+                } as UpdateAdvertDto)
+                .expect(HttpStatus.FORBIDDEN);
+        });
+
+        it(`successfully with admin permissions`, () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: ['user', 'admin'] };
+                return true;
+            });
+
+            return request(app.getHttpServer())
+                .patch(`/adverts/${uuid()}`)
+                .send({
+                    title: '123123',
+                    fields: [],
+                } as UpdateAdvertDto)
+                .expect(HttpStatus.OK);
+        });
+    });
+
+    describe('delete advert by id', () => {
+        it(`successfully`, () => {
+            return request(app.getHttpServer()).delete(`/adverts/${uuid()}`).expect(HttpStatus.NO_CONTENT);
+        });
+
+        it(`with error - not owner of advert`, () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: ['user'] };
+                return true;
+            });
+
+            return request(app.getHttpServer())
+                .delete(`/adverts/${uuid()}`)
+                .expect(HttpStatus.FORBIDDEN)
+        });
+
+        it(`successfully with admin permissions`, () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: ['user', 'admin'] };
+                return true;
+            });
+
+            return request(app.getHttpServer())
+                .delete(`/adverts/${uuid()}`)
+                .expect(HttpStatus.NO_CONTENT)
+        });
+
     });
 
     afterAll(async () => {

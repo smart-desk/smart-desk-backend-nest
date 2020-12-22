@@ -25,11 +25,9 @@ roles
     // User
     .grant(RolesEnum.USER)
     .extend(RolesEnum.VIEWER)
-    .createOwn(ResourceEnum.ADVERT)
-    .updateOwn(ResourceEnum.ADVERT)
-    .deleteOwn(ResourceEnum.ADVERT)
-    .updateOwn(ResourceEnum.PROFILE)
-    .createOwn(ResourceEnum.FILE)
+    .create([ResourceEnum.ADVERT, ResourceEnum.FILE])
+    .update([ResourceEnum.ADVERT, ResourceEnum.PROFILE])
+    .delete(ResourceEnum.ADVERT)
     // Admin
     .grant(RolesEnum.ADMIN)
     .create([
