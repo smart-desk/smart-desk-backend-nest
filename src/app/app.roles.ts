@@ -13,6 +13,7 @@ export enum ResourceEnum {
     FIELD = 'field',
     CATEGORY = 'category',
     PROFILE = 'profile',
+    FILE = 'file',
 }
 
 export const roles = new RolesBuilder();
@@ -20,9 +21,7 @@ export const roles = new RolesBuilder();
 roles
     // Viewer
     .grant(RolesEnum.VIEWER)
-    .read(ResourceEnum.ADVERT)
-    .read(ResourceEnum.CATEGORY)
-    .read(ResourceEnum.PROFILE) // todo remove hidden fields
+    .read([ResourceEnum.ADVERT, ResourceEnum.CATEGORY, ResourceEnum.PROFILE]) // todo hidden profile fields
     // User
     .grant(RolesEnum.USER)
     .extend(RolesEnum.VIEWER)
@@ -30,29 +29,42 @@ roles
     .updateOwn(ResourceEnum.ADVERT)
     .deleteOwn(ResourceEnum.ADVERT)
     .updateOwn(ResourceEnum.PROFILE)
+    .createOwn(ResourceEnum.FILE)
     // Admin
     .grant(RolesEnum.ADMIN)
-    .create(ResourceEnum.ADVERT)
-    .read(ResourceEnum.ADVERT)
-    .update(ResourceEnum.ADVERT)
-    .delete(ResourceEnum.ADVERT)
-    .create(ResourceEnum.MODEL)
-    .read(ResourceEnum.MODEL)
-    .update(ResourceEnum.MODEL)
-    .delete(ResourceEnum.MODEL)
-    .create(ResourceEnum.SECTION)
-    .read(ResourceEnum.SECTION)
-    .update(ResourceEnum.SECTION)
-    .delete(ResourceEnum.SECTION)
-    .create(ResourceEnum.FIELD)
-    .read(ResourceEnum.FIELD)
-    .update(ResourceEnum.FIELD)
-    .delete(ResourceEnum.FIELD)
-    .create(ResourceEnum.CATEGORY)
-    .read(ResourceEnum.CATEGORY)
-    .update(ResourceEnum.CATEGORY)
-    .delete(ResourceEnum.CATEGORY)
-    .create(ResourceEnum.PROFILE)
-    .read(ResourceEnum.PROFILE)
-    .update(ResourceEnum.PROFILE)
-    .delete(ResourceEnum.PROFILE);
+    .create([
+        ResourceEnum.ADVERT,
+        ResourceEnum.MODEL,
+        ResourceEnum.SECTION,
+        ResourceEnum.FIELD,
+        ResourceEnum.CATEGORY,
+        ResourceEnum.PROFILE,
+        ResourceEnum.FILE,
+    ])
+    .read([
+        ResourceEnum.ADVERT,
+        ResourceEnum.MODEL,
+        ResourceEnum.SECTION,
+        ResourceEnum.FIELD,
+        ResourceEnum.CATEGORY,
+        ResourceEnum.PROFILE,
+        ResourceEnum.FILE,
+    ])
+    .update([
+        ResourceEnum.ADVERT,
+        ResourceEnum.MODEL,
+        ResourceEnum.SECTION,
+        ResourceEnum.FIELD,
+        ResourceEnum.CATEGORY,
+        ResourceEnum.PROFILE,
+        ResourceEnum.FILE,
+    ])
+    .delete([
+        ResourceEnum.ADVERT,
+        ResourceEnum.MODEL,
+        ResourceEnum.SECTION,
+        ResourceEnum.FIELD,
+        ResourceEnum.CATEGORY,
+        ResourceEnum.PROFILE,
+        ResourceEnum.FILE,
+    ]);
