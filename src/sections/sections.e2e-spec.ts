@@ -1,12 +1,16 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
+import { ExecutionContext, HttpStatus, INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as request from 'supertest';
 import { v4 as uuid } from 'uuid';
+import { AccessControlModule, ACGuard } from 'nest-access-control';
 import { createRepositoryMock, createTestAppForModule } from '../../test/test.utils';
 import { Section, SectionType } from './section.entity';
 import { SectionsModule } from './sections.module';
-import fn = jest.fn;
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuardMock } from '../../test/mocks/jwt-auth.guard.mock';
+import { AcGuardMock } from '../../test/mocks/ac.guard.mock';
+import { roles, RolesEnum } from '../app/app.roles';
 
 describe('Sections controller', () => {
     let app: INestApplication;
@@ -20,6 +24,10 @@ describe('Sections controller', () => {
         })
             .overrideProvider(getRepositoryToken(Section))
             .useValue(sectionRepositoryMock)
+            .overrideGuard(JwtAuthGuard)
+            .useValue(JwtAuthGuardMock)
+            .overrideGuard(ACGuard)
+            .useValue(AcGuardMock)
             .compile();
 
         app = await createTestAppForModule(moduleRef);
@@ -56,14 +64,89 @@ describe('Sections controller', () => {
 
     describe('delete section by id', () => {
         it(`successfully`, () => {
-            return request(app.getHttpServer()).delete('/sections/123123').expect(HttpStatus.NO_CONTENT);
+            return request(app.getHttpServer()).delete(`/sections/${uuid()}`).expect(HttpStatus.NO_CONTENT);
         });
 
         it(`with error - not found`, () => {
             sectionRepositoryMock.findOne.mockReturnValueOnce(undefined);
-            return request(app.getHttpServer()).delete('/sections/123123').expect(HttpStatus.NOT_FOUND);
+            return request(app.getHttpServer()).delete(`/sections/${uuid()}`).expect(HttpStatus.NOT_FOUND);
         });
     });
+
+    afterAll(async () => {
+        await app.close();
+    });
+});
+
+describe('Sections controller with ACL enabled', () => {
+    let app: INestApplication;
+    const sectionEntity = new Section();
+    const JwtGuard = JwtAuthGuardMock;
+
+    beforeAll(async () => {
+        const moduleRef = await Test.createTestingModule({
+            imports: [SectionsModule, AccessControlModule.forRoles(roles)],
+        })
+            .overrideProvider(getRepositoryToken(Section))
+            .useValue(createRepositoryMock<Section>([sectionEntity]))
+            .overrideGuard(JwtAuthGuard)
+            .useValue(JwtGuard)
+            .compile();
+
+        app = await createTestAppForModule(moduleRef);
+    });
+
+    describe('create section', () => {
+        it(`successfully`, () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: [RolesEnum.USER, RolesEnum.ADMIN] };
+                return true;
+            });
+
+            return request(app.getHttpServer())
+                .post('/sections')
+                .send({ type: SectionType.PARAMS, model_id: uuid() })
+                .expect(HttpStatus.CREATED);
+        });
+
+        it(`with error unauthorized`, () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+
+            return request(app.getHttpServer())
+                .post('/sections')
+                .send({ type: SectionType.PARAMS, model_id: uuid() })
+                .expect(HttpStatus.FORBIDDEN);
+        });
+
+        it(`with error not an admin`, () => {
+            return request(app.getHttpServer())
+                .post('/sections')
+                .send({ type: SectionType.PARAMS, model_id: uuid() })
+                .expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
+    describe('delete section by id', () => {
+        it(`successfully`, () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: [RolesEnum.USER, RolesEnum.ADMIN] };
+                return true;
+            });
+            return request(app.getHttpServer()).delete(`/sections/${uuid()}`).expect(HttpStatus.NO_CONTENT);
+        });
+
+        it(`with error unauthorized`, () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false)
+            return request(app.getHttpServer()).delete(`/sections/${uuid()}`).expect(HttpStatus.FORBIDDEN);
+        });
+
+        it(`with error not an admin`, () => {
+            return request(app.getHttpServer()).delete(`/sections/${uuid()}`).expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
 
     afterAll(async () => {
         await app.close();

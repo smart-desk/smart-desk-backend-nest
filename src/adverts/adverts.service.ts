@@ -149,6 +149,11 @@ export class AdvertsService {
         return this.advertRepository.remove(advert);
     }
 
+    async getAdvertOwner(id: string): Promise<string> {
+        const advert = await this.getById(id);
+        return advert.userId;
+    }
+
     private async findOneOrThrowException(id: string): Promise<Advert> {
         const advert = await this.advertRepository.findOne({ id });
         if (!advert) {

@@ -15,4 +15,7 @@ export class User {
     @Column('varchar', { length: 255 })
     @Expose({ groups: ['owner'] })
     email: string;
+
+    @Column('varchar', { length: 255, array: true })
+    roles: string[];
 }

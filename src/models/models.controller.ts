@@ -1,8 +1,23 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpCode,
+    HttpStatus,
+    Param,
+    ParseUUIDPipe,
+    Post,
+    Put,
+    UseGuards,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Model } from './model.entity';
 import { ModelsService } from './models.service';
 import { ModelCreateDto, ModelUpdateDto } from './model.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { ACGuard, UseRoles } from 'nest-access-control';
+import { ResourceEnum } from '../app/app.roles';
 
 @Controller('models')
 @ApiTags('Models')
@@ -20,18 +35,33 @@ export class ModelsController {
     }
 
     @Post()
+    @UseGuards(JwtAuthGuard, ACGuard)
+    @UseRoles({
+        resource: ResourceEnum.MODEL,
+        action: 'create',
+    })
     createModel(@Body() model: ModelCreateDto): Promise<Model> {
         return this.modelsService.create(model);
     }
 
     @Put(':id')
-    updateModel(@Param('id') id: string, @Body() model: ModelUpdateDto): Promise<Model> {
+    @UseGuards(JwtAuthGuard, ACGuard)
+    @UseRoles({
+        resource: ResourceEnum.MODEL,
+        action: 'update',
+    })
+    updateModel(@Param('id', ParseUUIDPipe) id: string, @Body() model: ModelUpdateDto): Promise<Model> {
         return this.modelsService.update(id, model);
     }
 
     @Delete(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
-    async deleteModel(@Param('id') id: string) {
+    @UseGuards(JwtAuthGuard, ACGuard)
+    @UseRoles({
+        resource: ResourceEnum.MODEL,
+        action: 'delete',
+    })
+    async deleteModel(@Param('id', ParseUUIDPipe) id: string) {
         await this.modelsService.delete(id);
     }
 }

@@ -34,6 +34,7 @@ const CATEGORIES: Category[] = [
     },
 ];
 
+// @chekit todo maybe we should rewrite this and test controller instead of service
 describe('CategoriesService', () => {
     let categoriesService: CategoriesService;
     let categoryRepository: MockRepository;
