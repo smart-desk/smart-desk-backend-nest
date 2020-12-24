@@ -1,8 +1,7 @@
-import { Body, Controller, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { ACGuard, UseRoles } from 'nest-access-control';
-import { UploadImageDto } from './dto/upload-image.dto';
 import { S3Service } from './s3.service';
 import { UploadImageResponse } from './dto/upload-image-response';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -21,7 +20,9 @@ export class S3Controller {
         resource: ResourceEnum.FILE,
         action: 'create',
     })
-    uploadImage(@Body() payload: UploadImageDto, @UploadedFile() file: Express.Multer.File): Promise<UploadImageResponse> {
+    // todo add file validation when this issue will be resolved
+    // https://github.com/nestjs/nest/issues/4752
+    uploadImage(@UploadedFile() file: Express.Multer.File): Promise<UploadImageResponse> {
         return this.s3Service.uploadTemporaryImage(file.buffer, file.originalname);
     }
 }
