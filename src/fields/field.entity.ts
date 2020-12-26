@@ -19,6 +19,9 @@ export class Field {
     @Column('json')
     params: unknown;
 
+    @Column('boolean')
+    filterable: boolean;
+
     data: unknown;
 
     @ManyToOne(() => Section, (section: Section) => section.fields)
