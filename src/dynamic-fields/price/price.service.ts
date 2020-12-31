@@ -67,7 +67,7 @@ export class PriceService extends AbstractFieldService {
         return await validate(dtoClass);
     }
 
-    async getAdvertIdsByFilterParams(fieldId: string, params: { from?: string; to?: string }): Promise<Set<string>> {
+    async getAdvertIdsByFilter(fieldId: string, params: { from?: string; to?: string }): Promise<string[]> {
         const result = await this.repository
             .createQueryBuilder()
             .where({
@@ -76,6 +76,6 @@ export class PriceService extends AbstractFieldService {
             })
             .getMany();
 
-        return new Set(result.map(r => r.advert_id));
+        return result.map(r => r.advert_id);
     }
 }

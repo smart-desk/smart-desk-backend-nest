@@ -21,5 +21,5 @@ export abstract class AbstractFieldService {
 
     abstract validateParams(dtoObject: Record<any, any>): Promise<ValidationError[]>;
 
-    abstract async getAdvertIdsByFilterParams(fieldId: string, params: any): Promise<Set<string>>;
+    abstract async getAdvertIdsByFilter(fieldId: string, params: any): Promise<string[]>;
 }

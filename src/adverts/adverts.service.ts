@@ -33,7 +33,7 @@ export class AdvertsService {
         const skipped = (options.page - 1) * options.limit;
 
         if (options.filters) {
-            return await this.getAdvertsWithFilters(options.filters as any);
+            return await this.getAdvertsWithFilters(options);
         }
 
         // todo check findAndCount method
@@ -196,17 +196,14 @@ export class AdvertsService {
         return advert;
     }
 
-    private async getAdvertsWithFilters(filters: Filter[]): Promise<AdvertsGetResponseDto> {
-        // todo apply options
-        // todo apply category
-        // todo use only intersection of advert ids !!!
+    private async getAdvertsWithFilters(options: AdvertsGetDto): Promise<AdvertsGetResponseDto> {
+        const { filters } = options;
         if (typeof filters !== 'object') {
-            return;
+            throw new BadRequestException('Invalid filters format');
         }
-        let advertIdsSet = new Set();
 
-        const filtersMap = new Map(Object.entries(filters));
-        for (let [fieldId, params] of filtersMap) {
+        let advertIds: string[];
+        for (let [fieldId, params] of Object.entries(filters)) {
             try {
                 const field = await this.fieldsService.getById(fieldId);
                 const service = this.dynamicFieldsService.getService(field.type);
@@ -214,21 +211,42 @@ export class AdvertsService {
                     continue;
                 }
 
-                const ids = await service.getAdvertIdsByFilterParams(fieldId, params);
-                advertIdsSet = new Set([...advertIdsSet, ...ids]);
+                const filteredAdvertIds = await service.getAdvertIdsByFilter(fieldId, params);
+                if (!filteredAdvertIds) {
+                    continue;
+                }
+
+                // find intersection to exclude already filtered adverts
+                advertIds = advertIds ? advertIds.filter(id => filteredAdvertIds.includes(id)) : filteredAdvertIds;
             } catch (e) {
+                // skip filter if field id is not correct
                 continue;
             }
         }
 
-        const advertResponse = new AdvertsGetResponseDto();
-        advertResponse.totalCount = advertIdsSet.size;
+        let adverts: Advert[] = [];
+        let totalCount: number = 0;
+        if (advertIds && advertIds.length) {
+            [adverts, totalCount] = await this.advertRepository.findAndCount({
+                where: {
+                    id: In(advertIds),
+                    category_id: options.category_id,
+                },
+                order: {
+                    createdAt: 'DESC',
+                },
+                skip: (options.page - 1) * options.limit,
+                take: options.limit,
+            });
+        }
 
-        advertResponse.adverts = await this.advertRepository.find({
-            where: {
-                id: In([...advertIdsSet]),
-            },
-        });
+        const advertsWithData = await Promise.all<Advert>(adverts.map(advert => this.loadFieldDataForAdvert(advert)));
+        const advertResponse = new AdvertsGetResponseDto();
+
+        advertResponse.totalCount = totalCount;
+        advertResponse.adverts = advertsWithData;
+        advertResponse.page = options.page;
+        advertResponse.limit = options.limit;
 
         return advertResponse;
     }
