@@ -20,4 +20,6 @@ export abstract class AbstractFieldService {
     abstract validateAndUpdate(dtoObject: Partial<DynamicFieldsBaseUpdateDto>): Promise<DynamicFieldsBaseEntity>;
 
     abstract validateParams(dtoObject: Record<any, any>): Promise<ValidationError[]>;
+
+    abstract async getAdvertIdsByFilterParams(fieldId: string, params: any): Promise<Set<string>>;
 }

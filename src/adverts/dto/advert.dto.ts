@@ -1,4 +1,16 @@
-import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, IsUUID, Max, MaxLength } from 'class-validator';
+import {
+    IsArray,
+    IsDefined,
+    IsNotEmpty,
+    IsNumber,
+    IsObject,
+    IsOptional,
+    IsPositive,
+    IsString,
+    IsUUID,
+    Max,
+    MaxLength,
+} from 'class-validator';
 import { DynamicFieldsBaseCreateDto } from '../../dynamic-fields/dynamic-fields-base-create.dto';
 import { Transform } from 'class-transformer';
 import { Advert } from '../entities/advert.entity';
@@ -35,6 +47,10 @@ export class UpdateAdvertDto {
 }
 
 export class AdvertsGetDto {
+    @IsDefined()
+    @IsUUID()
+    category_id: string; // todo use it as a param
+
     @IsOptional()
     @IsPositive()
     @IsNumber()
@@ -49,13 +65,13 @@ export class AdvertsGetDto {
     limit?: number = 20;
 
     @IsOptional()
-    @IsUUID()
-    category_id?: string;
-
-    @IsOptional()
     @IsString()
     @MaxLength(255)
     search?: string = '';
+
+    @IsObject()
+    @IsOptional()
+    filters?: object; // todo define class or interface
 }
 
 export class AdvertsGetResponseDto {

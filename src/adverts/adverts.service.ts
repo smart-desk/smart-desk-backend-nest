@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { isUUID } from 'class-validator';
 import { Advert } from './entities/advert.entity';
 import { AdvertsGetDto, AdvertsGetResponseDto, UpdateAdvertDto } from './dto/advert.dto';
@@ -16,6 +16,10 @@ interface FieldDataDtoInstance {
     dto: any; // todo not any
 }
 
+interface Filter {
+    [key: string]: any; // todo
+}
+
 @Injectable()
 export class AdvertsService {
     constructor(
@@ -28,16 +32,21 @@ export class AdvertsService {
     async getAll(options: AdvertsGetDto): Promise<AdvertsGetResponseDto> {
         const skipped = (options.page - 1) * options.limit;
 
+        if (options.filters) {
+            return await this.getAdvertsWithFilters(options.filters as any);
+        }
+
+        // todo check findAndCount method
         const query = await this.advertRepository
             .createQueryBuilder('advert')
-            .andWhere(options.category_id ? 'advert.category_id = :category_id' : '1=1', { category_id: options.category_id })
+            .andWhere('advert.category_id = :category_id', { category_id: options.category_id })
             .andWhere(options.search ? 'LOWER(advert.title COLLATE "en_US") LIKE :search' : '1=1', {
                 search: options.search ? `%${options.search.toLocaleLowerCase()}%` : '',
             });
 
         const adverts = await query.orderBy('created_at', 'DESC').offset(skipped).limit(options.limit).getMany();
         const totalCount = await query.getCount();
-        const resolvedAdverts = await Promise.all(adverts.map(advert => this.loadFieldDataForAdvert(advert)));
+        const resolvedAdverts = await Promise.all<Advert>(adverts.map(advert => this.loadFieldDataForAdvert(advert)));
 
         const response = new AdvertsGetResponseDto();
         response.adverts = resolvedAdverts;
@@ -185,5 +194,42 @@ export class AdvertsService {
         }
 
         return advert;
+    }
+
+    private async getAdvertsWithFilters(filters: Filter[]): Promise<AdvertsGetResponseDto> {
+        // todo apply options
+        // todo apply category
+        // todo use only intersection of advert ids !!!
+        if (typeof filters !== 'object') {
+            return;
+        }
+        let advertIdsSet = new Set();
+
+        const filtersMap = new Map(Object.entries(filters));
+        for (let [fieldId, params] of filtersMap) {
+            try {
+                const field = await this.fieldsService.getById(fieldId);
+                const service = this.dynamicFieldsService.getService(field.type);
+                if (!service) {
+                    continue;
+                }
+
+                const ids = await service.getAdvertIdsByFilterParams(fieldId, params);
+                advertIdsSet = new Set([...advertIdsSet, ...ids]);
+            } catch (e) {
+                continue;
+            }
+        }
+
+        const advertResponse = new AdvertsGetResponseDto();
+        advertResponse.totalCount = advertIdsSet.size;
+
+        advertResponse.adverts = await this.advertRepository.find({
+            where: {
+                id: In([...advertIdsSet]),
+            },
+        });
+
+        return advertResponse;
     }
 }
