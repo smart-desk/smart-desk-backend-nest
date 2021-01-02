@@ -111,7 +111,7 @@ describe('Adverts controller', () => {
                     page: 2,
                     limit: 2,
                     category_id: uuid(),
-                    search: test,
+                    search: 'test',
                 })
                 .expect(HttpStatus.OK)
                 .expect(res => {
@@ -182,7 +182,7 @@ describe('Adverts controller', () => {
                 .query({
                     page: 2,
                     limit: 2,
-                    search: test,
+                    search: 'test',
                 })
                 .expect(HttpStatus.OK)
                 .expect(res => {
