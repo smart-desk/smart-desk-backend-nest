@@ -30,9 +30,17 @@ import { ResourceEnum, RolesEnum } from '../app/app.roles';
 export class AdvertsController {
     constructor(private advertsService: AdvertsService) {}
 
+    @Get()
+    getAll(@Query() options: AdvertsGetDto): Promise<AdvertsGetResponseDto> {
+        return this.advertsService.getAll(options);
+    }
+
     @Get('/category/:categoryId')
-    getAll(@Param('categoryId', ParseUUIDPipe) categoryId: string, @Query() options: AdvertsGetDto): Promise<AdvertsGetResponseDto> {
-        return this.advertsService.getAll(categoryId, options);
+    getForCategory(
+        @Param('categoryId', ParseUUIDPipe) categoryId: string,
+        @Query() options: AdvertsGetDto
+    ): Promise<AdvertsGetResponseDto> {
+        return this.advertsService.getForCategory(categoryId, options);
     }
 
     @Get(':id')

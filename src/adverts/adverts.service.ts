@@ -16,10 +16,6 @@ interface FieldDataDtoInstance {
     dto: any; // todo not any
 }
 
-interface Filter {
-    [key: string]: any; // todo
-}
-
 @Injectable()
 export class AdvertsService {
     constructor(
@@ -29,32 +25,18 @@ export class AdvertsService {
         private dynamicFieldsService: DynamicFieldsService
     ) {}
 
-    async getAll(categoryId: string, options: AdvertsGetDto): Promise<AdvertsGetResponseDto> {
-        const skipped = (options.page - 1) * options.limit;
-
+    async getAll(options: AdvertsGetDto): Promise<AdvertsGetResponseDto> {
         if (options.filters) {
-            return await this.getAdvertsWithFilters(categoryId, options);
+            return await this.getAdvertsWithFilters(options);
         }
+        return this.getAdverts(options);
+    }
 
-        // todo check findAndCount method
-        const query = await this.advertRepository
-            .createQueryBuilder('advert')
-            .andWhere('advert.category_id = :category_id', { category_id: categoryId })
-            .andWhere(options.search ? 'LOWER(advert.title COLLATE "en_US") LIKE :search' : '1=1', {
-                search: options.search ? `%${options.search.toLocaleLowerCase()}%` : '',
-            });
-
-        const adverts = await query.orderBy('created_at', 'DESC').offset(skipped).limit(options.limit).getMany();
-        const totalCount = await query.getCount();
-        const resolvedAdverts = await Promise.all<Advert>(adverts.map(advert => this.loadFieldDataForAdvert(advert)));
-
-        const response = new AdvertsGetResponseDto();
-        response.adverts = resolvedAdverts;
-        response.page = options.page;
-        response.limit = options.limit;
-        response.totalCount = totalCount;
-
-        return response;
+    async getForCategory(categoryId: string, options: AdvertsGetDto): Promise<AdvertsGetResponseDto> {
+        if (options.filters) {
+            return await this.getAdvertsWithFilters(options, categoryId);
+        }
+        return this.getAdverts(options, categoryId);
     }
 
     async getById(id: string): Promise<Advert> {
@@ -196,7 +178,33 @@ export class AdvertsService {
         return advert;
     }
 
-    private async getAdvertsWithFilters(categoryId: string, options: AdvertsGetDto): Promise<AdvertsGetResponseDto> {
+    private async getAdverts(options: AdvertsGetDto, categoryId?: string): Promise<AdvertsGetResponseDto> {
+        const where: any = {};
+        if (categoryId) {
+            where.category_id = categoryId;
+        }
+
+        const [adverts, totalCount] = await this.advertRepository.findAndCount({
+            where,
+            order: {
+                createdAt: 'DESC',
+            },
+            skip: (options.page - 1) * options.limit,
+            take: options.limit,
+        });
+
+        const advertsWithData = await Promise.all<Advert>(adverts.map(advert => this.loadFieldDataForAdvert(advert)));
+        const advertResponse = new AdvertsGetResponseDto();
+
+        advertResponse.totalCount = totalCount;
+        advertResponse.adverts = advertsWithData;
+        advertResponse.page = options.page;
+        advertResponse.limit = options.limit;
+
+        return advertResponse;
+    }
+
+    private async getAdvertsWithFilters(options: AdvertsGetDto, categoryId?: string): Promise<AdvertsGetResponseDto> {
         const { filters } = options;
         if (typeof filters !== 'object') {
             throw new BadRequestException('Invalid filters format');
@@ -227,11 +235,13 @@ export class AdvertsService {
         let adverts: Advert[] = [];
         let totalCount: number = 0;
         if (advertIds && advertIds.length) {
+            const where: any = { id: In(advertIds) };
+            if (categoryId) {
+                where.category_id = categoryId;
+            }
+
             [adverts, totalCount] = await this.advertRepository.findAndCount({
-                where: {
-                    id: In(advertIds),
-                    category_id: categoryId,
-                },
+                where,
                 order: {
                     createdAt: 'DESC',
                 },
