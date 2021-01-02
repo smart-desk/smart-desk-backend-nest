@@ -161,6 +161,21 @@ describe('Adverts controller', () => {
                     expect(res.body.message).toContain('search must be shorter than or equal to 255 characters');
                 });
         });
+
+        it(`successfully with filters`, () => {
+            return request(app.getHttpServer())
+                .get(`/adverts?filters[${uuid()}][from]=100&filters[${uuid()}][to]=500`)
+                .expect(HttpStatus.OK);
+        });
+
+        it(`with error - invalid filters format`, () => {
+            return request(app.getHttpServer())
+                .get(`/adverts?filters=1000`)
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('filters must be an object');
+                });
+        });
     });
 
     describe('get adverts for category', () => {
@@ -239,6 +254,21 @@ describe('Adverts controller', () => {
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('search must be shorter than or equal to 255 characters');
+                });
+        });
+
+        it(`successfully with filters`, () => {
+            return request(app.getHttpServer())
+                .get(`/adverts/category/${uuid()}?filters[${uuid()}][from]=100&filters[${uuid()}][to]=500`)
+                .expect(HttpStatus.OK);
+        });
+
+        it(`with error - invalid filters format`, () => {
+            return request(app.getHttpServer())
+                .get(`/adverts/category/${uuid()}?filters=1000`)
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('filters must be an object');
                 });
         });
     });
