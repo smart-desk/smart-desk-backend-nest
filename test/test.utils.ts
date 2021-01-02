@@ -26,6 +26,7 @@ export function createRepositoryMock<T>(values?: T[]) {
         }),
         find: fn().mockReturnValue(resultValues),
         findOne: fn().mockReturnValue(resultValues[0]),
+        findAndCount: fn().mockReturnValue([resultValues, resultValues.length]),
         create: fn().mockReturnValue(resultValues[0]),
         preload: fn().mockReturnValue(resultValues[0]),
         save: fn().mockReturnValue(resultValues[0]),

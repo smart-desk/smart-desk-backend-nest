@@ -152,16 +152,6 @@ describe('Adverts controller', () => {
                 });
         });
 
-        it(`with error - not valid category`, () => {
-            return request(app.getHttpServer())
-                .get('/adverts')
-                .query({ category_id: 12333 })
-                .expect(HttpStatus.BAD_REQUEST)
-                .expect(res => {
-                    expect(res.body.message).toContain('category_id must be an UUID');
-                });
-        });
-
         it(`with error - not valid search`, () => {
             return request(app.getHttpServer())
                 .get('/adverts')
@@ -1410,9 +1400,7 @@ describe('Adverts controller with ACL enabled', () => {
                 return true;
             });
 
-            return request(app.getHttpServer())
-                .delete(`/adverts/${uuid()}`)
-                .expect(HttpStatus.FORBIDDEN)
+            return request(app.getHttpServer()).delete(`/adverts/${uuid()}`).expect(HttpStatus.FORBIDDEN);
         });
 
         it(`successfully with admin permissions`, () => {
@@ -1422,11 +1410,8 @@ describe('Adverts controller with ACL enabled', () => {
                 return true;
             });
 
-            return request(app.getHttpServer())
-                .delete(`/adverts/${uuid()}`)
-                .expect(HttpStatus.NO_CONTENT)
+            return request(app.getHttpServer()).delete(`/adverts/${uuid()}`).expect(HttpStatus.NO_CONTENT);
         });
-
     });
 
     afterAll(async () => {
