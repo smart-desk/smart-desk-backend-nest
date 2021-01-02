@@ -47,10 +47,6 @@ export class UpdateAdvertDto {
 }
 
 export class AdvertsGetDto {
-    @IsDefined()
-    @IsUUID()
-    category_id: string; // todo use it as a param
-
     @IsOptional()
     @IsPositive()
     @IsNumber()

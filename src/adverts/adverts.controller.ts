@@ -30,9 +30,9 @@ import { ResourceEnum, RolesEnum } from '../app/app.roles';
 export class AdvertsController {
     constructor(private advertsService: AdvertsService) {}
 
-    @Get()
-    getAll(@Query() options: AdvertsGetDto): Promise<AdvertsGetResponseDto> {
-        return this.advertsService.getAll(options);
+    @Get('/category/:categoryId')
+    getAll(@Param('categoryId', ParseUUIDPipe) categoryId: string, @Query() options: AdvertsGetDto): Promise<AdvertsGetResponseDto> {
+        return this.advertsService.getAll(categoryId, options);
     }
 
     @Get(':id')
@@ -59,9 +59,9 @@ export class AdvertsController {
     async updateAdvert(
         @Param('id', ParseUUIDPipe) id: string,
         @Body() body: UpdateAdvertDto,
-        @Req() req: Request & JWTUserPayload,
+        @Req() req: Request & JWTUserPayload
     ): Promise<Advert> {
-        const isAdminOrOwner = await this.isAdminOrOwner(id, req.user)
+        const isAdminOrOwner = await this.isAdminOrOwner(id, req.user);
         if (!isAdminOrOwner) throw new ForbiddenException();
         return this.advertsService.update(id, body);
     }
@@ -74,7 +74,7 @@ export class AdvertsController {
         action: 'delete',
     })
     async deleteAdvert(@Param('id', ParseUUIDPipe) id: string, @Req() req: Request & JWTUserPayload): Promise<Advert> {
-        const isAdminOrOwner = await this.isAdminOrOwner(id, req.user)
+        const isAdminOrOwner = await this.isAdminOrOwner(id, req.user);
         if (!isAdminOrOwner) throw new ForbiddenException();
         return await this.advertsService.delete(id);
     }

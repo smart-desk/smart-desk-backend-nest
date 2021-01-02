@@ -29,17 +29,17 @@ export class AdvertsService {
         private dynamicFieldsService: DynamicFieldsService
     ) {}
 
-    async getAll(options: AdvertsGetDto): Promise<AdvertsGetResponseDto> {
+    async getAll(categoryId: string, options: AdvertsGetDto): Promise<AdvertsGetResponseDto> {
         const skipped = (options.page - 1) * options.limit;
 
         if (options.filters) {
-            return await this.getAdvertsWithFilters(options);
+            return await this.getAdvertsWithFilters(categoryId, options);
         }
 
         // todo check findAndCount method
         const query = await this.advertRepository
             .createQueryBuilder('advert')
-            .andWhere('advert.category_id = :category_id', { category_id: options.category_id })
+            .andWhere('advert.category_id = :category_id', { category_id: categoryId })
             .andWhere(options.search ? 'LOWER(advert.title COLLATE "en_US") LIKE :search' : '1=1', {
                 search: options.search ? `%${options.search.toLocaleLowerCase()}%` : '',
             });
@@ -196,7 +196,7 @@ export class AdvertsService {
         return advert;
     }
 
-    private async getAdvertsWithFilters(options: AdvertsGetDto): Promise<AdvertsGetResponseDto> {
+    private async getAdvertsWithFilters(categoryId: string, options: AdvertsGetDto): Promise<AdvertsGetResponseDto> {
         const { filters } = options;
         if (typeof filters !== 'object') {
             throw new BadRequestException('Invalid filters format');
@@ -230,7 +230,7 @@ export class AdvertsService {
             [adverts, totalCount] = await this.advertRepository.findAndCount({
                 where: {
                     id: In(advertIds),
-                    category_id: options.category_id,
+                    category_id: categoryId,
                 },
                 order: {
                     createdAt: 'DESC',
