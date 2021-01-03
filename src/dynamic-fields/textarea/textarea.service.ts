@@ -66,4 +66,8 @@ export class TextareaService extends AbstractFieldService {
         const dtoClass = plainToClass(TextareaParamsDto, dtoObject);
         return await validate(dtoClass);
     }
+
+    async getAdvertIdsByFilter(fieldId: string, params: any): Promise<string[]> {
+        return null;
+    }
 }

@@ -49,4 +49,8 @@ export class TextService extends AbstractFieldService {
         const dtoClass = plainToClass(TextParamsDto, dtoObject);
         return await validate(dtoClass);
     }
+
+    async getAdvertIdsByFilter(fieldId: string, params: any): Promise<string[]> {
+        return null;
+    }
 }

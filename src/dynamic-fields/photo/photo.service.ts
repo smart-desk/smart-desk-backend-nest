@@ -64,4 +64,8 @@ export class PhotoService extends AbstractFieldService {
         const dtoClass = plainToClass(PhotoParamsDto, dtoObject);
         return await validate(dtoClass);
     }
+
+    async getAdvertIdsByFilter(fieldId: string, params: any): Promise<string[]> {
+        return null;
+    }
 }

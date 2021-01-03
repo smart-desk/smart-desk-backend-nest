@@ -65,4 +65,8 @@ export class InputTextService extends AbstractFieldService {
         const dtoClass = plainToClass(InputTextParamsDto, dtoObject);
         return await validate(dtoClass);
     }
+
+    async getAdvertIdsByFilter(fieldId: string, params: any): Promise<string[]> {
+        return null;
+    }
 }

@@ -65,4 +65,8 @@ export class RadioService extends AbstractFieldService {
         const dtoClass = plainToClass(RadioParamsDto, dtoObject);
         return await validate(dtoClass);
     }
+
+    async getAdvertIdsByFilter(fieldId: string, params: any): Promise<string[]> {
+        return null;
+    }
 }

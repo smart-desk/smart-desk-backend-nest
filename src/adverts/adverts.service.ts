@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { isUUID } from 'class-validator';
 import { Advert } from './entities/advert.entity';
 import { AdvertsGetDto, AdvertsGetResponseDto, UpdateAdvertDto } from './dto/advert.dto';
@@ -26,26 +26,17 @@ export class AdvertsService {
     ) {}
 
     async getAll(options: AdvertsGetDto): Promise<AdvertsGetResponseDto> {
-        const skipped = (options.page - 1) * options.limit;
+        if (options.filters) {
+            return await this.getAdvertsWithFilters(options);
+        }
+        return this.getAdverts(options);
+    }
 
-        const query = await this.advertRepository
-            .createQueryBuilder('advert')
-            .andWhere(options.category_id ? 'advert.category_id = :category_id' : '1=1', { category_id: options.category_id })
-            .andWhere(options.search ? 'LOWER(advert.title COLLATE "en_US") LIKE :search' : '1=1', {
-                search: options.search ? `%${options.search.toLocaleLowerCase()}%` : '',
-            });
-
-        const adverts = await query.orderBy('created_at', 'DESC').offset(skipped).limit(options.limit).getMany();
-        const totalCount = await query.getCount();
-        const resolvedAdverts = await Promise.all(adverts.map(advert => this.loadFieldDataForAdvert(advert)));
-
-        const response = new AdvertsGetResponseDto();
-        response.adverts = resolvedAdverts;
-        response.page = options.page;
-        response.limit = options.limit;
-        response.totalCount = totalCount;
-
-        return response;
+    async getForCategory(categoryId: string, options: AdvertsGetDto): Promise<AdvertsGetResponseDto> {
+        if (options.filters) {
+            return await this.getAdvertsWithFilters(options, categoryId);
+        }
+        return this.getAdverts(options, categoryId);
     }
 
     async getById(id: string): Promise<Advert> {
@@ -185,5 +176,88 @@ export class AdvertsService {
         }
 
         return advert;
+    }
+
+    private async getAdverts(options: AdvertsGetDto, categoryId?: string): Promise<AdvertsGetResponseDto> {
+        const where: any = {};
+        if (categoryId) {
+            where.category_id = categoryId;
+        }
+
+        const [adverts, totalCount] = await this.advertRepository.findAndCount({
+            where,
+            order: {
+                createdAt: 'DESC',
+            },
+            skip: (options.page - 1) * options.limit,
+            take: options.limit,
+        });
+
+        const advertsWithData = await Promise.all<Advert>(adverts.map(advert => this.loadFieldDataForAdvert(advert)));
+        const advertResponse = new AdvertsGetResponseDto();
+
+        advertResponse.totalCount = totalCount;
+        advertResponse.adverts = advertsWithData;
+        advertResponse.page = options.page;
+        advertResponse.limit = options.limit;
+
+        return advertResponse;
+    }
+
+    private async getAdvertsWithFilters(options: AdvertsGetDto, categoryId?: string): Promise<AdvertsGetResponseDto> {
+        const { filters } = options;
+        if (typeof filters !== 'object') {
+            throw new BadRequestException('Invalid filters format');
+        }
+
+        let advertIds: string[];
+        for (let [fieldId, params] of Object.entries(filters)) {
+            try {
+                const field = await this.fieldsService.getById(fieldId);
+                const service = this.dynamicFieldsService.getService(field.type);
+                if (!service) {
+                    continue;
+                }
+
+                const filteredAdvertIds = await service.getAdvertIdsByFilter(fieldId, params);
+                if (!filteredAdvertIds) {
+                    continue;
+                }
+
+                // find intersection to exclude already filtered adverts
+                advertIds = advertIds ? advertIds.filter(id => filteredAdvertIds.includes(id)) : filteredAdvertIds;
+            } catch (e) {
+                // skip filter if field id is not correct
+                continue;
+            }
+        }
+
+        let adverts: Advert[] = [];
+        let totalCount: number = 0;
+        if (advertIds && advertIds.length) {
+            const where: any = { id: In(advertIds) };
+            if (categoryId) {
+                where.category_id = categoryId;
+            }
+
+            [adverts, totalCount] = await this.advertRepository.findAndCount({
+                where,
+                order: {
+                    createdAt: 'DESC',
+                },
+                skip: (options.page - 1) * options.limit,
+                take: options.limit,
+            });
+        }
+
+        const advertsWithData = await Promise.all<Advert>(adverts.map(advert => this.loadFieldDataForAdvert(advert)));
+        const advertResponse = new AdvertsGetResponseDto();
+
+        advertResponse.totalCount = totalCount;
+        advertResponse.adverts = advertsWithData;
+        advertResponse.page = options.page;
+        advertResponse.limit = options.limit;
+
+        return advertResponse;
     }
 }

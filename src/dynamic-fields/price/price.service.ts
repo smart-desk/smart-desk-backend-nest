@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AbstractFieldService } from '../abstract-field.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { validate, ValidationError } from 'class-validator';
 import { plainToClass } from 'class-transformer';
 import { PriceEntity } from './price.entity';
@@ -65,5 +65,17 @@ export class PriceService extends AbstractFieldService {
     async validateParams(dtoObject: Partial<PriceParamsDto>): Promise<ValidationError[]> {
         const dtoClass = plainToClass(PriceParamsDto, dtoObject);
         return await validate(dtoClass);
+    }
+
+    async getAdvertIdsByFilter(fieldId: string, params: { from?: string; to?: string }): Promise<string[]> {
+        const result = await this.repository
+            .createQueryBuilder()
+            .where({
+                field_id: fieldId,
+                value: Between(params.from || 0, params.to || 9999999999999),
+            })
+            .getMany();
+
+        return result.map(r => r.advert_id);
     }
 }

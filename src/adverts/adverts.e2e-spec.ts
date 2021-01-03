@@ -111,7 +111,7 @@ describe('Adverts controller', () => {
                     page: 2,
                     limit: 2,
                     category_id: uuid(),
-                    search: test,
+                    search: 'test',
                 })
                 .expect(HttpStatus.OK)
                 .expect(res => {
@@ -152,16 +152,6 @@ describe('Adverts controller', () => {
                 });
         });
 
-        it(`with error - not valid category`, () => {
-            return request(app.getHttpServer())
-                .get('/adverts')
-                .query({ category_id: 12333 })
-                .expect(HttpStatus.BAD_REQUEST)
-                .expect(res => {
-                    expect(res.body.message).toContain('category_id must be an UUID');
-                });
-        });
-
         it(`with error - not valid search`, () => {
             return request(app.getHttpServer())
                 .get('/adverts')
@@ -169,6 +159,116 @@ describe('Adverts controller', () => {
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('search must be shorter than or equal to 255 characters');
+                });
+        });
+
+        it(`successfully with filters`, () => {
+            return request(app.getHttpServer())
+                .get(`/adverts?filters[${uuid()}][from]=100&filters[${uuid()}][to]=500`)
+                .expect(HttpStatus.OK);
+        });
+
+        it(`with error - invalid filters format`, () => {
+            return request(app.getHttpServer())
+                .get(`/adverts?filters=1000`)
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('filters must be an object');
+                });
+        });
+    });
+
+    describe('get adverts for category', () => {
+        it(`successfully with no params`, () => {
+            return request(app.getHttpServer())
+                .get(`/adverts/category/${uuid()}`)
+                .expect(HttpStatus.OK)
+                .expect(res => {
+                    expect(res.body.adverts).toBeDefined();
+                    expect(res.body.limit).toEqual(20);
+                    expect(res.body.totalCount).toEqual(1);
+                    expect(res.body.page).toEqual(1);
+                });
+        });
+
+        it(`successfully with page, limit, search`, () => {
+            return request(app.getHttpServer())
+                .get(`/adverts/category/${uuid()}`)
+                .query({
+                    page: 2,
+                    limit: 2,
+                    search: 'test',
+                })
+                .expect(HttpStatus.OK)
+                .expect(res => {
+                    expect(res.body.adverts).toBeDefined();
+                    expect(res.body.limit).toEqual(2);
+                    expect(res.body.totalCount).toEqual(1);
+                    expect(res.body.page).toEqual(2);
+                });
+        });
+
+        it(`with error - not valid category id`, () => {
+            return request(app.getHttpServer())
+                .get(`/adverts/category/13244`)
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('Validation failed (uuid  is expected)');
+                });
+        });
+
+        it(`with error - not valid page`, () => {
+            return request(app.getHttpServer())
+                .get(`/adverts/category/${uuid()}`)
+                .query({ page: 0 })
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('page must be a positive number');
+                });
+        });
+
+        it(`with error - not valid limit, no negative numbers`, () => {
+            return request(app.getHttpServer())
+                .get(`/adverts/category/${uuid()}`)
+                .query({ limit: -1 })
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('limit must be a positive number');
+                });
+        });
+
+        it(`with error - not valid limit, no greater than 100`, () => {
+            return request(app.getHttpServer())
+                .get(`/adverts/category/${uuid()}`)
+                .query({ limit: 300 })
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('limit must not be greater than 100');
+                });
+        });
+
+        it(`with error - not valid search`, () => {
+            return request(app.getHttpServer())
+                .get(`/adverts/category/${uuid()}`)
+                .query({ search: Array(300).fill('a').join('') })
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('search must be shorter than or equal to 255 characters');
+                });
+        });
+
+        it(`successfully with filters`, () => {
+            return request(app.getHttpServer())
+                .get(`/adverts/category/${uuid()}?filters[${uuid()}][from]=100&filters[${uuid()}][to]=500`)
+                .expect(HttpStatus.OK);
+        });
+
+        it(`with error - invalid filters format`, () => {
+            return request(app.getHttpServer())
+                .get(`/adverts/category/${uuid()}?filters=1000`)
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('filters must be an object');
                 });
         });
     });
@@ -1410,9 +1510,7 @@ describe('Adverts controller with ACL enabled', () => {
                 return true;
             });
 
-            return request(app.getHttpServer())
-                .delete(`/adverts/${uuid()}`)
-                .expect(HttpStatus.FORBIDDEN)
+            return request(app.getHttpServer()).delete(`/adverts/${uuid()}`).expect(HttpStatus.FORBIDDEN);
         });
 
         it(`successfully with admin permissions`, () => {
@@ -1422,11 +1520,8 @@ describe('Adverts controller with ACL enabled', () => {
                 return true;
             });
 
-            return request(app.getHttpServer())
-                .delete(`/adverts/${uuid()}`)
-                .expect(HttpStatus.NO_CONTENT)
+            return request(app.getHttpServer()).delete(`/adverts/${uuid()}`).expect(HttpStatus.NO_CONTENT);
         });
-
     });
 
     afterAll(async () => {
