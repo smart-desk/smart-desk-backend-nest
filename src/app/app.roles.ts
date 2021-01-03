@@ -12,7 +12,7 @@ export enum ResourceEnum {
     SECTION = 'section',
     FIELD = 'field',
     CATEGORY = 'category',
-    PROFILE = 'profile',
+    USER = 'user',
     FILE = 'file',
 }
 
@@ -21,12 +21,12 @@ export const roles = new RolesBuilder();
 roles
     // Viewer
     .grant(RolesEnum.VIEWER)
-    .read([ResourceEnum.ADVERT, ResourceEnum.CATEGORY, ResourceEnum.PROFILE]) // todo hidden profile fields
+    .read([ResourceEnum.ADVERT, ResourceEnum.CATEGORY, ResourceEnum.USER]) // todo hidden profile fields
     // User
     .grant(RolesEnum.USER)
     .extend(RolesEnum.VIEWER)
     .create([ResourceEnum.ADVERT, ResourceEnum.FILE])
-    .update([ResourceEnum.ADVERT, ResourceEnum.PROFILE])
+    .update([ResourceEnum.ADVERT, ResourceEnum.USER])
     .delete(ResourceEnum.ADVERT)
     // Admin
     .grant(RolesEnum.ADMIN)
@@ -36,7 +36,7 @@ roles
         ResourceEnum.SECTION,
         ResourceEnum.FIELD,
         ResourceEnum.CATEGORY,
-        ResourceEnum.PROFILE,
+        ResourceEnum.USER,
         ResourceEnum.FILE,
     ])
     .read([
@@ -45,7 +45,7 @@ roles
         ResourceEnum.SECTION,
         ResourceEnum.FIELD,
         ResourceEnum.CATEGORY,
-        ResourceEnum.PROFILE,
+        ResourceEnum.USER,
         ResourceEnum.FILE,
     ])
     .update([
@@ -54,7 +54,7 @@ roles
         ResourceEnum.SECTION,
         ResourceEnum.FIELD,
         ResourceEnum.CATEGORY,
-        ResourceEnum.PROFILE,
+        ResourceEnum.USER,
         ResourceEnum.FILE,
     ])
     .delete([
@@ -63,6 +63,6 @@ roles
         ResourceEnum.SECTION,
         ResourceEnum.FIELD,
         ResourceEnum.CATEGORY,
-        ResourceEnum.PROFILE,
+        ResourceEnum.USER,
         ResourceEnum.FILE,
     ]);
