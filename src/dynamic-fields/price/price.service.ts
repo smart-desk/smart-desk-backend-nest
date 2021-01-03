@@ -9,6 +9,7 @@ import { CreatePriceDto } from './dto/create-price.dto';
 import { getMessageFromValidationErrors } from '../../utils/validation';
 import { UpdatePriceDto } from './dto/update-price.dto';
 import { PriceParamsDto } from './dto/price-params.dto';
+import { PriceFilterDto } from './dto/price-filter.dto';
 
 @Injectable()
 export class PriceService extends AbstractFieldService {
@@ -67,7 +68,7 @@ export class PriceService extends AbstractFieldService {
         return await validate(dtoClass);
     }
 
-    async getAdvertIdsByFilter(fieldId: string, params: { from?: string; to?: string }): Promise<string[]> {
+    async getAdvertIdsByFilter(fieldId: string, params: PriceFilterDto): Promise<string[]> {
         const result = await this.repository
             .createQueryBuilder()
             .where({

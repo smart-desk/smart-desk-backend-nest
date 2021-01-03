@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AbstractFieldService } from '../abstract-field.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { RadioEntity } from './radio.entity';
 import { validate, ValidationError } from 'class-validator';
 import { plainToClass } from 'class-transformer';
@@ -9,6 +9,7 @@ import { CreateRadioDto } from './dto/create-radio.dto';
 import { getMessageFromValidationErrors } from '../../utils/validation';
 import { UpdateRadioDto } from './dto/update-radio.dto';
 import { RadioParamsDto } from './dto/radio-params.dto';
+import { RadioFilterDto } from './dto/radio-filter.dto';
 
 @Injectable()
 export class RadioService extends AbstractFieldService {
@@ -49,7 +50,6 @@ export class RadioService extends AbstractFieldService {
         return await validate(dtoClass);
     }
 
-    // todo think one more time about api, maybe return { error, instance }
     async validateAndUpdate(dtoObject: Partial<UpdateRadioDto>): Promise<RadioEntity> {
         const dtoClass = this.transformUpdateObjectToClass(dtoObject);
         const errors = await validate(dtoClass);
@@ -66,7 +66,14 @@ export class RadioService extends AbstractFieldService {
         return await validate(dtoClass);
     }
 
-    async getAdvertIdsByFilter(fieldId: string, params: any): Promise<string[]> {
-        return null;
+    async getAdvertIdsByFilter(fieldId: string, params: RadioFilterDto): Promise<string[]> {
+        const result = await this.repository.find({
+            where: {
+                field_id: fieldId,
+                value: In(params),
+            },
+        });
+
+        return result.map(r => r.advert_id);
     }
 }
