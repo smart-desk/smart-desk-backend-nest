@@ -30,6 +30,7 @@ import { ResourceEnum, RolesEnum } from '../app/app.roles';
 export class AdvertsController {
     constructor(private advertsService: AdvertsService) {}
 
+    // todo make it accessible only for admin
     @Get()
     getAll(@Query() options: AdvertsGetDto): Promise<AdvertsGetResponseDto> {
         return this.advertsService.getAll(options);

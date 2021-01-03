@@ -13,9 +13,8 @@ export class User {
     lastName: string;
 
     @Column('varchar', { length: 255 })
-    @Expose({ groups: ['owner'] })
-    email: string;
+    email: string; // todo hide for public
 
     @Column('varchar', { length: 255, array: true })
-    roles: string[];
+    roles: string[]; // todo hide for public
 }
