@@ -19,7 +19,7 @@ describe('Users controller', () => {
 
     beforeAll(async () => {
         const moduleRef = await Test.createTestingModule({
-            imports: [UsersModule, TypeOrmModule.forRoot(), AccessControlModule.forRoles(roles)],
+            imports: [UsersModule, AccessControlModule.forRoles(roles)],
         })
             .overrideProvider(getRepositoryToken(User))
             .useValue(
