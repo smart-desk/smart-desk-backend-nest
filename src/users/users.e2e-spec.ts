@@ -74,7 +74,7 @@ describe('Users controller', () => {
                 });
         });
 
-        it(`with error - firstname and lastname cannot be longer than 255 symbols`, () => {
+        it(`with error - props must be shorter`, () => {
             return request(app.getHttpServer())
                 .patch('/users/profile')
                 .send({
