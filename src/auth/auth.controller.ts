@@ -30,6 +30,7 @@ export class AuthController {
                 email: payload.email,
                 firstName: payload.given_name,
                 lastName: payload.family_name,
+                avatar: payload.picture,
                 roles: [RolesEnum.USER],
             });
         }
