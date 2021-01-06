@@ -3,4 +3,5 @@ export class CreateUserDto {
     lastName: string;
     email: string;
     roles: string[];
+    avatar?: string;
 }
