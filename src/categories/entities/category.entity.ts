@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, Tree, TreeChildren, TreeParent } from 'typeorm';
 
 @Entity('categories')
 export class Category {
@@ -13,6 +13,13 @@ export class Category {
 
     @Column('varchar', { length: 255 })
     name: string;
+
+    @ManyToOne(() => Category, category => category.children)
+    @JoinColumn({ name: 'parent_id' })
+    parent: Category;
+
+    @OneToMany(() => Category, category => category.parent)
+    children: Category[];
 
     @Column('date', { name: 'created_at' })
     createdAt: string;

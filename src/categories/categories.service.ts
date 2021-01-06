@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
+import { EntityManager, Repository, TreeRepository } from 'typeorm';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Category } from './entities/category.entity';
@@ -9,8 +9,12 @@ import { Category } from './entities/category.entity';
 export class CategoriesService {
     constructor(@InjectRepository(Category) private categoryRepository: Repository<Category>) {}
 
-    findAll(): Promise<Category[]> {
-        return this.categoryRepository.find();
+    async  findAll(): Promise<Category[]> {
+        const categoriesTree = await this.categoryRepository.find({
+            relations: ['children'],
+        });
+        // Todo try to use @Tree from typeorm
+        return categoriesTree.filter(cat => !cat.parentId);
     }
 
     async findOne(id: string): Promise<Category> {
