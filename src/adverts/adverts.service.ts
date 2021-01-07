@@ -187,7 +187,7 @@ export class AdvertsService {
 
         // todo make it reusable
         if (options.user) {
-            where.user = options.user;
+            where.userId = options.user;
         }
 
         const [adverts, totalCount] = await this.advertRepository.findAndCount({
@@ -248,7 +248,7 @@ export class AdvertsService {
             }
 
             if (options.user) {
-                where.user = options.user;
+                where.userId = options.user;
             }
 
             [adverts, totalCount] = await this.advertRepository.findAndCount({
