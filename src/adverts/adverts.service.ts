@@ -3,13 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { isUUID } from 'class-validator';
 import { Advert } from './entities/advert.entity';
-import { AdvertsGetDto, AdvertsGetResponseDto, UpdateAdvertDto } from './dto/advert.dto';
+import { GetAdvertsDto, GetAdvertsResponseDto } from './dto/get-adverts.dto';
 import { SectionsService } from '../sections/sections.service';
-import { CreateAdvertDto } from './dto/advert.dto';
 import { FieldsService } from '../fields/fields.service';
 import { getMessageFromValidationErrors } from '../utils/validation';
 import { DynamicFieldsService } from '../dynamic-fields/dynamic-fields.service';
 import { FieldType } from '../dynamic-fields/dynamic-fields.module';
+import { CreateAdvertDto } from './dto/create-advert.dto';
+import { UpdateAdvertDto } from './dto/update-advert.dto';
 
 interface FieldDataDtoInstance {
     type: FieldType;
@@ -25,14 +26,14 @@ export class AdvertsService {
         private dynamicFieldsService: DynamicFieldsService
     ) {}
 
-    async getAll(options: AdvertsGetDto): Promise<AdvertsGetResponseDto> {
+    async getAll(options: GetAdvertsDto): Promise<GetAdvertsResponseDto> {
         if (options.filters) {
             return await this.getAdvertsWithFilters(options);
         }
         return this.getAdverts(options);
     }
 
-    async getForCategory(categoryId: string, options: AdvertsGetDto): Promise<AdvertsGetResponseDto> {
+    async getForCategory(categoryId: string, options: GetAdvertsDto): Promise<GetAdvertsResponseDto> {
         if (options.filters) {
             return await this.getAdvertsWithFilters(options, categoryId);
         }
@@ -178,10 +179,15 @@ export class AdvertsService {
         return advert;
     }
 
-    private async getAdverts(options: AdvertsGetDto, categoryId?: string): Promise<AdvertsGetResponseDto> {
+    private async getAdverts(options: GetAdvertsDto, categoryId?: string): Promise<GetAdvertsResponseDto> {
         const where: any = {};
         if (categoryId) {
             where.category_id = categoryId;
+        }
+
+        // todo make it reusable
+        if (options.user) {
+            where.user = options.user;
         }
 
         const [adverts, totalCount] = await this.advertRepository.findAndCount({
@@ -194,7 +200,7 @@ export class AdvertsService {
         });
 
         const advertsWithData = await Promise.all<Advert>(adverts.map(advert => this.loadFieldDataForAdvert(advert)));
-        const advertResponse = new AdvertsGetResponseDto();
+        const advertResponse = new GetAdvertsResponseDto();
 
         advertResponse.totalCount = totalCount;
         advertResponse.adverts = advertsWithData;
@@ -204,7 +210,7 @@ export class AdvertsService {
         return advertResponse;
     }
 
-    private async getAdvertsWithFilters(options: AdvertsGetDto, categoryId?: string): Promise<AdvertsGetResponseDto> {
+    private async getAdvertsWithFilters(options: GetAdvertsDto, categoryId?: string): Promise<GetAdvertsResponseDto> {
         const { filters } = options;
         if (typeof filters !== 'object') {
             throw new BadRequestException('Invalid filters format');
@@ -236,8 +242,13 @@ export class AdvertsService {
         let totalCount: number = 0;
         if (advertIds && advertIds.length) {
             const where: any = { id: In(advertIds) };
+
             if (categoryId) {
                 where.category_id = categoryId;
+            }
+
+            if (options.user) {
+                where.user = options.user;
             }
 
             [adverts, totalCount] = await this.advertRepository.findAndCount({
@@ -251,7 +262,7 @@ export class AdvertsService {
         }
 
         const advertsWithData = await Promise.all<Advert>(adverts.map(advert => this.loadFieldDataForAdvert(advert)));
-        const advertResponse = new AdvertsGetResponseDto();
+        const advertResponse = new GetAdvertsResponseDto();
 
         advertResponse.totalCount = totalCount;
         advertResponse.adverts = advertsWithData;

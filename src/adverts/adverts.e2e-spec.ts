@@ -13,7 +13,8 @@ import { TextareaEntity } from '../dynamic-fields/textarea/textarea.entity';
 import { RadioEntity } from '../dynamic-fields/radio/radio.entity';
 import { Field } from '../fields/field.entity';
 import { Section, SectionType } from '../sections/section.entity';
-import { CreateAdvertDto, UpdateAdvertDto } from './dto/advert.dto';
+import { CreateAdvertDto } from './dto/create-advert.dto';
+import { UpdateAdvertDto } from './dto/update-advert.dto';
 import { UpdateInputTextDto } from '../dynamic-fields/input-text/dto/update-input-text.dto';
 import { UpdateTextareaDto } from '../dynamic-fields/textarea/dto/update-textarea.dto';
 import { UpdateRadioDto } from '../dynamic-fields/radio/dto/update-radio.dto';
@@ -176,6 +177,19 @@ describe('Adverts controller', () => {
                     expect(res.body.message).toContain('filters must be an object');
                 });
         });
+
+        it(`successfully with user id`, () => {
+            return request(app.getHttpServer()).get(`/adverts?user=${uuid()}`).expect(HttpStatus.OK);
+        });
+
+        it(`with error - user uuid is not valid`, () => {
+            return request(app.getHttpServer())
+                .get(`/adverts?user=1000`)
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('user must be an UUID');
+                });
+        });
     });
 
     describe('get adverts for category', () => {
@@ -269,6 +283,19 @@ describe('Adverts controller', () => {
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('filters must be an object');
+                });
+        });
+
+        it(`successfully with user id`, () => {
+            return request(app.getHttpServer()).get(`/adverts/category/${uuid()}?user=${uuid()}`).expect(HttpStatus.OK);
+        });
+
+        it(`with error - user uuid is not valid`, () => {
+            return request(app.getHttpServer())
+                .get(`/adverts/category/${uuid()}?user=1000`)
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('user must be an UUID');
                 });
         });
     });
