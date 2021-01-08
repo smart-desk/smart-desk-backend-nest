@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Req, UseGuards } fr
 import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UsersService } from './users.service';
-import { User } from './user.entity';
+import { User } from './entities/user.entity';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ACGuard, UseRoles } from 'nest-access-control';
 import { ResourceEnum } from '../app/app.roles';
@@ -13,6 +13,12 @@ import { UpdateUserDto } from './dto/update-user.dto';
 @ApiTags('Users')
 export class UsersController {
     constructor(private usersService: UsersService) {}
+
+
+    @Get(':id')
+    async getUser(@Param('id', ParseUUIDPipe) id: string): Promise<User> {
+        return await this.usersService.fineOne(id);
+    }
 
     @Get('profile')
     @ApiBearerAuth('access-token')
@@ -30,10 +36,5 @@ export class UsersController {
     })
     async updateProfile(@Req() req: Request & JWTUserPayload, @Body() data: UpdateUserDto): Promise<User> {
         return await this.usersService.updateUser(req.user.id, data);
-    }
-
-    @Get(':id')
-    async getUser(@Param('id', ParseUUIDPipe) id: string): Promise<User> {
-        return await this.usersService.fineOne(id);
     }
 }

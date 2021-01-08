@@ -1,9 +1,9 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import * as request from 'supertest';
 import { createRepositoryMock, createTestAppForModule } from '../../test/test.utils';
-import { User } from './user.entity';
+import { User } from './entities/user.entity';
 import { UsersModule } from './users.module';
 import { AccessControlModule } from 'nest-access-control';
 import { roles } from '../app/app.roles';
