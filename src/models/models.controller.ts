@@ -24,6 +24,7 @@ import { ResourceEnum } from '../app/app.roles';
 export class ModelsController {
     constructor(private modelsService: ModelsService) {}
 
+    // todo only for admin
     @Get()
     getAll(): Promise<Model[]> {
         return this.modelsService.getAll();

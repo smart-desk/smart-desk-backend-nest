@@ -19,11 +19,12 @@ import { ACGuard, UseRoles } from 'nest-access-control';
 import { Request } from 'express';
 import { AdvertsService } from './adverts.service';
 import { Advert } from './entities/advert.entity';
-import { AdvertsGetDto, AdvertsGetResponseDto, UpdateAdvertDto } from './dto/advert.dto';
-import { CreateAdvertDto } from './dto/advert.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { JWTPayload, JWTUserPayload } from '../auth/jwt.strategy';
 import { ResourceEnum, RolesEnum } from '../app/app.roles';
+import { CreateAdvertDto } from './dto/create-advert.dto';
+import { UpdateAdvertDto } from './dto/update-advert.dto';
+import { GetAdvertsDto, GetAdvertsResponseDto } from './dto/get-adverts.dto';
 
 @Controller('adverts')
 @ApiTags('Adverts')
@@ -32,15 +33,15 @@ export class AdvertsController {
 
     // todo make it accessible only for admin
     @Get()
-    getAll(@Query() options: AdvertsGetDto): Promise<AdvertsGetResponseDto> {
+    getAll(@Query() options: GetAdvertsDto): Promise<GetAdvertsResponseDto> {
         return this.advertsService.getAll(options);
     }
 
     @Get('/category/:categoryId')
     getForCategory(
         @Param('categoryId', ParseUUIDPipe) categoryId: string,
-        @Query() options: AdvertsGetDto
-    ): Promise<AdvertsGetResponseDto> {
+        @Query() options: GetAdvertsDto
+    ): Promise<GetAdvertsResponseDto> {
         return this.advertsService.getForCategory(categoryId, options);
     }
 
