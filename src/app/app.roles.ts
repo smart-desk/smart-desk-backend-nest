@@ -14,6 +14,7 @@ export enum ResourceEnum {
     CATEGORY = 'category',
     USER = 'user',
     FILE = 'file',
+    BOOKMARK = 'bookmark',
 }
 
 export const roles = new RolesBuilder();
@@ -25,9 +26,10 @@ roles
     // User
     .grant(RolesEnum.USER)
     .extend(RolesEnum.VIEWER)
-    .create([ResourceEnum.ADVERT, ResourceEnum.FILE])
-    .update([ResourceEnum.ADVERT, ResourceEnum.USER])
-    .delete(ResourceEnum.ADVERT)
+    .read([ResourceEnum.BOOKMARK])
+    .create([ResourceEnum.ADVERT, ResourceEnum.FILE, ResourceEnum.BOOKMARK])
+    .update([ResourceEnum.ADVERT, ResourceEnum.USER, ResourceEnum.BOOKMARK])
+    .delete(ResourceEnum.ADVERT) // todo shouldn't be possible
     // Admin
     .grant(RolesEnum.ADMIN)
     .create([
@@ -38,6 +40,7 @@ roles
         ResourceEnum.CATEGORY,
         ResourceEnum.USER,
         ResourceEnum.FILE,
+        ResourceEnum.BOOKMARK,
     ])
     .read([
         ResourceEnum.ADVERT,
@@ -47,6 +50,7 @@ roles
         ResourceEnum.CATEGORY,
         ResourceEnum.USER,
         ResourceEnum.FILE,
+        ResourceEnum.BOOKMARK,
     ])
     .update([
         ResourceEnum.ADVERT,
@@ -56,6 +60,7 @@ roles
         ResourceEnum.CATEGORY,
         ResourceEnum.USER,
         ResourceEnum.FILE,
+        ResourceEnum.BOOKMARK,
     ])
     .delete([
         ResourceEnum.ADVERT,
@@ -65,4 +70,5 @@ roles
         ResourceEnum.CATEGORY,
         ResourceEnum.USER,
         ResourceEnum.FILE,
+        ResourceEnum.BOOKMARK,
     ]);
