@@ -14,6 +14,7 @@ import { DynamicFieldsModule } from '../dynamic-fields/dynamic-fields.module';
 import { DataPipe } from '../utils/data.pipe';
 import { S3Module } from '../s3/s3.module';
 import { roles } from './app.roles';
+import { BookmarksModule } from '../bookmarks/bookmarks.module';
 
 const app = [
     AuthModule,
@@ -25,6 +26,7 @@ const app = [
     AdvertsModule,
     DynamicFieldsModule,
     S3Module,
+    // BookmarksModule,
 ];
 
 @Module({

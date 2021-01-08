@@ -14,7 +14,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UsersController {
     constructor(private usersService: UsersService) {}
 
-
     @Get(':id')
     async getUser(@Param('id', ParseUUIDPipe) id: string): Promise<User> {
         return await this.usersService.fineOne(id);
