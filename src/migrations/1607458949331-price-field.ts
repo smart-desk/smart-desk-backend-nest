@@ -54,14 +54,6 @@ export class priceField1607458949331 implements MigrationInterface {
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        const tableFields = await queryRunner.getTable('fields');
-        const foreignKey1 = tableFields.foreignKeys.find(fk => fk.columnNames.indexOf('field_id') !== -1);
-        await queryRunner.dropForeignKey('fields', foreignKey1);
-
-        const tableAdverts = await queryRunner.getTable('adverts');
-        const foreignKey2 = tableAdverts.foreignKeys.find(fk => fk.columnNames.indexOf('advert_id') !== -1);
-        await queryRunner.dropForeignKey('adverts', foreignKey2);
-
         await queryRunner.dropTable('data_price');
     }
 }

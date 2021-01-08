@@ -11,5 +11,6 @@ import { DynamicFieldsModule } from '../dynamic-fields/dynamic-fields.module';
     imports: [TypeOrmModule.forFeature([Advert]), SectionsModule, FieldsModule, DynamicFieldsModule],
     providers: [AdvertsService],
     controllers: [AdvertsController],
+    exports: [AdvertsService],
 })
 export class AdvertsModule {}

@@ -6,18 +6,18 @@ export class UpdateUserDto {
     @IsString()
     @MaxLength(255)
     @MinLength(1)
-    firstName: string;
+    firstName?: string;
 
     @IsOptional()
     @IsString()
     @MaxLength(255)
     @MinLength(1)
-    lastName: string;
+    lastName?: string;
 
     @IsOptional()
     @MaxLength(1000)
     @IsString()
     @IsUrl()
     @IsImageUrl()
-    avatar: string;
+    avatar?: string;
 }

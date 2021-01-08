@@ -1,10 +1,10 @@
 import { MigrationInterface, QueryRunner, Table, TableForeignKey } from 'typeorm';
 
-export class Photo1606076284212 implements MigrationInterface {
+export class AddBookmarks1610129896515 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(
             new Table({
-                name: 'data_photos',
+                name: 'bookmarks',
                 columns: [
                     {
                         name: 'id',
@@ -15,45 +15,37 @@ export class Photo1606076284212 implements MigrationInterface {
                         default: `uuid_generate_v4()`,
                     },
                     {
-                        name: 'field_id',
+                        name: 'user_id',
                         type: 'uuid',
                     },
                     {
                         name: 'advert_id',
                         type: 'uuid',
                     },
-                    {
-                        name: 'value',
-                        type: 'varchar',
-                        length: '1000',
-                        isArray: true,
-                    },
                 ],
             })
         );
 
         await queryRunner.createForeignKey(
-            'data_photos',
+            'bookmarks',
             new TableForeignKey({
-                columnNames: ['field_id'],
+                columnNames: ['user_id'],
                 referencedColumnNames: ['id'],
-                referencedTableName: 'fields',
-                onDelete: 'CASCADE',
+                referencedTableName: 'users',
             })
         );
 
         await queryRunner.createForeignKey(
-            'data_photos',
+            'bookmarks',
             new TableForeignKey({
                 columnNames: ['advert_id'],
                 referencedColumnNames: ['id'],
                 referencedTableName: 'adverts',
-                onDelete: 'CASCADE',
             })
         );
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.dropTable('data_photos');
+        await queryRunner.dropTable('bookmarks');
     }
 }
