@@ -146,15 +146,7 @@ export class AdvertsService {
         return advert.userId;
     }
 
-    private async findOneOrThrowException(id: string): Promise<Advert> {
-        const advert = await this.advertRepository.findOne({ id });
-        if (!advert) {
-            throw new NotFoundException(`Advert ${id} not found`);
-        }
-        return advert;
-    }
-
-    private async loadFieldDataForAdvert(advert: Advert): Promise<Advert> {
+    async loadFieldDataForAdvert(advert: Advert): Promise<Advert> {
         advert.sections = await this.sectionsService.getByModelId(advert.model_id);
 
         // todo sequential loading is not effective, replace with parallel
@@ -178,6 +170,15 @@ export class AdvertsService {
 
         return advert;
     }
+
+    private async findOneOrThrowException(id: string): Promise<Advert> {
+        const advert = await this.advertRepository.findOne({ id });
+        if (!advert) {
+            throw new NotFoundException(`Advert ${id} not found`);
+        }
+        return advert;
+    }
+
 
     private async getAdverts(options: GetAdvertsDto, categoryId?: string): Promise<GetAdvertsResponseDto> {
         const where: any = {};

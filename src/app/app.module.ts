@@ -26,7 +26,7 @@ const app = [
     AdvertsModule,
     DynamicFieldsModule,
     S3Module,
-    // BookmarksModule,
+    BookmarksModule,
 ];
 
 @Module({

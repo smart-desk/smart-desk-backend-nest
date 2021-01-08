@@ -3,21 +3,28 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Bookmark } from './entities/bookmark.entity';
 import { CreateBookmarkDto } from './dto/create-bookmark.dto';
+import { AdvertsService } from '../adverts/adverts.service';
 
 @Injectable()
 export class BookmarksService {
-    constructor(@InjectRepository(Bookmark) private bookmarkRepository: Repository<Bookmark>) {}
+    constructor(@InjectRepository(Bookmark) private bookmarkRepository: Repository<Bookmark>, private advertsService: AdvertsService) {}
 
     async getUserBookmarks(userId: string): Promise<Bookmark[]> {
-        return this.bookmarkRepository.find({
+        const bookmarks = await this.bookmarkRepository.find({
             where: {
                 userId,
             },
         });
+
+        for (let i = 0; i < bookmarks.length; i += 1) {
+            bookmarks[i].advert = await this.advertsService.loadFieldDataForAdvert(bookmarks[i].advert);
+        }
+
+        return bookmarks;
     }
 
-    async createBookmark(user: CreateBookmarkDto): Promise<Bookmark> {
-        const bookmarkEntity = this.bookmarkRepository.create(user);
+    async createBookmark(userId: string, bookmark: CreateBookmarkDto): Promise<Bookmark> {
+        const bookmarkEntity = this.bookmarkRepository.create({ userId, ...bookmark });
         return this.bookmarkRepository.save(bookmarkEntity);
     }
 }

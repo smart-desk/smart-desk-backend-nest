@@ -14,11 +14,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UsersController {
     constructor(private usersService: UsersService) {}
 
-    @Get(':id')
-    async getUser(@Param('id', ParseUUIDPipe) id: string): Promise<User> {
-        return await this.usersService.fineOne(id);
-    }
-
     @Get('profile')
     @ApiBearerAuth('access-token')
     @UseGuards(JwtAuthGuard)
@@ -35,5 +30,10 @@ export class UsersController {
     })
     async updateProfile(@Req() req: Request & JWTUserPayload, @Body() data: UpdateUserDto): Promise<User> {
         return await this.usersService.updateUser(req.user.id, data);
+    }
+
+    @Get(':id')
+    async getUser(@Param('id', ParseUUIDPipe) id: string): Promise<User> {
+        return await this.usersService.fineOne(id);
     }
 }
