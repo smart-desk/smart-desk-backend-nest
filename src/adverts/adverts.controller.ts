@@ -37,6 +37,17 @@ export class AdvertsController {
         return this.advertsService.getAll(options);
     }
 
+    @Get('/my')
+    @UseGuards(JwtAuthGuard, ACGuard)
+    @UseRoles({
+        resource: ResourceEnum.ADVERT,
+        action: 'read',
+    })
+    getMy(@Req() req: Request & JWTUserPayload, @Query() options: GetAdvertsDto): Promise<GetAdvertsResponseDto> {
+        options.user = req.user.id;
+        return this.advertsService.getAll(options);
+    }
+
     @Get('/category/:categoryId')
     getForCategory(
         @Param('categoryId', ParseUUIDPipe) categoryId: string,
