@@ -1453,6 +1453,25 @@ describe('Adverts controller with ACL enabled', () => {
         });
     });
 
+    describe('get my adverts', () => {
+        it(`successfully`, () => {
+            return request(app.getHttpServer())
+                .get('/adverts/my')
+                .expect(HttpStatus.OK)
+                .expect(res => {
+                    expect(res.body.adverts).toBeDefined();
+                    expect(res.body.limit).toEqual(20);
+                    expect(res.body.totalCount).toEqual(1);
+                    expect(res.body.page).toEqual(1);
+                });
+        });
+
+        it(`with error - not authorized`, () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+            return request(app.getHttpServer()).get('/adverts/my').expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
     describe('create advert', () => {
         it(`successfully `, () => {
             return request(app.getHttpServer())
