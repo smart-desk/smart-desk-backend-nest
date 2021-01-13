@@ -42,7 +42,7 @@ export class UsersController {
     async getUsers(@Req() req: Request & JWTUserPayload): Promise<User[]> {
         const isAdmin = this.isAdmin(req.user);
         if (!isAdmin) throw new ForbiddenException();
-        return await this.usersService.fineAll();
+        return await this.usersService.findAll();
     }
 
     @Get(':id')

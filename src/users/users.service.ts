@@ -14,7 +14,7 @@ export class UsersService {
         return this.userRepository.save(userEntity);
     }
 
-    async fineAll(): Promise<User[]> {
+    async findAll(): Promise<User[]> {
         return this.userRepository.find();
     }
 
