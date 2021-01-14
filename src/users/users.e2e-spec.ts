@@ -32,6 +32,37 @@ describe('Users controller', () => {
         app = await createTestAppForModule(moduleRef);
     });
 
+    describe('get all users', () => {
+        it(`successfully`, () => {
+            JwtGuard.canActivate.mockImplementationOnce(context => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '123', email: 'test@email.com', roles: ['user', 'admin'] };
+                return true;
+            });
+
+            return request(app.getHttpServer())
+                .get('/users')
+                .expect(HttpStatus.OK)
+                .expect(res => {
+                    expect(res.body).toBeDefined();
+                });
+        });
+
+        it(`with error - unauthorized`, () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+
+            return request(app.getHttpServer())
+                .get('/users')
+                .expect(HttpStatus.FORBIDDEN);
+        });
+
+        it(`with error - not enough permissions`, () => {
+            return request(app.getHttpServer())
+                .get('/users')
+                .expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
     describe('update user', () => {
         it(`successfully`, () => {
             return request(app.getHttpServer())
