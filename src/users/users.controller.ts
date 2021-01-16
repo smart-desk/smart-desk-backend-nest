@@ -8,6 +8,7 @@ import { ACGuard, UseRoles } from 'nest-access-control';
 import { ResourceEnum, RolesEnum } from '../app/app.roles';
 import { JWTPayload, JWTUserPayload } from '../auth/jwt.strategy';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserRolesDto } from './dto/update-user-roles.dto';
 
 @Controller('users')
 @ApiTags('Users')
@@ -48,6 +49,23 @@ export class UsersController {
     @Get(':id')
     async getUser(@Param('id', ParseUUIDPipe) id: string): Promise<User> {
         return await this.usersService.fineOne(id);
+    }
+
+    @Patch(':id/roles')
+    @ApiBearerAuth('access-token')
+    @UseGuards(JwtAuthGuard, ACGuard)
+    @UseRoles({
+        resource: ResourceEnum.USER,
+        action: 'update',
+    })
+    async changeRoles(
+        @Param('id', ParseUUIDPipe) id: string,
+        @Req() req: Request & JWTUserPayload,
+        @Body() body: UpdateUserRolesDto
+    ): Promise<User> {
+        const isAdmin = this.isAdmin(req.user);
+        if (!isAdmin) throw new ForbiddenException();
+        return this.usersService.updateUserRoles(id, body.roles);
     }
 
     private isAdmin(userPayload: JWTPayload): boolean {
