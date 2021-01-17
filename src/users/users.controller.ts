@@ -9,6 +9,7 @@ import { JWTPayload, RequestWithUserPayload } from '../auth/jwt.strategy';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateUserRolesDto } from './dto/update-user-roles.dto';
 import { BlockedUserGuard } from '../guards/blocked-user.guard';
+import { BlockUserDto } from './dto/block-user.dto';
 
 @Controller('users')
 @ApiTags('Users')
@@ -75,10 +76,10 @@ export class UsersController {
         resource: ResourceEnum.USER,
         action: 'update',
     })
-    async blockUser(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<User> {
+    async blockUser(@Param('id', ParseUUIDPipe) id: string, @Body() body: BlockUserDto, @Req() req: RequestWithUserPayload): Promise<User> {
         const isAdmin = this.isAdmin(req.user);
         if (!isAdmin) throw new ForbiddenException();
-        return this.usersService.blockUser(id);
+        return this.usersService.blockUser(id, body.value);
     }
 
     private isAdmin(userPayload: JWTPayload): boolean {
