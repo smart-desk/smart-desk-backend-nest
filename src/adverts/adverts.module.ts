@@ -6,9 +6,10 @@ import { Advert } from './entities/advert.entity';
 import { SectionsModule } from '../sections/sections.module';
 import { FieldsModule } from '../fields/fields.module';
 import { DynamicFieldsModule } from '../dynamic-fields/dynamic-fields.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Advert]), SectionsModule, FieldsModule, DynamicFieldsModule],
+    imports: [TypeOrmModule.forFeature([Advert]), SectionsModule, FieldsModule, DynamicFieldsModule, UsersModule],
     providers: [AdvertsService],
     controllers: [AdvertsController],
     exports: [AdvertsService],

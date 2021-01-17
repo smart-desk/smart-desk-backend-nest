@@ -46,6 +46,14 @@ export class UsersService {
         return user.status === UserStatus.BLOCKED;
     }
 
+    async blockUser(id: string): Promise<User> {
+        const user = await this.findOneOrThrowException(id);
+        user.status = UserStatus.BLOCKED;
+        user.roles = [RolesEnum.USER];
+        const updatedUser = await this.userRepository.preload({ id, ...user });
+        return await this.userRepository.save(updatedUser);
+    }
+
     private async findOneOrThrowException(id: string): Promise<User> {
         const user = await this.userRepository.findOne({ id });
         if (!user) {

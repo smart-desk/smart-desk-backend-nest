@@ -20,6 +20,7 @@ import { ResourceEnum, RolesEnum } from '../app/app.roles';
 import { BookmarksService } from './bookmarks.service';
 import { Bookmark } from './entities/bookmark.entity';
 import { CreateBookmarkDto } from './dto/create-bookmark.dto';
+import { BlockedUserGuard } from '../guards/blocked-user.guard';
 
 @ApiTags('Bookmarks')
 @Controller('bookmarks')
@@ -39,7 +40,7 @@ export class BookmarksController {
 
     @Post()
     @ApiBearerAuth('access-token')
-    @UseGuards(JwtAuthGuard, ACGuard)
+    @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
     @UseRoles({
         resource: ResourceEnum.BOOKMARK,
         action: 'create',
@@ -51,7 +52,7 @@ export class BookmarksController {
     @Delete(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
     @ApiBearerAuth('access-token')
-    @UseGuards(JwtAuthGuard, ACGuard)
+    @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
     @UseRoles({
         resource: ResourceEnum.BOOKMARK,
         action: 'delete',

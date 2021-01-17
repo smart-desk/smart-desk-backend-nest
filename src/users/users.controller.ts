@@ -8,6 +8,7 @@ import { ResourceEnum, RolesEnum } from '../app/app.roles';
 import { JWTPayload, RequestWithUserPayload } from '../auth/jwt.strategy';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateUserRolesDto } from './dto/update-user-roles.dto';
+import { BlockedUserGuard } from '../guards/blocked-user.guard';
 
 @Controller('users')
 @ApiTags('Users')
@@ -23,7 +24,7 @@ export class UsersController {
 
     @Patch('profile')
     @ApiBearerAuth('access-token')
-    @UseGuards(JwtAuthGuard, ACGuard)
+    @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
     @UseRoles({
         resource: ResourceEnum.USER,
         action: 'update',
@@ -65,6 +66,19 @@ export class UsersController {
         const isAdmin = this.isAdmin(req.user);
         if (!isAdmin) throw new ForbiddenException();
         return this.usersService.updateUserRoles(id, body.roles);
+    }
+
+    @Patch(':id/block')
+    @ApiBearerAuth('access-token')
+    @UseGuards(JwtAuthGuard, ACGuard)
+    @UseRoles({
+        resource: ResourceEnum.USER,
+        action: 'update',
+    })
+    async blockUser(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<User> {
+        const isAdmin = this.isAdmin(req.user);
+        if (!isAdmin) throw new ForbiddenException();
+        return this.usersService.blockUser(id);
     }
 
     private isAdmin(userPayload: JWTPayload): boolean {

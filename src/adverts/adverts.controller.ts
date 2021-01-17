@@ -24,6 +24,7 @@ import { ResourceEnum, RolesEnum } from '../app/app.roles';
 import { CreateAdvertDto } from './dto/create-advert.dto';
 import { UpdateAdvertDto } from './dto/update-advert.dto';
 import { GetAdvertsDto, GetAdvertsResponseDto } from './dto/get-adverts.dto';
+import { BlockedUserGuard } from '../guards/blocked-user.guard';
 
 @Controller('adverts')
 @ApiTags('Adverts')
@@ -61,7 +62,7 @@ export class AdvertsController {
     }
 
     @Post()
-    @UseGuards(JwtAuthGuard, ACGuard)
+    @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
     @UseRoles({
         resource: ResourceEnum.ADVERT,
         action: 'create',
@@ -71,7 +72,7 @@ export class AdvertsController {
     }
 
     @Patch(':id')
-    @UseGuards(JwtAuthGuard, ACGuard)
+    @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
     @UseRoles({
         resource: ResourceEnum.ADVERT,
         action: 'update',
@@ -88,7 +89,7 @@ export class AdvertsController {
 
     @Delete(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
-    @UseGuards(JwtAuthGuard, ACGuard)
+    @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
     @UseRoles({
         resource: ResourceEnum.ADVERT,
         action: 'delete',
