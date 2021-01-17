@@ -8,7 +8,7 @@ import { User } from './entities/user.entity';
 import { UsersModule } from './users.module';
 import { AccessControlModule } from 'nest-access-control';
 import { roles, RolesEnum } from '../app/app.roles';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { JwtAuthGuardMock } from '../../test/mocks/jwt-auth.guard.mock';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateUserRolesDto } from './dto/update-user-roles.dto';

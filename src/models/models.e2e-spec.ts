@@ -8,7 +8,7 @@ import { Model } from './model.entity';
 import { createRepositoryMock, createTestAppForModule } from '../../test/test.utils';
 import { ModelsModule } from './models.module';
 import { Section } from '../sections/section.entity';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { JwtAuthGuardMock } from '../../test/mocks/jwt-auth.guard.mock';
 import { AcGuardMock } from '../../test/mocks/ac.guard.mock';
 import { roles, RolesEnum } from '../app/app.roles';

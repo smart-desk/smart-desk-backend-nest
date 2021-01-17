@@ -28,7 +28,7 @@ import { UpdatePhotoDto } from '../dynamic-fields/photo/dto/update-photo.dto';
 import { PriceEntity } from '../dynamic-fields/price/price.entity';
 import { CreatePriceDto } from '../dynamic-fields/price/dto/create-price.dto';
 import { UpdatePriceDto } from '../dynamic-fields/price/dto/update-price.dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { JwtAuthGuardMock } from '../../test/mocks/jwt-auth.guard.mock';
 import { AcGuardMock } from '../../test/mocks/ac.guard.mock';
 import { roles } from '../app/app.roles';

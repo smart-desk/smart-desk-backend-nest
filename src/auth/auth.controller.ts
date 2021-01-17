@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { ApiTags } from '@nestjs/swagger';
 import { RolesEnum } from '../app/app.roles';
+import { UserStatus } from '../users/user-status.enum';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -32,6 +33,7 @@ export class AuthController {
                 lastName: payload.family_name,
                 avatar: payload.picture,
                 roles: [RolesEnum.USER],
+                status: UserStatus.ACTIVE,
             });
         }
 

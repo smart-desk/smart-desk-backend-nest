@@ -13,9 +13,8 @@ import {
     UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { Request } from 'express';
-import { JWTPayload, JWTUserPayload } from '../auth/jwt.strategy';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { JWTPayload, RequestWithUserPayload } from '../auth/jwt.strategy';
 import { ACGuard, UseRoles } from 'nest-access-control';
 import { ResourceEnum, RolesEnum } from '../app/app.roles';
 import { BookmarksService } from './bookmarks.service';
@@ -34,7 +33,7 @@ export class BookmarksController {
         resource: ResourceEnum.BOOKMARK,
         action: 'read',
     })
-    async getAll(@Req() req: Request & JWTUserPayload): Promise<Bookmark[]> {
+    async getAll(@Req() req: RequestWithUserPayload): Promise<Bookmark[]> {
         return await this.bookmarksService.getUserBookmarks(req.user.id);
     }
 
@@ -45,7 +44,7 @@ export class BookmarksController {
         resource: ResourceEnum.BOOKMARK,
         action: 'create',
     })
-    async create(@Req() req: Request & JWTUserPayload, @Body() data: CreateBookmarkDto): Promise<Bookmark> {
+    async create(@Req() req: RequestWithUserPayload, @Body() data: CreateBookmarkDto): Promise<Bookmark> {
         return await this.bookmarksService.createBookmark(req.user.id, data);
     }
 
@@ -57,7 +56,7 @@ export class BookmarksController {
         resource: ResourceEnum.BOOKMARK,
         action: 'delete',
     })
-    async delete(@Param('id', ParseUUIDPipe) id: string, @Req() req: Request & JWTUserPayload): Promise<Bookmark> {
+    async delete(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<Bookmark> {
         const isAdminOrOwner = await this.isAdminOrOwner(id, req.user);
         if (!isAdminOrOwner) throw new ForbiddenException();
 

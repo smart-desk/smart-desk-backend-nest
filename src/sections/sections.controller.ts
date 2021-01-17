@@ -3,7 +3,7 @@ import { SectionsService } from './sections.service';
 import { SectionCreateDto } from './section.dto';
 import { Section } from './section.entity';
 import { ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { ACGuard, UseRoles } from 'nest-access-control';
 import { ResourceEnum } from '../app/app.roles';
 
