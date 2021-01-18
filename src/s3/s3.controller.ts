@@ -4,7 +4,7 @@ import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { ACGuard, UseRoles } from 'nest-access-control';
 import { S3Service } from './s3.service';
 import { UploadImageResponse } from './dto/upload-image-response';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { ResourceEnum } from '../app/app.roles';
 
 @Controller('s3')

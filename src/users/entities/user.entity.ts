@@ -1,4 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { UserStatus } from '../user-status.enum';
 
 @Entity('users')
 export class User {
@@ -10,6 +11,9 @@ export class User {
 
     @Column('varchar', { length: 255 })
     lastName: string;
+
+    @Column('varchar', { length: 255 })
+    status: UserStatus;
 
     @Column('varchar', { length: 1000 })
     avatar: string;
