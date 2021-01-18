@@ -4,7 +4,6 @@ import * as request from 'supertest';
 import { v4 as uuid } from 'uuid';
 import { AccessControlModule } from 'nest-access-control';
 import { createRepositoryMock, createTestAppForModule } from '../../test/test.utils';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { JwtAuthGuardMock } from '../../test/mocks/jwt-auth.guard.mock';
 import { BookmarksModule } from './bookmarks.module';
 import { CreateBookmarkDto } from './dto/create-bookmark.dto';
@@ -22,6 +21,9 @@ import { RadioEntity } from '../dynamic-fields/radio/radio.entity';
 import { PhotoEntity } from '../dynamic-fields/photo/photo.entity';
 import { PriceEntity } from '../dynamic-fields/price/price.entity';
 import { Connection } from 'typeorm';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { User } from '../users/entities/user.entity';
+import { UserStatus } from '../users/user-status.enum';
 
 describe('Bookmarks controller', () => {
     let app: INestApplication;
@@ -54,6 +56,7 @@ describe('Bookmarks controller', () => {
     const connectionMock = {
         manager: createRepositoryMock(),
     };
+    const userRepositoryMock = createRepositoryMock<User>([new User()]);
     const JwtGuard = JwtAuthGuardMock;
 
     beforeAll(async () => {
@@ -78,6 +81,8 @@ describe('Bookmarks controller', () => {
             .useValue(createRepositoryMock())
             .overrideProvider(getRepositoryToken(Bookmark))
             .useValue(bookmarkRepositoryMock)
+            .overrideProvider(getRepositoryToken(User))
+            .useValue(userRepositoryMock)
             .overrideProvider(Connection)
             .useValue(connectionMock)
             .overrideGuard(JwtAuthGuard)
@@ -119,16 +124,34 @@ describe('Bookmarks controller', () => {
                 } as CreateBookmarkDto)
                 .expect(HttpStatus.FORBIDDEN);
         });
+
+        it(`with error - user blocked`, () => {
+            const user = new User();
+            user.status = UserStatus.BLOCKED;
+            userRepositoryMock.findOne.mockReturnValueOnce(user);
+
+            return request(app.getHttpServer())
+                .post('/bookmarks')
+                .send({
+                    advertId: uuid(),
+                } as CreateBookmarkDto)
+                .expect(HttpStatus.FORBIDDEN);
+        });
     });
 
-    // todo fix it
-    // describe('delete bookmarks by id', () => {
-    //     it(`successfully`, () => {
-    //         return request(app.getHttpServer())
-    //             .delete(`/bookmarks/${uuid()}`)
-    //             .expect(HttpStatus.NO_CONTENT);
-    //     });
-    // });
+    describe('delete bookmarks by id', () => {
+        it(`successfully`, () => {
+            return request(app.getHttpServer()).delete(`/bookmarks/${uuid()}`).expect(HttpStatus.NO_CONTENT);
+        });
+
+        it(`with error - user blocked`, () => {
+            const user = new User();
+            user.status = UserStatus.BLOCKED;
+            userRepositoryMock.findOne.mockReturnValueOnce(user);
+
+            return request(app.getHttpServer()).delete(`/bookmarks/${uuid()}`).expect(HttpStatus.FORBIDDEN);
+        });
+    });
 
     afterAll(async () => {
         await app.close();

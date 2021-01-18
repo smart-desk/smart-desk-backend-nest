@@ -29,7 +29,7 @@ roles
     .read([ResourceEnum.BOOKMARK])
     .create([ResourceEnum.ADVERT, ResourceEnum.FILE, ResourceEnum.BOOKMARK])
     .update([ResourceEnum.ADVERT, ResourceEnum.USER, ResourceEnum.BOOKMARK])
-    .delete(ResourceEnum.ADVERT) // todo shouldn't be possible
+    .delete([ResourceEnum.ADVERT, ResourceEnum.BOOKMARK]) // todo shouldn't be possible
     // Admin
     .grant(RolesEnum.ADMIN)
     .create([
