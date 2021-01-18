@@ -8,10 +8,11 @@ import { User } from './entities/user.entity';
 import { UsersModule } from './users.module';
 import { AccessControlModule } from 'nest-access-control';
 import { roles, RolesEnum } from '../app/app.roles';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { JwtAuthGuardMock } from '../../test/mocks/jwt-auth.guard.mock';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateUserRolesDto } from './dto/update-user-roles.dto';
+import { BlockUserDto } from './dto/block-user.dto';
 
 describe('Users controller', () => {
     let app: INestApplication;
@@ -161,6 +162,52 @@ describe('Users controller', () => {
             return request(app.getHttpServer())
                 .patch(`/users/${uuid()}/roles`)
                 .send({ roles: [RolesEnum.USER, RolesEnum.ADMIN] } as UpdateUserRolesDto)
+                .expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
+    describe('block user', () => {
+        it(`successfully`, () => {
+            JwtGuard.canActivate.mockImplementationOnce(context => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '123', email: 'test@email.com', roles: ['user', 'admin'] };
+                return true;
+            });
+
+            return request(app.getHttpServer())
+                .patch(`/users/${uuid()}/block`)
+                .send({ value: true } as BlockUserDto)
+                .expect(HttpStatus.OK);
+        });
+
+        it(`with error - wrong value`, () => {
+            JwtGuard.canActivate.mockImplementationOnce(context => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '123', email: 'test@email.com', roles: ['user', 'admin'] };
+                return true;
+            });
+
+            return request(app.getHttpServer())
+                .patch(`/users/${uuid()}/block`)
+                .send({ value: 'some wrong value' })
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('value must be a boolean value');
+                });
+        });
+
+        it(`with error - not an admin`, () => {
+            return request(app.getHttpServer())
+                .patch(`/users/${uuid()}/block`)
+                .send({ value: true } as BlockUserDto)
+                .expect(HttpStatus.FORBIDDEN);
+        });
+
+        it(`with error - unauthorized`, () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+            return request(app.getHttpServer())
+                .patch(`/users/${uuid()}/block`)
+                .send({ value: true } as BlockUserDto)
                 .expect(HttpStatus.FORBIDDEN);
         });
     });

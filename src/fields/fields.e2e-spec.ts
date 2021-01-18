@@ -21,7 +21,7 @@ import { FieldType } from '../dynamic-fields/dynamic-fields.module';
 import { PhotoEntity } from '../dynamic-fields/photo/photo.entity';
 import { PriceEntity } from '../dynamic-fields/price/price.entity';
 import { PriceParamsDto } from '../dynamic-fields/price/dto/price-params.dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { JwtAuthGuardMock } from '../../test/mocks/jwt-auth.guard.mock';
 import { AcGuardMock } from '../../test/mocks/ac.guard.mock';
 import { roles, RolesEnum } from '../app/app.roles';
@@ -550,7 +550,6 @@ describe('Fields controller', () => {
     });
 });
 
-
 describe('Fields controller with ACL enabled', () => {
     let app: INestApplication;
     const field = new Field();
@@ -564,7 +563,9 @@ describe('Fields controller with ACL enabled', () => {
             .overrideProvider(getRepositoryToken(Field))
             .useValue(createRepositoryMock([field]))
             .overrideProvider(getRepositoryToken(Section))
-            .useValue(createRepositoryMock<Section>([section]))
+            .useValue(
+                createRepositoryMock<Section>([section])
+            )
             .overrideProvider(getRepositoryToken(InputTextEntity))
             .useValue(createRepositoryMock())
             .overrideProvider(getRepositoryToken(TextareaEntity))

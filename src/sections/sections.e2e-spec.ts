@@ -7,7 +7,7 @@ import { AccessControlModule, ACGuard } from 'nest-access-control';
 import { createRepositoryMock, createTestAppForModule } from '../../test/test.utils';
 import { Section, SectionType } from './section.entity';
 import { SectionsModule } from './sections.module';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { JwtAuthGuardMock } from '../../test/mocks/jwt-auth.guard.mock';
 import { AcGuardMock } from '../../test/mocks/ac.guard.mock';
 import { roles, RolesEnum } from '../app/app.roles';
@@ -88,7 +88,9 @@ describe('Sections controller with ACL enabled', () => {
             imports: [SectionsModule, AccessControlModule.forRoles(roles)],
         })
             .overrideProvider(getRepositoryToken(Section))
-            .useValue(createRepositoryMock<Section>([sectionEntity]))
+            .useValue(
+                createRepositoryMock<Section>([sectionEntity])
+            )
             .overrideGuard(JwtAuthGuard)
             .useValue(JwtGuard)
             .compile();
@@ -138,7 +140,7 @@ describe('Sections controller with ACL enabled', () => {
         });
 
         it(`with error unauthorized`, () => {
-            JwtGuard.canActivate.mockReturnValueOnce(false)
+            JwtGuard.canActivate.mockReturnValueOnce(false);
             return request(app.getHttpServer()).delete(`/sections/${uuid()}`).expect(HttpStatus.FORBIDDEN);
         });
 
@@ -146,7 +148,6 @@ describe('Sections controller with ACL enabled', () => {
             return request(app.getHttpServer()).delete(`/sections/${uuid()}`).expect(HttpStatus.FORBIDDEN);
         });
     });
-
 
     afterAll(async () => {
         await app.close();

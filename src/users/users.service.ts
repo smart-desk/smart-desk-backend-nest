@@ -5,6 +5,7 @@ import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RolesEnum } from '../app/app.roles';
+import { UserStatus } from './user-status.enum';
 
 @Injectable()
 export class UsersService {
@@ -19,7 +20,7 @@ export class UsersService {
         return this.userRepository.find();
     }
 
-    async fineOne(id: string): Promise<User> {
+    async findOne(id: string): Promise<User> {
         return this.userRepository.findOne({ id });
     }
 
@@ -37,6 +38,25 @@ export class UsersService {
     async updateUser(id: string, data: UpdateUserDto): Promise<User> {
         await this.findOneOrThrowException(id);
         const updatedUser = await this.userRepository.preload({ id, ...data });
+        return await this.userRepository.save(updatedUser);
+    }
+
+    async isUserBlocked(id: string): Promise<boolean> {
+        const user = await this.userRepository.findOne({ id });
+        return user.status === UserStatus.BLOCKED;
+    }
+
+    async blockUser(id: string, block: boolean): Promise<User> {
+        const user = await this.findOneOrThrowException(id);
+
+        if (block) {
+            user.status = UserStatus.BLOCKED;
+            user.roles = [RolesEnum.USER];
+        } else {
+            user.status = UserStatus.ACTIVE;
+        }
+
+        const updatedUser = await this.userRepository.preload({ id, ...user });
         return await this.userRepository.save(updatedUser);
     }
 

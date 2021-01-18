@@ -4,7 +4,7 @@ import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Category } from './entities/category.entity';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { ACGuard, UseRoles } from 'nest-access-control';
 import { ResourceEnum } from '../app/app.roles';
 
@@ -32,7 +32,6 @@ export class CategoriesController {
     create(@Body() createCategoryDto: CreateCategoryDto): Promise<Category> {
         return this.categoriesService.create(createCategoryDto);
     }
-
 
     @Patch(':id')
     @UseGuards(JwtAuthGuard, ACGuard)

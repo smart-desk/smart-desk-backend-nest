@@ -16,15 +16,15 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ACGuard, UseRoles } from 'nest-access-control';
-import { Request } from 'express';
 import { AdvertsService } from './adverts.service';
 import { Advert } from './entities/advert.entity';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { JWTPayload, JWTUserPayload } from '../auth/jwt.strategy';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { JWTPayload, RequestWithUserPayload } from '../auth/jwt.strategy';
 import { ResourceEnum, RolesEnum } from '../app/app.roles';
 import { CreateAdvertDto } from './dto/create-advert.dto';
 import { UpdateAdvertDto } from './dto/update-advert.dto';
 import { GetAdvertsDto, GetAdvertsResponseDto } from './dto/get-adverts.dto';
+import { BlockedUserGuard } from '../guards/blocked-user.guard';
 
 @Controller('adverts')
 @ApiTags('Adverts')
@@ -43,7 +43,7 @@ export class AdvertsController {
         resource: ResourceEnum.ADVERT,
         action: 'read',
     })
-    getMy(@Req() req: Request & JWTUserPayload, @Query() options: GetAdvertsDto): Promise<GetAdvertsResponseDto> {
+    getMy(@Req() req: RequestWithUserPayload, @Query() options: GetAdvertsDto): Promise<GetAdvertsResponseDto> {
         options.user = req.user.id;
         return this.advertsService.getAll(options);
     }
@@ -62,17 +62,17 @@ export class AdvertsController {
     }
 
     @Post()
-    @UseGuards(JwtAuthGuard, ACGuard)
+    @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
     @UseRoles({
         resource: ResourceEnum.ADVERT,
         action: 'create',
     })
-    createAdvert(@Body() body: CreateAdvertDto, @Req() req: Request & JWTUserPayload): Promise<Advert> {
+    createAdvert(@Body() body: CreateAdvertDto, @Req() req: RequestWithUserPayload): Promise<Advert> {
         return this.advertsService.create(req.user.id, body);
     }
 
     @Patch(':id')
-    @UseGuards(JwtAuthGuard, ACGuard)
+    @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
     @UseRoles({
         resource: ResourceEnum.ADVERT,
         action: 'update',
@@ -80,7 +80,7 @@ export class AdvertsController {
     async updateAdvert(
         @Param('id', ParseUUIDPipe) id: string,
         @Body() body: UpdateAdvertDto,
-        @Req() req: Request & JWTUserPayload
+        @Req() req: RequestWithUserPayload
     ): Promise<Advert> {
         const isAdminOrOwner = await this.isAdminOrOwner(id, req.user);
         if (!isAdminOrOwner) throw new ForbiddenException();
@@ -89,12 +89,12 @@ export class AdvertsController {
 
     @Delete(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
-    @UseGuards(JwtAuthGuard, ACGuard)
+    @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
     @UseRoles({
         resource: ResourceEnum.ADVERT,
         action: 'delete',
     })
-    async deleteAdvert(@Param('id', ParseUUIDPipe) id: string, @Req() req: Request & JWTUserPayload): Promise<Advert> {
+    async deleteAdvert(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<Advert> {
         const isAdminOrOwner = await this.isAdminOrOwner(id, req.user);
         if (!isAdminOrOwner) throw new ForbiddenException();
         return await this.advertsService.delete(id);
