@@ -1,6 +1,6 @@
 import * as request from 'supertest';
 import { Test } from '@nestjs/testing';
-import { ExecutionContext, HttpStatus, INestApplication, Inject } from '@nestjs/common';
+import { ExecutionContext, HttpStatus, INestApplication } from '@nestjs/common';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { v4 as uuid } from 'uuid';
 import { Connection } from 'typeorm';
@@ -32,6 +32,11 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { JwtAuthGuardMock } from '../../test/mocks/jwt-auth.guard.mock';
 import { AcGuardMock } from '../../test/mocks/ac.guard.mock';
 import { roles } from '../app/app.roles';
+import { UsersModule } from '../users/users.module';
+import { User } from '../users/entities/user.entity';
+import { UserStatus } from '../users/user-status.enum';
+import { BlockedUserGuard } from '../guards/blocked-user.guard';
+import { BlockedUserGuardMock } from '../../test/mocks/blocked-user.guard.mock';
 
 describe('Adverts controller', () => {
     let app: INestApplication;
@@ -81,12 +86,16 @@ describe('Adverts controller', () => {
             .useValue(createRepositoryMock())
             .overrideProvider(getRepositoryToken(PriceEntity))
             .useValue(createRepositoryMock())
+            .overrideProvider(getRepositoryToken(User))
+            .useValue(createRepositoryMock())
             .overrideProvider(Connection)
             .useValue(connectionMock)
             .overrideGuard(JwtAuthGuard)
             .useValue(JwtAuthGuardMock)
             .overrideGuard(ACGuard)
             .useValue(AcGuardMock)
+            .overrideGuard(BlockedUserGuard)
+            .useValue(BlockedUserGuardMock)
             .compile();
 
         app = await createTestAppForModule(moduleRef);
@@ -1410,11 +1419,12 @@ describe('Adverts controller with ACL enabled', () => {
     const connectionMock = {
         manager: createRepositoryMock(),
     };
+    const userRepositoryMock = createRepositoryMock<User>([new User()]);
     const JwtGuard = JwtAuthGuardMock;
 
     beforeAll(async () => {
         const moduleRef = await Test.createTestingModule({
-            imports: [AdvertsModule, TypeOrmModule.forRoot(), AccessControlModule.forRoles(roles)],
+            imports: [AdvertsModule, TypeOrmModule.forRoot(), AccessControlModule.forRoles(roles), UsersModule],
         })
             .overrideProvider(getRepositoryToken(Advert))
             .useValue(advertRepositoryMock)
@@ -1432,6 +1442,8 @@ describe('Adverts controller with ACL enabled', () => {
             .useValue(createRepositoryMock())
             .overrideProvider(getRepositoryToken(PriceEntity))
             .useValue(createRepositoryMock())
+            .overrideProvider(getRepositoryToken(User))
+            .useValue(userRepositoryMock)
             .overrideProvider(Connection)
             .useValue(connectionMock)
             .overrideGuard(JwtAuthGuard)
@@ -1498,6 +1510,22 @@ describe('Adverts controller with ACL enabled', () => {
                 } as CreateAdvertDto)
                 .expect(HttpStatus.FORBIDDEN);
         });
+
+        it(`with error - user is blocked`, () => {
+            const user = new User();
+            user.status = UserStatus.BLOCKED;
+            userRepositoryMock.findOne.mockReturnValueOnce(user);
+
+            return request(app.getHttpServer())
+                .post(`/adverts`)
+                .send({
+                    model_id: '12312',
+                    category_id: '123123',
+                    title: '',
+                    fields: [],
+                } as CreateAdvertDto)
+                .expect(HttpStatus.FORBIDDEN);
+        });
     });
 
     describe('update advert', () => {
@@ -1517,6 +1545,20 @@ describe('Adverts controller with ACL enabled', () => {
                 req.user = { id: '007', email: 'test@email.com', roles: ['user'] };
                 return true;
             });
+
+            return request(app.getHttpServer())
+                .patch(`/adverts/${uuid()}`)
+                .send({
+                    title: '123123',
+                    fields: [],
+                } as UpdateAdvertDto)
+                .expect(HttpStatus.FORBIDDEN);
+        });
+
+        it(`with error - user is blocked`, () => {
+            const user = new User();
+            user.status = UserStatus.BLOCKED;
+            userRepositoryMock.findOne.mockReturnValueOnce(user);
 
             return request(app.getHttpServer())
                 .patch(`/adverts/${uuid()}`)
