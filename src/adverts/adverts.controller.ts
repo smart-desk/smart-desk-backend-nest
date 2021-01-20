@@ -14,7 +14,7 @@ import {
     Req,
     UseGuards,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ACGuard, UseRoles } from 'nest-access-control';
 import { AdvertsService } from './adverts.service';
 import { Advert } from './entities/advert.entity';
@@ -25,6 +25,7 @@ import { CreateAdvertDto } from './dto/create-advert.dto';
 import { UpdateAdvertDto } from './dto/update-advert.dto';
 import { GetAdvertsDto, GetAdvertsResponseDto } from './dto/get-adverts.dto';
 import { BlockedUserGuard } from '../guards/blocked-user.guard';
+import { AdvertStatus } from './advert-status.enum';
 
 @Controller('adverts')
 @ApiTags('Adverts')
@@ -37,8 +38,39 @@ export class AdvertsController {
         return this.advertsService.getAll(options);
     }
 
+    @Get('/blocked')
+    @ApiBearerAuth('access-token')
+    @UseGuards(JwtAuthGuard, ACGuard)
+    @UseRoles({
+        resource: ResourceEnum.ADVERT,
+        action: 'read',
+    })
+    async getBlocked(@Req() req: RequestWithUserPayload, @Query() options: GetAdvertsDto): Promise<GetAdvertsResponseDto> {
+        if (!this.isAdmin(req.user)) {
+            options.user = req.user.id;
+        }
+        options.status = AdvertStatus.BLOCKED;
+        return this.advertsService.getAll(options);
+    }
+
+    @Get('/pending')
+    @ApiBearerAuth('access-token')
+    @UseGuards(JwtAuthGuard, ACGuard)
+    @UseRoles({
+        resource: ResourceEnum.ADVERT,
+        action: 'read',
+    })
+    async getPending(@Req() req: RequestWithUserPayload, @Query() options: GetAdvertsDto): Promise<GetAdvertsResponseDto> {
+        if (!this.isAdmin(req.user)) {
+            options.user = req.user.id;
+        }
+        options.status = AdvertStatus.PENDING;
+        return this.advertsService.getAll(options);
+    }
+
     @Get('/my')
     @UseGuards(JwtAuthGuard, ACGuard)
+    @ApiBearerAuth('access-token')
     @UseRoles({
         resource: ResourceEnum.ADVERT,
         action: 'read',
@@ -58,10 +90,12 @@ export class AdvertsController {
 
     @Get(':id')
     getById(@Param('id', ParseUUIDPipe) id: string): Promise<Advert> {
+        // todo should not be available for others if it's blocked or pending
         return this.advertsService.getById(id);
     }
 
     @Post()
+    @ApiBearerAuth('access-token')
     @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
     @UseRoles({
         resource: ResourceEnum.ADVERT,
@@ -72,6 +106,7 @@ export class AdvertsController {
     }
 
     @Patch(':id')
+    @ApiBearerAuth('access-token')
     @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
     @UseRoles({
         resource: ResourceEnum.ADVERT,
@@ -88,6 +123,7 @@ export class AdvertsController {
     }
 
     @Delete(':id')
+    @ApiBearerAuth('access-token')
     @HttpCode(HttpStatus.NO_CONTENT)
     @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
     @UseRoles({

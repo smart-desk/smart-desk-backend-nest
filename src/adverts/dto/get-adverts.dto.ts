@@ -1,6 +1,7 @@
 import { IsNumber, IsObject, IsOptional, IsPositive, IsString, IsUUID, Max, MaxLength } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { Exclude, Transform } from 'class-transformer';
 import { Advert } from '../entities/advert.entity';
+import { AdvertStatus } from '../advert-status.enum';
 
 export class GetAdvertsDto {
     @IsOptional()
@@ -28,6 +29,9 @@ export class GetAdvertsDto {
     @IsUUID()
     @IsOptional()
     user?: string;
+
+    @Exclude()
+    status: AdvertStatus = AdvertStatus.ACTIVE;
 }
 
 export class GetAdvertsResponseDto {
