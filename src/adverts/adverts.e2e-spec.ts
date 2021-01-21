@@ -1484,6 +1484,44 @@ describe('Adverts controller with ACL enabled', () => {
         });
     });
 
+    describe('get blocked adverts', () => {
+        it(`successfully`, () => {
+            return request(app.getHttpServer())
+                .get('/adverts/blocked')
+                .expect(HttpStatus.OK)
+                .expect(res => {
+                    expect(res.body.adverts).toBeDefined();
+                    expect(res.body.limit).toEqual(20);
+                    expect(res.body.totalCount).toEqual(1);
+                    expect(res.body.page).toEqual(1);
+                });
+        });
+
+        it(`with error - not authorized`, () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+            return request(app.getHttpServer()).get('/adverts/blocked').expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
+    describe('get pending adverts', () => {
+        it(`successfully`, () => {
+            return request(app.getHttpServer())
+                .get('/adverts/pending')
+                .expect(HttpStatus.OK)
+                .expect(res => {
+                    expect(res.body.adverts).toBeDefined();
+                    expect(res.body.limit).toEqual(20);
+                    expect(res.body.totalCount).toEqual(1);
+                    expect(res.body.page).toEqual(1);
+                });
+        });
+
+        it(`with error - not authorized`, () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+            return request(app.getHttpServer()).get('/adverts/pending').expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
     describe('create advert', () => {
         it(`successfully `, () => {
             return request(app.getHttpServer())
