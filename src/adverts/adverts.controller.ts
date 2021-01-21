@@ -122,6 +122,32 @@ export class AdvertsController {
         return this.advertsService.update(id, body);
     }
 
+    @Patch(':id/block')
+    @ApiBearerAuth('access-token')
+    @UseGuards(JwtAuthGuard, ACGuard)
+    @UseRoles({
+        resource: ResourceEnum.ADVERT,
+        action: 'update',
+    })
+    async blockAdvert(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<Advert> {
+        const isAdmin = await this.isAdmin(req.user);
+        if (!isAdmin) throw new ForbiddenException();
+        return this.advertsService.block(id);
+    }
+
+    @Patch(':id/publish')
+    @ApiBearerAuth('access-token')
+    @UseGuards(JwtAuthGuard, ACGuard)
+    @UseRoles({
+        resource: ResourceEnum.ADVERT,
+        action: 'update',
+    })
+    async publishAdvert(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<Advert> {
+        const isAdmin = await this.isAdmin(req.user);
+        if (!isAdmin) throw new ForbiddenException();
+        return this.advertsService.publish(id);
+    }
+
     @Delete(':id')
     @ApiBearerAuth('access-token')
     @HttpCode(HttpStatus.NO_CONTENT)

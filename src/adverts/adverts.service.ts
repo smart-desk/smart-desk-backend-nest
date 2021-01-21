@@ -138,6 +138,20 @@ export class AdvertsService {
         return this.getById(advertResult.id);
     }
 
+    async block(id: string): Promise<Advert> {
+        const advert = await this.findOneOrThrowException(id);
+        advert.status = AdvertStatus.BLOCKED;
+        const updatedAdvert = await this.advertRepository.preload({ id, ...advert });
+        return await this.advertRepository.save(updatedAdvert);
+    }
+
+    async publish(id: string): Promise<Advert> {
+        const advert = await this.findOneOrThrowException(id);
+        advert.status = AdvertStatus.ACTIVE;
+        const updatedAdvert = await this.advertRepository.preload({ id, ...advert });
+        return await this.advertRepository.save(updatedAdvert);
+    }
+
     async delete(id: string): Promise<Advert> {
         const advert = await this.findOneOrThrowException(id);
         return this.advertRepository.remove(advert);
