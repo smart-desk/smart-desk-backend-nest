@@ -18,6 +18,9 @@ export class Advert {
     @Column('uuid', { name: 'user_id' })
     userId: string;
 
+    @Column('varchar', { length: 255 })
+    status: string;
+
     @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })
     createdAt: Date;
 

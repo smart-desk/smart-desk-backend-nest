@@ -1484,6 +1484,44 @@ describe('Adverts controller with ACL enabled', () => {
         });
     });
 
+    describe('get blocked adverts', () => {
+        it(`successfully`, () => {
+            return request(app.getHttpServer())
+                .get('/adverts/blocked')
+                .expect(HttpStatus.OK)
+                .expect(res => {
+                    expect(res.body.adverts).toBeDefined();
+                    expect(res.body.limit).toEqual(20);
+                    expect(res.body.totalCount).toEqual(1);
+                    expect(res.body.page).toEqual(1);
+                });
+        });
+
+        it(`with error - not authorized`, () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+            return request(app.getHttpServer()).get('/adverts/blocked').expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
+    describe('get pending adverts', () => {
+        it(`successfully`, () => {
+            return request(app.getHttpServer())
+                .get('/adverts/pending')
+                .expect(HttpStatus.OK)
+                .expect(res => {
+                    expect(res.body.adverts).toBeDefined();
+                    expect(res.body.limit).toEqual(20);
+                    expect(res.body.totalCount).toEqual(1);
+                    expect(res.body.page).toEqual(1);
+                });
+        });
+
+        it(`with error - not authorized`, () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+            return request(app.getHttpServer()).get('/adverts/pending').expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
     describe('create advert', () => {
         it(`successfully `, () => {
             return request(app.getHttpServer())
@@ -1583,6 +1621,74 @@ describe('Adverts controller with ACL enabled', () => {
                     fields: [],
                 } as UpdateAdvertDto)
                 .expect(HttpStatus.OK);
+        });
+    });
+
+    describe('block advert', () => {
+        it(`successfully`, () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: ['user', 'admin'] };
+                return true;
+            });
+            return request(app.getHttpServer()).patch(`/adverts/${uuid()}/block`).expect(HttpStatus.OK);
+        });
+
+        it(`with error - not authorized`, () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+            return request(app.getHttpServer()).patch(`/adverts/${uuid()}/block`).expect(HttpStatus.FORBIDDEN);
+        });
+
+        it(`with error - not an admin`, () => {
+            return request(app.getHttpServer()).patch(`/adverts/${uuid()}/block`).expect(HttpStatus.FORBIDDEN);
+        });
+
+        it(`with error - not valid advert id`, () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: ['user', 'admin'] };
+                return true;
+            });
+            return request(app.getHttpServer())
+                .patch(`/adverts/some/block`)
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('Validation failed (uuid  is expected)');
+                });
+        });
+    });
+
+    describe('publish advert', () => {
+        it(`successfully`, () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: ['user', 'admin'] };
+                return true;
+            });
+            return request(app.getHttpServer()).patch(`/adverts/${uuid()}/publish`).expect(HttpStatus.OK);
+        });
+
+        it(`with error - not authorized`, () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+            return request(app.getHttpServer()).patch(`/adverts/${uuid()}/publish`).expect(HttpStatus.FORBIDDEN);
+        });
+
+        it(`with error - not an admin`, () => {
+            return request(app.getHttpServer()).patch(`/adverts/${uuid()}/publish`).expect(HttpStatus.FORBIDDEN);
+        });
+
+        it(`with error - not valid advert id`, () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: ['user', 'admin'] };
+                return true;
+            });
+            return request(app.getHttpServer())
+                .patch(`/adverts/some/publish`)
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('Validation failed (uuid  is expected)');
+                });
         });
     });
 

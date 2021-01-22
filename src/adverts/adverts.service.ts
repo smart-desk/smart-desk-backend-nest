@@ -11,6 +11,7 @@ import { DynamicFieldsService } from '../dynamic-fields/dynamic-fields.service';
 import { FieldType } from '../dynamic-fields/dynamic-fields.module';
 import { CreateAdvertDto } from './dto/create-advert.dto';
 import { UpdateAdvertDto } from './dto/update-advert.dto';
+import { AdvertStatus } from './advert-status.enum';
 
 interface FieldDataDtoInstance {
     type: FieldType;
@@ -72,7 +73,8 @@ export class AdvertsService {
             });
         }
 
-        const advert = this.advertRepository.create({ ...advertDto, userId });
+        const status = AdvertStatus.PENDING;
+        const advert = this.advertRepository.create({ ...advertDto, userId, status });
         const advertResult = await this.advertRepository.save(advert);
 
         for (const fieldData of validDtos) {
@@ -136,6 +138,20 @@ export class AdvertsService {
         return this.getById(advertResult.id);
     }
 
+    async block(id: string): Promise<Advert> {
+        const advert = await this.findOneOrThrowException(id);
+        advert.status = AdvertStatus.BLOCKED;
+        const updatedAdvert = await this.advertRepository.preload({ id, ...advert });
+        return await this.advertRepository.save(updatedAdvert);
+    }
+
+    async publish(id: string): Promise<Advert> {
+        const advert = await this.findOneOrThrowException(id);
+        advert.status = AdvertStatus.ACTIVE;
+        const updatedAdvert = await this.advertRepository.preload({ id, ...advert });
+        return await this.advertRepository.save(updatedAdvert);
+    }
+
     async delete(id: string): Promise<Advert> {
         const advert = await this.findOneOrThrowException(id);
         return this.advertRepository.remove(advert);
@@ -179,17 +195,8 @@ export class AdvertsService {
         return advert;
     }
 
-
     private async getAdverts(options: GetAdvertsDto, categoryId?: string): Promise<GetAdvertsResponseDto> {
-        const where: any = {};
-        if (categoryId) {
-            where.category_id = categoryId;
-        }
-
-        // todo make it reusable
-        if (options.user) {
-            where.userId = options.user;
-        }
+        const where = this.getWhereClause(options, categoryId);
 
         const [adverts, totalCount] = await this.advertRepository.findAndCount({
             where,
@@ -242,15 +249,8 @@ export class AdvertsService {
         let adverts: Advert[] = [];
         let totalCount: number = 0;
         if (advertIds && advertIds.length) {
-            const where: any = { id: In(advertIds) };
-
-            if (categoryId) {
-                where.category_id = categoryId;
-            }
-
-            if (options.user) {
-                where.userId = options.user;
-            }
+            const where = this.getWhereClause(options);
+            where.id = In(advertIds);
 
             [adverts, totalCount] = await this.advertRepository.findAndCount({
                 where,
@@ -271,5 +271,21 @@ export class AdvertsService {
         advertResponse.limit = options.limit;
 
         return advertResponse;
+    }
+
+    private getWhereClause(options: GetAdvertsDto, categoryId?: string): any {
+        const where: any = {
+            status: options.status || AdvertStatus.ACTIVE,
+        };
+
+        if (categoryId) {
+            where.category_id = categoryId;
+        }
+
+        if (options.user) {
+            where.userId = options.user;
+        }
+
+        return where;
     }
 }
