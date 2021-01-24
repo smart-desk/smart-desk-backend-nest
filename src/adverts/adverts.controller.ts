@@ -68,6 +68,21 @@ export class AdvertsController {
         return this.advertsService.getAll(options);
     }
 
+    @Get('/completed')
+    @ApiBearerAuth('access-token')
+    @UseGuards(JwtAuthGuard, ACGuard)
+    @UseRoles({
+        resource: ResourceEnum.ADVERT,
+        action: 'read',
+    })
+    async getCompleted(@Req() req: RequestWithUserPayload, @Query() options: GetAdvertsDto): Promise<GetAdvertsResponseDto> {
+        if (!this.isAdmin(req.user)) {
+            options.user = req.user.id;
+        }
+        options.status = AdvertStatus.COMPLETED;
+        return this.advertsService.getAll(options);
+    }
+
     @Get('/my')
     @UseGuards(JwtAuthGuard, ACGuard)
     @ApiBearerAuth('access-token')
