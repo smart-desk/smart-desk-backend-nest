@@ -152,6 +152,13 @@ export class AdvertsService {
         return await this.advertRepository.save(updatedAdvert);
     }
 
+    async complete(id: string): Promise<Advert> {
+        const advert = await this.findOneOrThrowException(id);
+        advert.status = AdvertStatus.COMPLETED;
+        const updatedAdvert = await this.advertRepository.preload({ id, ...advert });
+        return await this.advertRepository.save(updatedAdvert);
+    }
+
     async delete(id: string): Promise<Advert> {
         const advert = await this.findOneOrThrowException(id);
         return this.advertRepository.remove(advert);
