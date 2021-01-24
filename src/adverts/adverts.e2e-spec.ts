@@ -1692,6 +1692,41 @@ describe('Adverts controller with ACL enabled', () => {
         });
     });
 
+    describe('complete advert', () => {
+        it(`successfully`, () => {
+            return request(app.getHttpServer()).patch(`/adverts/${uuid()}/complete`).expect(HttpStatus.OK);
+        });
+
+        it(`with error - not authorized`, () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+            return request(app.getHttpServer()).patch(`/adverts/${uuid()}/complete`).expect(HttpStatus.FORBIDDEN);
+        });
+
+        it(`with error - not valid advert id`, () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: ['user', 'admin'] };
+                return true;
+            });
+            return request(app.getHttpServer())
+                .patch(`/adverts/some/complete`)
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('Validation failed (uuid  is expected)');
+                });
+        });
+
+        it(`with error - not owner of advert`, () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: ['user'] };
+                return true;
+            });
+
+            return request(app.getHttpServer()).patch(`/adverts/${uuid()}/complete`).expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
     describe('delete advert by id', () => {
         it(`successfully`, () => {
             return request(app.getHttpServer()).delete(`/adverts/${uuid()}`).expect(HttpStatus.NO_CONTENT);

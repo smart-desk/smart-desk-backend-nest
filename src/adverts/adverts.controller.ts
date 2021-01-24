@@ -148,6 +148,19 @@ export class AdvertsController {
         return this.advertsService.publish(id);
     }
 
+    @Patch(':id/complete')
+    @ApiBearerAuth('access-token')
+    @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
+    @UseRoles({
+        resource: ResourceEnum.ADVERT,
+        action: 'update',
+    })
+    async completeAdvert(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<Advert> {
+        const isAdminOrOwner = await this.isAdminOrOwner(id, req.user);
+        if (!isAdminOrOwner) throw new ForbiddenException();
+        return this.advertsService.complete(id);
+    }
+
     @Delete(':id')
     @ApiBearerAuth('access-token')
     @HttpCode(HttpStatus.NO_CONTENT)
