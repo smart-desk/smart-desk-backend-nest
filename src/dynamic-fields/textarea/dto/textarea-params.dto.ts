@@ -13,4 +13,8 @@ export class TextareaParamsDto {
     @IsOptional()
     @IsBoolean()
     required?: boolean;
+
+    @IsOptional()
+    @IsBoolean()
+    richTextEditor?: boolean;
 }
