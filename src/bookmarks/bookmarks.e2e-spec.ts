@@ -43,11 +43,13 @@ describe('Bookmarks controller', () => {
 
     const advertEntity = new Advert();
     advertEntity.id = '1234';
+    advertEntity.model_id = '12323';
     advertEntity.sections = [sectionEntity, sectionEntity];
     advertEntity.userId = '123';
 
     const bookmark = new Bookmark();
     bookmark.userId = '123';
+    bookmark.advert = advertEntity;
 
     const advertRepositoryMock = createRepositoryMock<Advert>([advertEntity]);
     const sectionRepositoryMock = createRepositoryMock<Section>([sectionEntity]);

@@ -25,7 +25,10 @@ export class BookmarksService {
 
     async createBookmark(userId: string, bookmark: CreateBookmarkDto): Promise<Bookmark> {
         const bookmarkEntity = this.bookmarkRepository.create({ userId, ...bookmark });
-        return this.bookmarkRepository.save(bookmarkEntity);
+        const createdBookmarkEntity = await this.bookmarkRepository.save(bookmarkEntity);
+        const createdBookmark = await this.bookmarkRepository.findOne({ id: createdBookmarkEntity.id });
+        createdBookmark.advert = await this.advertsService.loadFieldDataForAdvert(createdBookmark.advert);
+        return createdBookmark;
     }
 
     async deleteBookmark(id: string): Promise<Bookmark> {
