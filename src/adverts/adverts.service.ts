@@ -118,7 +118,8 @@ export class AdvertsService {
             });
         }
 
-        const updatedAdvert = await this.advertRepository.preload({ id, ...advertDto });
+        const status = AdvertStatus.PENDING;
+        const updatedAdvert = await this.advertRepository.preload({ id, ...advertDto, status });
         const advertResult = await this.advertRepository.save(updatedAdvert);
 
         for (const fieldData of validDtos) {
