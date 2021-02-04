@@ -6,7 +6,7 @@ import { AccessControlModule } from 'nest-access-control';
 import { createRepositoryMock, createTestAppForModule } from '../../test/test.utils';
 import { JwtAuthGuardMock } from '../../test/mocks/jwt-auth.guard.mock';
 import { roles } from '../app/app.roles';
-import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { User } from '../users/entities/user.entity';
 import { CreateAddressDto } from './dto/create-address.dto';
@@ -22,7 +22,7 @@ describe('Address controller', () => {
 
     beforeAll(async () => {
         const moduleRef = await Test.createTestingModule({
-            imports: [AddressModule, TypeOrmModule.forRoot(), AccessControlModule.forRoles(roles)],
+            imports: [AddressModule, AccessControlModule.forRoles(roles)],
         })
             .overrideProvider(getRepositoryToken(Address))
             .useValue(addressRepositoryMock)
