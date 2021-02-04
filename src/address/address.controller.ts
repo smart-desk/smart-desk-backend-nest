@@ -4,7 +4,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { ACGuard, UseRoles } from 'nest-access-control';
 import { ResourceEnum } from '../app/app.roles';
-import { Address } from './address.entity';
+import { Address } from './entities/address.entity';
 import { RequestWithUserPayload } from '../auth/jwt.strategy';
 import { CreateAddressDto } from './dto/create-address.dto';
 
