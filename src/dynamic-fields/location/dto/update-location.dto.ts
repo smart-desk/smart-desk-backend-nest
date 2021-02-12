@@ -5,7 +5,7 @@ export class UpdateLocationDto extends DynamicFieldsBaseUpdateDto {
     @IsString()
     @IsNotEmpty()
     @MaxLength(255)
-    title: number;
+    title: string;
 
     @IsNumber()
     @IsNotEmpty()

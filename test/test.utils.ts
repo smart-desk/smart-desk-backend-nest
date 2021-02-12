@@ -1,6 +1,13 @@
 import { ValidationPipe } from '@nestjs/common';
-import { TestingModule } from '@nestjs/testing';
+import { TestingModule, TestingModuleBuilder } from '@nestjs/testing';
 import fn = jest.fn;
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { InputTextEntity } from '../src/dynamic-fields/input-text/input-text.entity';
+import { TextareaEntity } from '../src/dynamic-fields/textarea/textarea.entity';
+import { RadioEntity } from '../src/dynamic-fields/radio/radio.entity';
+import { PhotoEntity } from '../src/dynamic-fields/photo/photo.entity';
+import { LocationEntity } from '../src/dynamic-fields/location/location.entity';
+import { PriceEntity } from '../src/dynamic-fields/price/price.entity';
 
 export async function createTestAppForModule(moduleRef: TestingModule) {
     const app = moduleRef.createNestApplication();
@@ -34,4 +41,20 @@ export function createRepositoryMock<T>(values?: T[]) {
         update: fn(),
         delete: fn(),
     };
+}
+
+export function declareDynamicFieldsProviders(moduleRef: TestingModuleBuilder): TestingModuleBuilder {
+    return moduleRef
+        .overrideProvider(getRepositoryToken(InputTextEntity))
+        .useValue(createRepositoryMock())
+        .overrideProvider(getRepositoryToken(TextareaEntity))
+        .useValue(createRepositoryMock())
+        .overrideProvider(getRepositoryToken(RadioEntity))
+        .useValue(createRepositoryMock())
+        .overrideProvider(getRepositoryToken(PhotoEntity))
+        .useValue(createRepositoryMock())
+        .overrideProvider(getRepositoryToken(LocationEntity))
+        .useValue(createRepositoryMock())
+        .overrideProvider(getRepositoryToken(PriceEntity))
+        .useValue(createRepositoryMock());
 }

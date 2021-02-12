@@ -5,7 +5,7 @@ import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { v4 as uuid } from 'uuid';
 import { Connection } from 'typeorm';
 import { AccessControlModule, ACGuard } from 'nest-access-control';
-import { createRepositoryMock, createTestAppForModule } from '../../test/test.utils';
+import { createRepositoryMock, createTestAppForModule, declareDynamicFieldsProviders } from '../../test/test.utils';
 import { Advert } from './entities/advert.entity';
 import { AdvertsModule } from './adverts.module';
 import { InputTextEntity } from '../dynamic-fields/input-text/input-text.entity';
@@ -37,6 +37,7 @@ import { User } from '../users/entities/user.entity';
 import { UserStatus } from '../users/user-status.enum';
 import { BlockedUserGuard } from '../guards/blocked-user.guard';
 import { BlockedUserGuardMock } from '../../test/mocks/blocked-user.guard.mock';
+import { LocationEntity } from '../dynamic-fields/location/location.entity';
 
 describe('Adverts controller', () => {
     let app: INestApplication;
@@ -85,6 +86,8 @@ describe('Adverts controller', () => {
             .overrideProvider(getRepositoryToken(PhotoEntity))
             .useValue(createRepositoryMock())
             .overrideProvider(getRepositoryToken(PriceEntity))
+            .useValue(createRepositoryMock())
+            .overrideProvider(getRepositoryToken(LocationEntity))
             .useValue(createRepositoryMock())
             .overrideProvider(getRepositoryToken(User))
             .useValue(createRepositoryMock())
@@ -1423,7 +1426,7 @@ describe('Adverts controller with ACL enabled', () => {
     const JwtGuard = JwtAuthGuardMock;
 
     beforeAll(async () => {
-        const moduleRef = await Test.createTestingModule({
+        let moduleBuilder = Test.createTestingModule({
             imports: [AdvertsModule, TypeOrmModule.forRoot(), AccessControlModule.forRoles(roles), UsersModule],
         })
             .overrideProvider(getRepositoryToken(Advert))
@@ -1432,23 +1435,16 @@ describe('Adverts controller with ACL enabled', () => {
             .useValue(sectionRepositoryMock)
             .overrideProvider(getRepositoryToken(Field))
             .useValue(fieldRepositoryMock)
-            .overrideProvider(getRepositoryToken(InputTextEntity))
-            .useValue(createRepositoryMock())
-            .overrideProvider(getRepositoryToken(TextareaEntity))
-            .useValue(createRepositoryMock())
-            .overrideProvider(getRepositoryToken(RadioEntity))
-            .useValue(createRepositoryMock())
-            .overrideProvider(getRepositoryToken(PhotoEntity))
-            .useValue(createRepositoryMock())
-            .overrideProvider(getRepositoryToken(PriceEntity))
-            .useValue(createRepositoryMock())
             .overrideProvider(getRepositoryToken(User))
             .useValue(userRepositoryMock)
             .overrideProvider(Connection)
             .useValue(connectionMock)
             .overrideGuard(JwtAuthGuard)
-            .useValue(JwtGuard)
-            .compile();
+            .useValue(JwtGuard);
+
+        moduleBuilder = declareDynamicFieldsProviders(moduleBuilder);
+
+        const moduleRef = await moduleBuilder.compile();
 
         app = await createTestAppForModule(moduleRef);
     });

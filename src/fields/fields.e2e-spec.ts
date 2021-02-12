@@ -4,7 +4,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import * as request from 'supertest';
 import { v4 as uuid } from 'uuid';
 import { AccessControlModule, ACGuard } from 'nest-access-control';
-import { createRepositoryMock, createTestAppForModule } from '../../test/test.utils';
+import { createRepositoryMock, createTestAppForModule, declareDynamicFieldsProviders } from '../../test/test.utils';
 import { FieldsModule } from './fields.module';
 import { Field } from './field.entity';
 import { FieldCreateDto, FieldUpdateDto } from './dto/field.dto';
@@ -35,29 +35,21 @@ describe('Fields controller', () => {
     const sectionRepositoryMock = createRepositoryMock<Section>([section]);
 
     beforeAll(async () => {
-        const moduleRef = await Test.createTestingModule({
+        let moduleBuilder = Test.createTestingModule({
             imports: [FieldsModule, SectionsModule],
         })
             .overrideProvider(getRepositoryToken(Field))
             .useValue(fieldsRepositoryMock)
             .overrideProvider(getRepositoryToken(Section))
             .useValue(sectionRepositoryMock)
-            .overrideProvider(getRepositoryToken(InputTextEntity))
-            .useValue(createRepositoryMock())
-            .overrideProvider(getRepositoryToken(TextareaEntity))
-            .useValue(createRepositoryMock())
-            .overrideProvider(getRepositoryToken(RadioEntity))
-            .useValue(createRepositoryMock())
-            .overrideProvider(getRepositoryToken(PhotoEntity))
-            .useValue(createRepositoryMock())
-            .overrideProvider(getRepositoryToken(PriceEntity))
-            .useValue(createRepositoryMock())
             .overrideGuard(JwtAuthGuard)
             .useValue(JwtAuthGuardMock)
             .overrideGuard(ACGuard)
-            .useValue(AcGuardMock)
-            .compile();
+            .useValue(AcGuardMock);
 
+        moduleBuilder = declareDynamicFieldsProviders(moduleBuilder);
+
+        const moduleRef = await moduleBuilder.compile();
         app = await createTestAppForModule(moduleRef);
     });
 
@@ -557,29 +549,19 @@ describe('Fields controller with ACL enabled', () => {
     const JwtGuard = JwtAuthGuardMock;
 
     beforeAll(async () => {
-        const moduleRef = await Test.createTestingModule({
+        let moduleBuilder = Test.createTestingModule({
             imports: [FieldsModule, SectionsModule, AccessControlModule.forRoles(roles)],
         })
             .overrideProvider(getRepositoryToken(Field))
             .useValue(createRepositoryMock([field]))
             .overrideProvider(getRepositoryToken(Section))
-            .useValue(
-                createRepositoryMock<Section>([section])
-            )
-            .overrideProvider(getRepositoryToken(InputTextEntity))
-            .useValue(createRepositoryMock())
-            .overrideProvider(getRepositoryToken(TextareaEntity))
-            .useValue(createRepositoryMock())
-            .overrideProvider(getRepositoryToken(RadioEntity))
-            .useValue(createRepositoryMock())
-            .overrideProvider(getRepositoryToken(PhotoEntity))
-            .useValue(createRepositoryMock())
-            .overrideProvider(getRepositoryToken(PriceEntity))
-            .useValue(createRepositoryMock())
+            .useValue(createRepositoryMock([section]))
             .overrideGuard(JwtAuthGuard)
-            .useValue(JwtGuard)
-            .compile();
+            .useValue(JwtGuard);
 
+        moduleBuilder = declareDynamicFieldsProviders(moduleBuilder);
+
+        const moduleRef = await moduleBuilder.compile();
         app = await createTestAppForModule(moduleRef);
     });
 

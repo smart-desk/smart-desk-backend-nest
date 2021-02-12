@@ -5,7 +5,7 @@ export class CreateLocationDto extends DynamicFieldsBaseCreateDto {
     @IsString()
     @IsNotEmpty()
     @MaxLength(255)
-    title: number;
+    title: string;
 
     @IsNumber()
     @IsNotEmpty()
