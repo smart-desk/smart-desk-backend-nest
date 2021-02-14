@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put, UseGuards } from '@nestjs/common';
 import { Field } from './field.entity';
 import { FieldsService } from './fields.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { FieldCreateDto, FieldUpdateDto } from './dto/field.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { ACGuard, UseRoles } from 'nest-access-control';
@@ -14,6 +14,7 @@ export class FieldsController {
 
     @Post()
     @UseGuards(JwtAuthGuard, ACGuard)
+    @ApiBearerAuth('access-token')
     @UseRoles({
         resource: ResourceEnum.FIELD,
         action: 'create',
@@ -24,6 +25,7 @@ export class FieldsController {
 
     @Put(':id')
     @UseGuards(JwtAuthGuard, ACGuard)
+    @ApiBearerAuth('access-token')
     @UseRoles({
         resource: ResourceEnum.FIELD,
         action: 'update',
@@ -35,6 +37,7 @@ export class FieldsController {
     @Delete(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
     @UseGuards(JwtAuthGuard, ACGuard)
+    @ApiBearerAuth('access-token')
     @UseRoles({
         resource: ResourceEnum.FIELD,
         action: 'delete',

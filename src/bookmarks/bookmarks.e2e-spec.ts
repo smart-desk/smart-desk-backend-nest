@@ -3,7 +3,7 @@ import { Test } from '@nestjs/testing';
 import * as request from 'supertest';
 import { v4 as uuid } from 'uuid';
 import { AccessControlModule } from 'nest-access-control';
-import { createRepositoryMock, createTestAppForModule } from '../../test/test.utils';
+import { createRepositoryMock, createTestAppForModule, declareDynamicFieldsProviders } from '../../test/test.utils';
 import { JwtAuthGuardMock } from '../../test/mocks/jwt-auth.guard.mock';
 import { BookmarksModule } from './bookmarks.module';
 import { CreateBookmarkDto } from './dto/create-bookmark.dto';
@@ -62,7 +62,7 @@ describe('Bookmarks controller', () => {
     const JwtGuard = JwtAuthGuardMock;
 
     beforeAll(async () => {
-        const moduleRef = await Test.createTestingModule({
+        let moduleBuilder = Test.createTestingModule({
             imports: [BookmarksModule, AdvertsModule, TypeOrmModule.forRoot(), AccessControlModule.forRoles(roles)],
         })
             .overrideProvider(getRepositoryToken(Advert))
@@ -71,16 +71,6 @@ describe('Bookmarks controller', () => {
             .useValue(sectionRepositoryMock)
             .overrideProvider(getRepositoryToken(Field))
             .useValue(fieldRepositoryMock)
-            .overrideProvider(getRepositoryToken(InputTextEntity))
-            .useValue(createRepositoryMock())
-            .overrideProvider(getRepositoryToken(TextareaEntity))
-            .useValue(createRepositoryMock())
-            .overrideProvider(getRepositoryToken(RadioEntity))
-            .useValue(createRepositoryMock())
-            .overrideProvider(getRepositoryToken(PhotoEntity))
-            .useValue(createRepositoryMock())
-            .overrideProvider(getRepositoryToken(PriceEntity))
-            .useValue(createRepositoryMock())
             .overrideProvider(getRepositoryToken(Bookmark))
             .useValue(bookmarkRepositoryMock)
             .overrideProvider(getRepositoryToken(User))
@@ -88,9 +78,11 @@ describe('Bookmarks controller', () => {
             .overrideProvider(Connection)
             .useValue(connectionMock)
             .overrideGuard(JwtAuthGuard)
-            .useValue(JwtGuard)
-            .compile();
+            .useValue(JwtGuard);
 
+        moduleBuilder = declareDynamicFieldsProviders(moduleBuilder);
+
+        const moduleRef = await moduleBuilder.compile();
         app = await createTestAppForModule(moduleRef);
     });
 
