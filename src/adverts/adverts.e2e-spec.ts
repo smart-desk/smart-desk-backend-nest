@@ -332,6 +332,26 @@ describe('Adverts controller', () => {
         });
     });
 
+    describe('get recommended adverts by id', () => {
+        it(`successfully`, () => {
+            return request(app.getHttpServer()).get(`/adverts/${uuid()}/recommended`).expect(HttpStatus.OK);
+        });
+
+        it(`with error - not valid uuid`, () => {
+            return request(app.getHttpServer())
+                .get('/adverts/123123/recommended')
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('Validation failed (uuid  is expected)');
+                });
+        });
+
+        it(`with error - not found`, () => {
+            advertRepositoryMock.findOne.mockReturnValueOnce(undefined);
+            return request(app.getHttpServer()).get(`/adverts/${uuid()}/recommended`).expect(HttpStatus.NOT_FOUND);
+        });
+    });
+
     describe('create advert', () => {
         it(`successfully with empty fields array`, () => {
             return request(app.getHttpServer())
