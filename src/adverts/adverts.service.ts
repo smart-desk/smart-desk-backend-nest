@@ -46,6 +46,19 @@ export class AdvertsService {
         return this.loadFieldDataForAdvert(advert);
     }
 
+    async getRecommendedById(id: string): Promise<GetAdvertsResponseDto> {
+        const advert = await this.findOneOrThrowException(id);
+        const options = new GetAdvertsDto();
+        options.limit = 11;
+
+        const recommended = await this.getForCategory(advert.category_id, options);
+        recommended.adverts = recommended.adverts.filter(a => a.id !== advert.id);
+        recommended.totalCount -= 1;
+        recommended.limit -= 1;
+
+        return recommended;
+    }
+
     async create(userId: string, advertDto: CreateAdvertDto): Promise<Advert> {
         // todo (future) check that model belongs to category
         // todo (future) check that field belongs to model

@@ -109,6 +109,11 @@ export class AdvertsController {
         return this.advertsService.getById(id);
     }
 
+    @Get(':id/recommended')
+    getRecommended(@Param('id', ParseUUIDPipe) id: string): Promise<GetAdvertsResponseDto> {
+        return this.advertsService.getRecommendedById(id);
+    }
+
     @Post()
     @ApiBearerAuth('access-token')
     @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
