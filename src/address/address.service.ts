@@ -13,6 +13,10 @@ export class AddressService {
     }
 
     async createOrUpdate(userId: string, body: CreateAddressDto): Promise<Address> {
+        const address = await this.addressRepository.findOne({ userId });
+        if (address) {
+            return this.addressRepository.save({ id: address.id, userId, ...body });
+        }
         return this.addressRepository.save({ userId, ...body });
     }
 }
