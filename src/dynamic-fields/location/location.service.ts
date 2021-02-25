@@ -79,7 +79,7 @@ export class LocationService extends AbstractFieldService {
         return result.filter(field => this.withinRadius(field, params)).map(r => r.advert_id);
     }
 
-    private withinRadius(field: LocationEntity, params: LocationFilterDto) {
+    private withinRadius(field: LocationEntity, params: LocationFilterDto): boolean {
         const R = 6371;
         const deg2rad = n => Math.tan(n * (Math.PI / 180));
 
