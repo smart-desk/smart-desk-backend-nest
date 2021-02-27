@@ -34,7 +34,9 @@ export class AdvertsController {
 
     // todo make it accessible only for admin
     @Get()
-    getAll(@Query() options: GetAdvertsDto): Promise<GetAdvertsResponseDto> {
+    @ApiBearerAuth('access-token')
+    @UseGuards(new JwtAuthGuard({ allowNoToken: true }))
+    async getAll(@Req() req: RequestWithUserPayload, @Query() options: GetAdvertsDto): Promise<GetAdvertsResponseDto> {
         return this.advertsService.getAll(options);
     }
 
@@ -96,7 +98,10 @@ export class AdvertsController {
     }
 
     @Get('/category/:categoryId')
-    getForCategory(
+    @ApiBearerAuth('access-token')
+    @UseGuards(new JwtAuthGuard({ allowNoToken: true }))
+    async getForCategory(
+        @Req() req: RequestWithUserPayload,
         @Param('categoryId', ParseUUIDPipe) categoryId: string,
         @Query() options: GetAdvertsDto
     ): Promise<GetAdvertsResponseDto> {
@@ -110,7 +115,9 @@ export class AdvertsController {
     }
 
     @Get(':id/recommended')
-    getRecommended(@Param('id', ParseUUIDPipe) id: string): Promise<GetAdvertsResponseDto> {
+    @ApiBearerAuth('access-token')
+    @UseGuards(new JwtAuthGuard({ allowNoToken: true }))
+    async getRecommended(@Req() req: RequestWithUserPayload, @Param('id', ParseUUIDPipe) id: string): Promise<GetAdvertsResponseDto> {
         return this.advertsService.getRecommendedById(id);
     }
 
