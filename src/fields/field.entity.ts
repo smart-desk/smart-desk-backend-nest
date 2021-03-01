@@ -22,6 +22,9 @@ export class Field {
     @Column('boolean')
     filterable: boolean;
 
+    @Column('int')
+    order: number;
+
     data: unknown;
 
     @ManyToOne(() => Section, (section: Section) => section.fields)

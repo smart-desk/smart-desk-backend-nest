@@ -14,12 +14,7 @@ import { InputTextParamsDto } from '../dynamic-fields/input-text/dto/input-text-
 import { TextareaParamsDto } from '../dynamic-fields/textarea/dto/textarea-params.dto';
 import { TextParamsDto } from '../dynamic-fields/text/dto/text-params.dto';
 import { RadioParamsDto } from '../dynamic-fields/radio/dto/radio-params.dto';
-import { InputTextEntity } from '../dynamic-fields/input-text/input-text.entity';
-import { TextareaEntity } from '../dynamic-fields/textarea/textarea.entity';
-import { RadioEntity } from '../dynamic-fields/radio/radio.entity';
 import { FieldType } from '../dynamic-fields/dynamic-fields.module';
-import { PhotoEntity } from '../dynamic-fields/photo/photo.entity';
-import { PriceEntity } from '../dynamic-fields/price/price.entity';
 import { PriceParamsDto } from '../dynamic-fields/price/dto/price-params.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { JwtAuthGuardMock } from '../../test/mocks/jwt-auth.guard.mock';
@@ -61,6 +56,7 @@ describe('Fields controller', () => {
                     section_id: uuid(),
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
+                    order: 1,
                     params: { label: 'some label' } as InputTextParamsDto,
                 } as FieldCreateDto)
                 .expect(HttpStatus.CREATED);
@@ -109,6 +105,22 @@ describe('Fields controller', () => {
                 .expect(HttpStatus.NOT_FOUND)
                 .expect(res => {
                     expect(res.body.message).toContain('Section not found');
+                });
+        });
+
+        it(`with error - order is not valid`, () => {
+            return request(app.getHttpServer())
+                .post('/fields')
+                .send({
+                    section_id: uuid(),
+                    title: 'some title',
+                    type: FieldType.INPUT_TEXT,
+                    order: "test" as any,
+                    params: { label: 'some label' } as InputTextParamsDto,
+                } as FieldCreateDto)
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('order must be an integer number');
                 });
         });
 
