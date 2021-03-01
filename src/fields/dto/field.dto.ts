@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsUUID, MaxLength } from 'class-validator';
+import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsUUID, MaxLength } from 'class-validator';
 import { FieldType } from '../../dynamic-fields/dynamic-fields.module';
 
 export class FieldCreateDto {
@@ -14,6 +14,10 @@ export class FieldCreateDto {
     @IsUUID()
     section_id: string;
 
+    @IsOptional()
+    @IsInt()
+    order?: number;
+
     params?: unknown;
 }
 
@@ -24,6 +28,10 @@ export class FieldUpdateDto {
     @IsNotEmpty()
     @IsEnum(FieldType)
     type: FieldType;
+
+    @IsOptional()
+    @IsInt()
+    order?: number;
 
     params?: unknown;
 }
