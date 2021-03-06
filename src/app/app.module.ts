@@ -15,6 +15,7 @@ import { DataPipe } from '../utils/data.pipe';
 import { S3Module } from '../s3/s3.module';
 import { roles } from './app.roles';
 import { BookmarksModule } from '../bookmarks/bookmarks.module';
+import { PhoneModule } from '../phone/phone.module';
 
 const app = [
     AuthModule,
@@ -27,6 +28,7 @@ const app = [
     DynamicFieldsModule,
     S3Module,
     BookmarksModule,
+    PhoneModule,
 ];
 
 @Module({

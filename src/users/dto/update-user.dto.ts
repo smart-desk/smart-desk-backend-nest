@@ -1,4 +1,5 @@
 import { IsOptional, IsPhoneNumber, IsString, IsUrl, MaxLength, MinLength } from 'class-validator';
+import { ApiHideProperty } from '@nestjs/swagger';
 import { IsImageUrl } from '../../utils/validation';
 
 export class UpdateUserDto {
@@ -25,4 +26,7 @@ export class UpdateUserDto {
     @MaxLength(255)
     @IsPhoneNumber('ZZ')
     phone?: string;
+
+    @ApiHideProperty()
+    isPhoneVerified: boolean;
 }
