@@ -1,6 +1,5 @@
-import { BadRequestException, Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, HttpCode, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { ACGuard } from 'nest-access-control';
 import { PhoneService } from './phone.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { BlockedUserGuard } from '../guards/blocked-user.guard';
@@ -14,8 +13,9 @@ export class PhoneController {
     constructor(private phoneService: PhoneService, private usersService: UsersService) {}
 
     @Post('verify/request')
+    @HttpCode(HttpStatus.OK)
     @ApiBearerAuth('access-token')
-    @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
+    @UseGuards(JwtAuthGuard, BlockedUserGuard)
     async verifyRequest(@Req() req: RequestWithUserPayload): Promise<string> {
         const user = await this.usersService.findOneOrThrowException(req.user.id);
         if (!user.phone) {
@@ -28,8 +28,9 @@ export class PhoneController {
     }
 
     @Post('verify/check')
+    @HttpCode(HttpStatus.OK)
     @ApiBearerAuth('access-token')
-    @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
+    @UseGuards(JwtAuthGuard, BlockedUserGuard)
     async verifyCheck(@Req() req: RequestWithUserPayload, @Body() body: PhoneVerifyCheckDto): Promise<string> {
         const user = await this.usersService.findOneOrThrowException(req.user.id);
         if (!user.phone) {
