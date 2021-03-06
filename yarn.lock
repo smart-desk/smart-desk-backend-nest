@@ -4801,7 +4801,7 @@ jsonfile@^6.0.1:
   optionalDependencies:
     graceful-fs "^4.1.6"
 
-jsonwebtoken@8.5.1, jsonwebtoken@^8.2.0:
+jsonwebtoken@8.5.1, jsonwebtoken@^8.2.0, jsonwebtoken@^8.4.0:
   version "8.5.1"
   resolved "https://registry.yarnpkg.com/jsonwebtoken/-/jsonwebtoken-8.5.1.tgz#00e71e0b8df54c2121a1f26137df2280673bcc0d"
   integrity sha512-XjwVfRS6jTMsqYs0EsuJ4LGxXV14zQybNd4L2r0UvbVnSF9Af8x7p5MzbJ90Ioz/9TI41/hTCvznF/loiSzn8w==
@@ -5414,6 +5414,15 @@ nest-access-control@^2.0.2:
   integrity sha512-PBDygolc0ThNdCDAP/0ipp21itGDO3yxbAMh/egb1k+bRPxl7/Iuz65jnTKwNhmEBRMupkaX+zY7vxTAcsbsuQ==
   dependencies:
     accesscontrol "^2.2.1"
+
+nexmo@^2.9.1:
+  version "2.9.1"
+  resolved "https://registry.yarnpkg.com/nexmo/-/nexmo-2.9.1.tgz#35af37a22e21c3c9bbbc0733903eaf3b6753967e"
+  integrity sha512-FxmJ2Ou5qi4BH6hSo24OiFwPVYPl08uyXv13KybmkAbjh9W+kpaPK2wwsg1Dz39rrgIyAhWAq+4cqMvmk1UjrQ==
+  dependencies:
+    jsonwebtoken "^8.4.0"
+    request "^2.88.0"
+    uuid "^2.0.2"
 
 next-tick@1:
   version "1.1.0"
@@ -6445,7 +6454,7 @@ request-promise-native@^1.0.8:
     stealthy-require "^1.1.1"
     tough-cookie "^2.3.3"
 
-request@^2.88.2:
+request@^2.88.0, request@^2.88.2:
   version "2.88.2"
   resolved "https://registry.yarnpkg.com/request/-/request-2.88.2.tgz#d73c918731cb5a87da047e207234146f664d12b3"
   integrity sha512-MsvtOrfG9ZcrOwAW+Qi+F6HbD0CWXEh9ou77uOb7FM2WPhwT7smM833PzanhJLsgXjN89Ir6V2PczXNnMpwKhw==
@@ -7723,6 +7732,11 @@ uuid@8.3.0:
   version "8.3.0"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.0.tgz#ab738085ca22dc9a8c92725e459b1d507df5d6ea"
   integrity sha512-fX6Z5o4m6XsXBdli9g7DtWgAx+osMsRRZFKma1mIUsLCz6vRvv+pz5VNbyu9UEDzpMWulZfvpgb/cmDXVulYFQ==
+
+uuid@^2.0.2:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-2.0.3.tgz#67e2e863797215530dff318e5bf9dcebfd47b21a"
+  integrity sha1-Z+LoY3lyFVMN/zGOW/nc6/1Hsho=
 
 uuid@^3.3.2:
   version "3.4.0"

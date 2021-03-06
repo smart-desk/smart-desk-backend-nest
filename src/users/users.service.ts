@@ -36,8 +36,14 @@ export class UsersService {
     }
 
     async updateUser(id: string, data: UpdateUserDto): Promise<User> {
-        await this.findOneOrThrowException(id);
+        const user = await this.findOneOrThrowException(id);
+
+        if (data.phone && data.phone !== user.phone && user.isPhoneVerified) {
+            data.isPhoneVerified = false;
+        }
+
         const updatedUser = await this.userRepository.preload({ id, ...data });
+
         return await this.userRepository.save(updatedUser);
     }
 
@@ -60,10 +66,10 @@ export class UsersService {
         return await this.userRepository.save(updatedUser);
     }
 
-    private async findOneOrThrowException(id: string): Promise<User> {
+    async findOneOrThrowException(id: string): Promise<User> {
         const user = await this.userRepository.findOne({ id });
         if (!user) {
-            throw new NotFoundException('User not found');
+            throw new NotFoundException(`User ${id} not found`);
         }
         return user;
     }
