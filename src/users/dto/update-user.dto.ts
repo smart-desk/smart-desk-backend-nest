@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsUrl, MaxLength, MinLength } from 'class-validator';
+import { IsOptional, IsPhoneNumber, IsString, IsUrl, MaxLength, MinLength } from 'class-validator';
 import { IsImageUrl } from '../../utils/validation';
 
 export class UpdateUserDto {
@@ -20,4 +20,9 @@ export class UpdateUserDto {
     @IsUrl()
     @IsImageUrl()
     avatar?: string;
+
+    @IsOptional()
+    @MaxLength(255)
+    @IsPhoneNumber('ZZ')
+    phone?: string;
 }

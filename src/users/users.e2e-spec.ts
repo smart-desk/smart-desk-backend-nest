@@ -69,6 +69,7 @@ describe('Users controller', () => {
                     firstName: 'New first name',
                     lastName: 'New last name',
                     avatar: 'http://test.com/image.png',
+                    phone: '+4915141111111',
                 } as UpdateUserDto)
                 .expect(HttpStatus.OK);
         });
@@ -82,6 +83,7 @@ describe('Users controller', () => {
                     firstName: 'New first name',
                     lastName: 'New last name',
                     avatar: 'http://test.com/image.png',
+                    phone: '+4915141111111',
                 } as UpdateUserDto)
                 .expect(HttpStatus.FORBIDDEN);
         });
@@ -93,6 +95,7 @@ describe('Users controller', () => {
                     firstName: '',
                     lastName: '',
                     avatar: '',
+                    phone: '',
                 } as UpdateUserDto)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
@@ -100,6 +103,7 @@ describe('Users controller', () => {
                     expect(res.body.message).toContain('lastName must be longer than or equal to 1 characters');
                     expect(res.body.message).toContain('value must be url to image');
                     expect(res.body.message).toContain('avatar must be an URL address');
+                    expect(res.body.message).toContain('phone must be a valid phone number');
                 });
         });
 

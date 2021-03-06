@@ -23,4 +23,10 @@ export class User {
 
     @Column('varchar', { length: 255, array: true })
     roles: string[]; // todo hide for public
+
+    @Column('varchar', { length: 255 })
+    phone: string;  // todo hide for public
+
+    @Column('boolean', { name: 'is_phone_verified' })
+    isPhoneVerified: boolean;  // todo hide for public
 }
