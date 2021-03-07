@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import Nexmo from 'nexmo';
 import { ConfigService } from '@nestjs/config';
 import { PhoneVerifyCheckDto } from './dto/phone-verify-check.dto';
+const Nexmo = require('nexmo');
 
 @Injectable()
 export class PhoneService {
-    private nexmo: Nexmo;
+    // todo understand how to fix typings
+    private nexmo: InstanceType<typeof Nexmo>;
 
     constructor(private config: ConfigService) {
         this.nexmo = new Nexmo({
