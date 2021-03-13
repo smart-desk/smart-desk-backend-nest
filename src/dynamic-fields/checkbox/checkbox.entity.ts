@@ -3,6 +3,6 @@ import { DynamicFieldsBaseEntity } from '../dynamic-fields-base.entity';
 
 @Entity('data_checkboxes')
 export class CheckboxEntity extends DynamicFieldsBaseEntity {
-    @Column('varchar', { length: 255 })
-    value: string;
+    @Column('varchar', { length: 255, array: true })
+    value: string[];
 }
