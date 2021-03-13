@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AbstractFieldService } from '../abstract-field.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Any, In, Repository } from 'typeorm';
 import { CheckboxEntity } from './checkbox.entity';
 import { validate, ValidationError } from 'class-validator';
 import { plainToClass } from 'class-transformer';
@@ -67,12 +67,7 @@ export class CheckboxService extends AbstractFieldService {
     }
 
     async getAdvertIdsByFilter(fieldId: string, params: CheckboxFilterDto): Promise<string[]> {
-        const result = await this.repository.find({
-            where: {
-                field_id: fieldId,
-                value: In(params),
-            },
-        });
+        const result = await this.repository.createQueryBuilder('c').where('c.value && :params', { params }).getMany();
 
         return result.map(r => r.advert_id);
     }
