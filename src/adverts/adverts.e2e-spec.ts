@@ -68,7 +68,7 @@ describe('Adverts controller', () => {
     };
 
     beforeAll(async () => {
-        const moduleRef = await Test.createTestingModule({
+        let moduleBuilder = await Test.createTestingModule({
             imports: [AdvertsModule, TypeOrmModule.forRoot()],
         })
             .overrideProvider(getRepositoryToken(Advert))
@@ -77,18 +77,6 @@ describe('Adverts controller', () => {
             .useValue(sectionRepositoryMock)
             .overrideProvider(getRepositoryToken(Field))
             .useValue(fieldRepositoryMock)
-            .overrideProvider(getRepositoryToken(InputTextEntity))
-            .useValue(createRepositoryMock())
-            .overrideProvider(getRepositoryToken(TextareaEntity))
-            .useValue(createRepositoryMock())
-            .overrideProvider(getRepositoryToken(RadioEntity))
-            .useValue(createRepositoryMock())
-            .overrideProvider(getRepositoryToken(PhotoEntity))
-            .useValue(createRepositoryMock())
-            .overrideProvider(getRepositoryToken(PriceEntity))
-            .useValue(createRepositoryMock())
-            .overrideProvider(getRepositoryToken(LocationEntity))
-            .useValue(createRepositoryMock())
             .overrideProvider(getRepositoryToken(User))
             .useValue(createRepositoryMock())
             .overrideProvider(Connection)
@@ -98,9 +86,11 @@ describe('Adverts controller', () => {
             .overrideGuard(ACGuard)
             .useValue(AcGuardMock)
             .overrideGuard(BlockedUserGuard)
-            .useValue(BlockedUserGuardMock)
-            .compile();
+            .useValue(BlockedUserGuardMock);
 
+        moduleBuilder = declareDynamicFieldsProviders(moduleBuilder);
+
+        const moduleRef = await moduleBuilder.compile();
         app = await createTestAppForModule(moduleRef);
     });
 
