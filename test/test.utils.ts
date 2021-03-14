@@ -8,6 +8,7 @@ import { RadioEntity } from '../src/dynamic-fields/radio/radio.entity';
 import { PhotoEntity } from '../src/dynamic-fields/photo/photo.entity';
 import { LocationEntity } from '../src/dynamic-fields/location/location.entity';
 import { PriceEntity } from '../src/dynamic-fields/price/price.entity';
+import { CheckboxEntity } from '../src/dynamic-fields/checkbox/checkbox.entity';
 
 export async function createTestAppForModule(moduleRef: TestingModule) {
     const app = moduleRef.createNestApplication();
@@ -56,5 +57,7 @@ export function declareDynamicFieldsProviders(moduleRef: TestingModuleBuilder): 
         .overrideProvider(getRepositoryToken(LocationEntity))
         .useValue(createRepositoryMock())
         .overrideProvider(getRepositoryToken(PriceEntity))
+        .useValue(createRepositoryMock())
+        .overrideProvider(getRepositoryToken(CheckboxEntity))
         .useValue(createRepositoryMock());
 }
