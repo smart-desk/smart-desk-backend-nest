@@ -149,6 +149,12 @@ export class AdvertsController {
         return this.advertsService.update(id, body);
     }
 
+    @Post(':id/view')
+    @HttpCode(HttpStatus.OK)
+    async countView(@Param('id', ParseUUIDPipe) id: string): Promise<Advert> {
+        return this.advertsService.countView(id);
+    }
+
     @Patch(':id/block')
     @ApiBearerAuth('access-token')
     @UseGuards(JwtAuthGuard, ACGuard)

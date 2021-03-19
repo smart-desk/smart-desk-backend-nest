@@ -8,9 +8,6 @@ import { AccessControlModule, ACGuard } from 'nest-access-control';
 import { createRepositoryMock, createTestAppForModule, declareDynamicFieldsProviders } from '../../test/test.utils';
 import { Advert } from './entities/advert.entity';
 import { AdvertsModule } from './adverts.module';
-import { InputTextEntity } from '../dynamic-fields/input-text/input-text.entity';
-import { TextareaEntity } from '../dynamic-fields/textarea/textarea.entity';
-import { RadioEntity } from '../dynamic-fields/radio/radio.entity';
 import { Field } from '../fields/field.entity';
 import { Section, SectionType } from '../sections/section.entity';
 import { CreateAdvertDto } from './dto/create-advert.dto';
@@ -22,10 +19,8 @@ import { CreateInputTextDto } from '../dynamic-fields/input-text/dto/create-inpu
 import { CreateTextareaDto } from '../dynamic-fields/textarea/dto/create-textarea.dto';
 import { CreateRadioDto } from '../dynamic-fields/radio/dto/create-radio.dto';
 import { FieldType } from '../dynamic-fields/dynamic-fields.module';
-import { PhotoEntity } from '../dynamic-fields/photo/photo.entity';
 import { CreatePhotoDto } from '../dynamic-fields/photo/dto/create-photo.dto';
 import { UpdatePhotoDto } from '../dynamic-fields/photo/dto/update-photo.dto';
-import { PriceEntity } from '../dynamic-fields/price/price.entity';
 import { CreatePriceDto } from '../dynamic-fields/price/dto/create-price.dto';
 import { UpdatePriceDto } from '../dynamic-fields/price/dto/update-price.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -37,7 +32,6 @@ import { User } from '../users/entities/user.entity';
 import { UserStatus } from '../users/user-status.enum';
 import { BlockedUserGuard } from '../guards/blocked-user.guard';
 import { BlockedUserGuardMock } from '../../test/mocks/blocked-user.guard.mock';
-import { LocationEntity } from '../dynamic-fields/location/location.entity';
 
 describe('Adverts controller', () => {
     let app: INestApplication;
@@ -1544,6 +1538,12 @@ describe('Adverts controller with ACL enabled', () => {
         it(`with error - not authorized`, () => {
             JwtGuard.canActivate.mockReturnValueOnce(false);
             return request(app.getHttpServer()).get('/adverts/completed').expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
+    describe('count advert view', () => {
+        it(`successfully`, () => {
+            return request(app.getHttpServer()).post(`/adverts/${uuid()}/view`).expect(HttpStatus.OK);
         });
     });
 

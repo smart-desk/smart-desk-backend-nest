@@ -152,6 +152,13 @@ export class AdvertsService {
         return this.getById(advertResult.id);
     }
 
+    async countView(id: string): Promise<Advert> {
+        const advert = await this.findOneOrThrowException(id);
+        advert.views = advert.views += 1;
+        const updatedAdvert = await this.advertRepository.preload({ id, ...advert });
+        return await this.advertRepository.save(updatedAdvert);
+    }
+
     async block(id: string): Promise<Advert> {
         const advert = await this.findOneOrThrowException(id);
         advert.status = AdvertStatus.BLOCKED;
