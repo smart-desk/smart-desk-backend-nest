@@ -21,6 +21,9 @@ export class Advert {
     @Column('varchar', { length: 255 })
     status: string;
 
+    @Column('integer')
+    views: number;
+
     @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })
     createdAt: Date;
 
