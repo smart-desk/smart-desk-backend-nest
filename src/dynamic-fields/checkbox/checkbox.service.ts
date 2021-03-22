@@ -21,10 +21,6 @@ export class CheckboxService extends BaseFieldService {
         return this.repository;
     }
 
-    transformCreateObjectToClass(dtoObject: Partial<CreateCheckboxDto>): CreateCheckboxDto {
-        return plainToClass(CreateCheckboxDto, dtoObject);
-    }
-
     async validateBeforeCreate(dtoObject: Partial<CreateCheckboxDto>): Promise<ValidationError[]> {
         const dtoClass = plainToClass(CreateCheckboxDto, dtoObject);
         return await validate(dtoClass);
@@ -41,17 +37,13 @@ export class CheckboxService extends BaseFieldService {
         return this.repository.save(instance);
     }
 
-    transformUpdateObjectToClass(dtoObject: Partial<UpdateCheckboxDto>): UpdateCheckboxDto {
-        return plainToClass(UpdateCheckboxDto, dtoObject);
-    }
-
     async validateBeforeUpdate(dtoObject: Partial<UpdateCheckboxDto>): Promise<ValidationError[]> {
-        const dtoClass = this.transformUpdateObjectToClass(dtoObject);
+        const dtoClass = this.transformObjectToClass(UpdateCheckboxDto, dtoObject);
         return await validate(dtoClass);
     }
 
     async validateAndUpdate(dtoObject: Partial<UpdateCheckboxDto>): Promise<CheckboxEntity> {
-        const dtoClass = this.transformUpdateObjectToClass(dtoObject);
+        const dtoClass = this.transformObjectToClass(UpdateCheckboxDto, dtoObject);
         const errors = await validate(dtoClass);
         if (errors.length) {
             throw getMessageFromValidationErrors(errors);

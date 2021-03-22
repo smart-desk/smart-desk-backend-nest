@@ -21,18 +21,14 @@ export class PriceService extends BaseFieldService {
         return this.repository;
     }
 
-    transformCreateObjectToClass(dtoObject: Partial<CreatePriceDto>): CreatePriceDto {
-        return plainToClass(CreatePriceDto, dtoObject);
-    }
-
     async validateBeforeCreate(dtoObject: Partial<CreatePriceDto>): Promise<ValidationError[]> {
-        const dtoClass = this.transformCreateObjectToClass(dtoObject);
+        const dtoClass = this.transformObjectToClass(CreatePriceDto, dtoObject);
         return await validate(dtoClass);
     }
 
     // todo think one more time about api, maybe return { error, instance }
     async validateAndCreate(dtoObject: Partial<CreatePriceDto>): Promise<PriceEntity> {
-        const dtoClass = this.transformCreateObjectToClass(dtoObject);
+        const dtoClass = this.transformObjectToClass(CreatePriceDto, dtoObject);
         const errors = await validate(dtoClass);
         if (errors.length) {
             throw getMessageFromValidationErrors(errors);
@@ -42,18 +38,14 @@ export class PriceService extends BaseFieldService {
         return this.repository.save(instance);
     }
 
-    transformUpdateObjectToClass(dtoObject: Partial<UpdatePriceDto>): UpdatePriceDto {
-        return plainToClass(UpdatePriceDto, dtoObject);
-    }
-
     async validateBeforeUpdate(dtoObject: Partial<UpdatePriceDto>): Promise<ValidationError[]> {
-        const dtoClass = this.transformUpdateObjectToClass(dtoObject);
+        const dtoClass = this.transformObjectToClass(UpdatePriceDto, dtoObject);
         return await validate(dtoClass);
     }
 
     // todo think one more time about api, maybe return { error, instance }
     async validateAndUpdate(dtoObject: Partial<UpdatePriceDto>): Promise<PriceEntity> {
-        const dtoClass = this.transformUpdateObjectToClass(dtoObject);
+        const dtoClass = this.transformObjectToClass(UpdatePriceDto, dtoObject);
         const errors = await validate(dtoClass);
         if (errors.length) {
             throw getMessageFromValidationErrors(errors);

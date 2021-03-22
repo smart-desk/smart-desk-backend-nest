@@ -20,18 +20,14 @@ export class TextareaService extends BaseFieldService {
         return this.repository;
     }
 
-    transformCreateObjectToClass(dtoObject: Partial<CreateTextareaDto>): CreateTextareaDto {
-        return plainToClass(CreateTextareaDto, dtoObject);
-    }
-
     async validateBeforeCreate(dtoObject: Partial<CreateTextareaDto>): Promise<ValidationError[]> {
-        const dtoClass = this.transformCreateObjectToClass(dtoObject);
+        const dtoClass = this.transformObjectToClass(CreateTextareaDto, dtoObject);
         return await validate(dtoClass);
     }
 
     // todo think one more time about api, maybe return { error, instance }
     async validateAndCreate(dtoObject: Partial<CreateTextareaDto>): Promise<TextareaEntity> {
-        const dtoClass = this.transformCreateObjectToClass(dtoObject);
+        const dtoClass = this.transformObjectToClass(CreateTextareaDto, dtoObject);
         const errors = await validate(dtoClass);
         if (errors.length) {
             throw getMessageFromValidationErrors(errors);
@@ -41,18 +37,14 @@ export class TextareaService extends BaseFieldService {
         return this.repository.save(instance);
     }
 
-    transformUpdateObjectToClass(dtoObject: Partial<UpdateTextareaDto>): UpdateTextareaDto {
-        return plainToClass(UpdateTextareaDto, dtoObject);
-    }
-
     async validateBeforeUpdate(dtoObject: Partial<UpdateTextareaDto>): Promise<ValidationError[]> {
-        const dtoClass = this.transformUpdateObjectToClass(dtoObject);
+        const dtoClass = this.transformObjectToClass(UpdateTextareaDto, dtoObject);
         return await validate(dtoClass);
     }
 
     // todo think one more time about api, maybe return { error, instance }
     async validateAndUpdate(dtoObject: Partial<UpdateTextareaDto>): Promise<TextareaEntity> {
-        const dtoClass = this.transformUpdateObjectToClass(dtoObject);
+        const dtoClass = this.transformObjectToClass(UpdateTextareaDto, dtoObject);
         const errors = await validate(dtoClass);
         if (errors.length) {
             throw getMessageFromValidationErrors(errors);

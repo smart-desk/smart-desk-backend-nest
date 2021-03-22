@@ -21,10 +21,6 @@ export class RadioService extends BaseFieldService {
         return this.repository;
     }
 
-    transformCreateObjectToClass(dtoObject: Partial<CreateRadioDto>): CreateRadioDto {
-        return plainToClass(CreateRadioDto, dtoObject);
-    }
-
     async validateBeforeCreate(dtoObject: Partial<CreateRadioDto>): Promise<ValidationError[]> {
         const dtoClass = plainToClass(CreateRadioDto, dtoObject);
         return await validate(dtoClass);
@@ -41,17 +37,13 @@ export class RadioService extends BaseFieldService {
         return this.repository.save(instance);
     }
 
-    transformUpdateObjectToClass(dtoObject: Partial<UpdateRadioDto>): UpdateRadioDto {
-        return plainToClass(UpdateRadioDto, dtoObject);
-    }
-
     async validateBeforeUpdate(dtoObject: Partial<UpdateRadioDto>): Promise<ValidationError[]> {
-        const dtoClass = this.transformUpdateObjectToClass(dtoObject);
+        const dtoClass = this.transformObjectToClass(UpdateRadioDto, dtoObject);
         return await validate(dtoClass);
     }
 
     async validateAndUpdate(dtoObject: Partial<UpdateRadioDto>): Promise<RadioEntity> {
-        const dtoClass = this.transformUpdateObjectToClass(dtoObject);
+        const dtoClass = this.transformObjectToClass(UpdateRadioDto, dtoObject);
         const errors = await validate(dtoClass);
         if (errors.length) {
             throw getMessageFromValidationErrors(errors);

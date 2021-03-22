@@ -20,17 +20,13 @@ export class PhotoService extends BaseFieldService {
         return this.repository;
     }
 
-    transformCreateObjectToClass(dtoObject: Partial<CreatePhotoDto>): CreatePhotoDto {
-        return plainToClass(CreatePhotoDto, dtoObject);
-    }
-
     async validateBeforeCreate(dtoObject: Partial<CreatePhotoDto>): Promise<ValidationError[]> {
-        const dtoClass = this.transformCreateObjectToClass(dtoObject);
+        const dtoClass = this.transformObjectToClass(CreatePhotoDto, dtoObject);
         return await validate(dtoClass);
     }
 
     async validateAndCreate(dtoObject: Partial<CreatePhotoDto>): Promise<PhotoEntity> {
-        const dtoClass = this.transformCreateObjectToClass(dtoObject);
+        const dtoClass = this.transformObjectToClass(CreatePhotoDto, dtoObject);
         const errors = await validate(dtoClass);
         if (errors.length) {
             throw getMessageFromValidationErrors(errors);
@@ -40,17 +36,13 @@ export class PhotoService extends BaseFieldService {
         return this.repository.save(instance);
     }
 
-    transformUpdateObjectToClass(dtoObject: Partial<UpdatePhotoDto>): UpdatePhotoDto {
-        return plainToClass(UpdatePhotoDto, dtoObject);
-    }
-
     async validateBeforeUpdate(dtoObject: Partial<UpdatePhotoDto>): Promise<ValidationError[]> {
-        const dtoClass = this.transformUpdateObjectToClass(dtoObject);
+        const dtoClass = this.transformObjectToClass(UpdatePhotoDto, dtoObject);
         return await validate(dtoClass);
     }
 
     async validateAndUpdate(dtoObject: Partial<UpdatePhotoDto>): Promise<PhotoEntity> {
-        const dtoClass = this.transformUpdateObjectToClass(dtoObject);
+        const dtoClass = this.transformObjectToClass(UpdatePhotoDto, dtoObject);
         const errors = await validate(dtoClass);
         if (errors.length) {
             throw getMessageFromValidationErrors(errors);

@@ -21,18 +21,14 @@ export class LocationService extends BaseFieldService {
         return this.repository;
     }
 
-    transformCreateObjectToClass(dtoObject: Partial<CreateLocationDto>): CreateLocationDto {
-        return plainToClass(CreateLocationDto, dtoObject);
-    }
-
     async validateBeforeCreate(dtoObject: Partial<CreateLocationDto>): Promise<ValidationError[]> {
-        const dtoClass = this.transformCreateObjectToClass(dtoObject);
+        const dtoClass = this.transformObjectToClass<CreateLocationDto>(CreateLocationDto, dtoObject);
         return await validate(dtoClass);
     }
 
     // todo think one more time about api, maybe return { error, instance }
     async validateAndCreate(dtoObject: Partial<CreateLocationDto>): Promise<LocationEntity> {
-        const dtoClass = this.transformCreateObjectToClass(dtoObject);
+        const dtoClass = this.transformObjectToClass<CreateLocationDto>(CreateLocationDto, dtoObject);
         const errors = await validate(dtoClass);
         if (errors.length) {
             throw getMessageFromValidationErrors(errors);
@@ -42,18 +38,14 @@ export class LocationService extends BaseFieldService {
         return this.repository.save(instance);
     }
 
-    transformUpdateObjectToClass(dtoObject: Partial<UpdateLocationDto>): UpdateLocationDto {
-        return plainToClass(UpdateLocationDto, dtoObject);
-    }
-
     async validateBeforeUpdate(dtoObject: Partial<UpdateLocationDto>): Promise<ValidationError[]> {
-        const dtoClass = this.transformUpdateObjectToClass(dtoObject);
+        const dtoClass = this.transformObjectToClass(UpdateLocationDto, dtoObject);
         return await validate(dtoClass);
     }
 
     // todo think one more time about api, maybe return { error, instance }
     async validateAndUpdate(dtoObject: Partial<UpdateLocationDto>): Promise<LocationEntity> {
-        const dtoClass = this.transformUpdateObjectToClass(dtoObject);
+        const dtoClass = this.transformObjectToClass(UpdateLocationDto, dtoObject);
         const errors = await validate(dtoClass);
         if (errors.length) {
             throw getMessageFromValidationErrors(errors);

@@ -21,19 +21,11 @@ export class TextService extends BaseFieldService {
         return;
     }
 
-    transformCreateObjectToClass(dtoObject: Partial<any>): DynamicFieldsBaseCreateDto {
-        return;
-    }
-
     async validateBeforeCreate(dtoObject: Partial<CreateRadioDto>): Promise<ValidationError[]> {
         return;
     }
 
     async validateAndCreate(dtoObject: Partial<CreateRadioDto>): Promise<DynamicFieldsBaseEntity> {
-        return;
-    }
-
-    transformUpdateObjectToClass(dtoObject: Partial<UpdateRadioDto>): DynamicFieldsBaseUpdateDto {
         return;
     }
 
