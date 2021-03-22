@@ -4,7 +4,7 @@ import { DynamicFieldsBaseCreateDto } from './dynamic-fields-base-create.dto';
 import { DynamicFieldsBaseUpdateDto } from './dynamic-fields-base-update.dto';
 import { DynamicFieldsBaseEntity } from './dynamic-fields-base.entity';
 
-export abstract class AbstractFieldService {
+export abstract class BaseFieldService {
     abstract getRepository(): Repository<DynamicFieldsBaseEntity>;
 
     abstract transformCreateObjectToClass(dtoObject: Partial<DynamicFieldsBaseCreateDto>): DynamicFieldsBaseCreateDto;

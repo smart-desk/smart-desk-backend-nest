@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AbstractFieldService } from '../abstract-field.service';
+import { BaseFieldService } from '../base-field.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { validate, ValidationError } from 'class-validator';
@@ -11,7 +11,7 @@ import { UpdateTextareaDto } from './dto/update-textarea.dto';
 import { TextareaParamsDto } from './dto/textarea-params.dto';
 
 @Injectable()
-export class TextareaService extends AbstractFieldService {
+export class TextareaService extends BaseFieldService {
     constructor(@InjectRepository(TextareaEntity) private repository: Repository<TextareaEntity>) {
         super();
     }

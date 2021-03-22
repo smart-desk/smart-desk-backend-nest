@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AbstractFieldService } from '../abstract-field.service';
+import { BaseFieldService } from '../base-field.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { validate, ValidationError } from 'class-validator';
@@ -12,7 +12,7 @@ import { LocationParamsDto } from './dto/location-params.dto';
 import { LocationFilterDto } from './dto/location-filter.dto';
 
 @Injectable()
-export class LocationService extends AbstractFieldService {
+export class LocationService extends BaseFieldService {
     constructor(@InjectRepository(LocationEntity) private repository: Repository<LocationEntity>) {
         super();
     }

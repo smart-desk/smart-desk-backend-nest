@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AbstractFieldService } from '../abstract-field.service';
+import { BaseFieldService } from '../base-field.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Any, In, Repository } from 'typeorm';
 import { CheckboxEntity } from './checkbox.entity';
@@ -12,7 +12,7 @@ import { CheckboxParamsDto } from './dto/checkbox-params.dto';
 import { CheckboxFilterDto } from './dto/checkbox-filter.dto';
 
 @Injectable()
-export class CheckboxService extends AbstractFieldService {
+export class CheckboxService extends BaseFieldService {
     constructor(@InjectRepository(CheckboxEntity) private repository: Repository<CheckboxEntity>) {
         super();
     }

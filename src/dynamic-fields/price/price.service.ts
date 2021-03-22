@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AbstractFieldService } from '../abstract-field.service';
+import { BaseFieldService } from '../base-field.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { validate, ValidationError } from 'class-validator';
@@ -12,7 +12,7 @@ import { PriceParamsDto } from './dto/price-params.dto';
 import { PriceFilterDto } from './dto/price-filter.dto';
 
 @Injectable()
-export class PriceService extends AbstractFieldService {
+export class PriceService extends BaseFieldService {
     constructor(@InjectRepository(PriceEntity) private repository: Repository<PriceEntity>) {
         super();
     }

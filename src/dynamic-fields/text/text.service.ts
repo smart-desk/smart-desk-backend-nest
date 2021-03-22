@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AbstractFieldService } from '../abstract-field.service';
+import { BaseFieldService } from '../base-field.service';
 import { RadioEntity } from '../radio/radio.entity';
 import { Repository } from 'typeorm';
 import { CreateRadioDto } from '../radio/dto/create-radio.dto';
@@ -12,7 +12,7 @@ import { DynamicFieldsBaseUpdateDto } from '../dynamic-fields-base-update.dto';
 import { TextParamsDto } from './dto/text-params.dto';
 
 @Injectable()
-export class TextService extends AbstractFieldService {
+export class TextService extends BaseFieldService {
     constructor() {
         super();
     }

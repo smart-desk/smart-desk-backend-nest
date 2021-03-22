@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AbstractFieldService } from '../abstract-field.service';
+import { BaseFieldService } from '../base-field.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { RadioEntity } from './radio.entity';
@@ -12,7 +12,7 @@ import { RadioParamsDto } from './dto/radio-params.dto';
 import { RadioFilterDto } from './dto/radio-filter.dto';
 
 @Injectable()
-export class RadioService extends AbstractFieldService {
+export class RadioService extends BaseFieldService {
     constructor(@InjectRepository(RadioEntity) private repository: Repository<RadioEntity>) {
         super();
     }

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AbstractFieldService } from '../abstract-field.service';
+import { BaseFieldService } from '../base-field.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { validate, ValidationError } from 'class-validator';
@@ -11,7 +11,7 @@ import { UpdatePhotoDto } from './dto/update-photo.dto';
 import { PhotoParamsDto } from './dto/photo-params.dto';
 
 @Injectable()
-export class PhotoService extends AbstractFieldService {
+export class PhotoService extends BaseFieldService {
     constructor(@InjectRepository(PhotoEntity) private repository: Repository<PhotoEntity>) {
         super();
     }

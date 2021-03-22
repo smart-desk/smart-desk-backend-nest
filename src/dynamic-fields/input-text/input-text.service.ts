@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AbstractFieldService } from '../abstract-field.service';
+import { BaseFieldService } from '../base-field.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { plainToClass } from 'class-transformer';
@@ -11,7 +11,7 @@ import { UpdateInputTextDto } from './dto/update-input-text.dto';
 import { InputTextParamsDto } from './dto/input-text-params.dto';
 
 @Injectable()
-export class InputTextService extends AbstractFieldService {
+export class InputTextService extends BaseFieldService {
     constructor(@InjectRepository(InputTextEntity) private repository: Repository<InputTextEntity>) {
         super();
     }
