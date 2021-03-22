@@ -22,13 +22,13 @@ export class PriceService extends BaseFieldService {
     }
 
     async validateBeforeCreate(dtoObject: Partial<CreatePriceDto>): Promise<ValidationError[]> {
-        const dtoClass = this.transformObjectToClass(CreatePriceDto, dtoObject);
+        const dtoClass = plainToClass(CreatePriceDto, dtoObject);
         return await validate(dtoClass);
     }
 
     // todo think one more time about api, maybe return { error, instance }
     async validateAndCreate(dtoObject: Partial<CreatePriceDto>): Promise<PriceEntity> {
-        const dtoClass = this.transformObjectToClass(CreatePriceDto, dtoObject);
+        const dtoClass = plainToClass(CreatePriceDto, dtoObject);
         const errors = await validate(dtoClass);
         if (errors.length) {
             throw getMessageFromValidationErrors(errors);
@@ -39,13 +39,13 @@ export class PriceService extends BaseFieldService {
     }
 
     async validateBeforeUpdate(dtoObject: Partial<UpdatePriceDto>): Promise<ValidationError[]> {
-        const dtoClass = this.transformObjectToClass(UpdatePriceDto, dtoObject);
+        const dtoClass = plainToClass(UpdatePriceDto, dtoObject);
         return await validate(dtoClass);
     }
 
     // todo think one more time about api, maybe return { error, instance }
     async validateAndUpdate(dtoObject: Partial<UpdatePriceDto>): Promise<PriceEntity> {
-        const dtoClass = this.transformObjectToClass(UpdatePriceDto, dtoObject);
+        const dtoClass = plainToClass(UpdatePriceDto, dtoObject);
         const errors = await validate(dtoClass);
         if (errors.length) {
             throw getMessageFromValidationErrors(errors);

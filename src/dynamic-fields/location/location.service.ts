@@ -22,13 +22,13 @@ export class LocationService extends BaseFieldService {
     }
 
     async validateBeforeCreate(dtoObject: Partial<CreateLocationDto>): Promise<ValidationError[]> {
-        const dtoClass = this.transformObjectToClass<CreateLocationDto>(CreateLocationDto, dtoObject);
+        const dtoClass = plainToClass(CreateLocationDto, dtoObject);
         return await validate(dtoClass);
     }
 
     // todo think one more time about api, maybe return { error, instance }
     async validateAndCreate(dtoObject: Partial<CreateLocationDto>): Promise<LocationEntity> {
-        const dtoClass = this.transformObjectToClass<CreateLocationDto>(CreateLocationDto, dtoObject);
+        const dtoClass = plainToClass(CreateLocationDto, dtoObject);
         const errors = await validate(dtoClass);
         if (errors.length) {
             throw getMessageFromValidationErrors(errors);
@@ -39,13 +39,13 @@ export class LocationService extends BaseFieldService {
     }
 
     async validateBeforeUpdate(dtoObject: Partial<UpdateLocationDto>): Promise<ValidationError[]> {
-        const dtoClass = this.transformObjectToClass(UpdateLocationDto, dtoObject);
+        const dtoClass = plainToClass(UpdateLocationDto, dtoObject);
         return await validate(dtoClass);
     }
 
     // todo think one more time about api, maybe return { error, instance }
     async validateAndUpdate(dtoObject: Partial<UpdateLocationDto>): Promise<LocationEntity> {
-        const dtoClass = this.transformObjectToClass(UpdateLocationDto, dtoObject);
+        const dtoClass = plainToClass(UpdateLocationDto, dtoObject);
         const errors = await validate(dtoClass);
         if (errors.length) {
             throw getMessageFromValidationErrors(errors);

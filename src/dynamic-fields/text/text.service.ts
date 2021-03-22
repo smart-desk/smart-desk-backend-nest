@@ -6,9 +6,7 @@ import { CreateRadioDto } from '../radio/dto/create-radio.dto';
 import { plainToClass } from 'class-transformer';
 import { validate, ValidationError } from 'class-validator';
 import { UpdateRadioDto } from '../radio/dto/update-radio.dto';
-import { DynamicFieldsBaseCreateDto } from '../dynamic-fields-base-create.dto';
 import { DynamicFieldsBaseEntity } from '../dynamic-fields-base.entity';
-import { DynamicFieldsBaseUpdateDto } from '../dynamic-fields-base-update.dto';
 import { TextParamsDto } from './dto/text-params.dto';
 
 @Injectable()

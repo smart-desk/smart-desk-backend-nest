@@ -38,12 +38,12 @@ export class RadioService extends BaseFieldService {
     }
 
     async validateBeforeUpdate(dtoObject: Partial<UpdateRadioDto>): Promise<ValidationError[]> {
-        const dtoClass = this.transformObjectToClass(UpdateRadioDto, dtoObject);
+        const dtoClass = plainToClass(UpdateRadioDto, dtoObject);
         return await validate(dtoClass);
     }
 
     async validateAndUpdate(dtoObject: Partial<UpdateRadioDto>): Promise<RadioEntity> {
-        const dtoClass = this.transformObjectToClass(UpdateRadioDto, dtoObject);
+        const dtoClass = plainToClass(UpdateRadioDto, dtoObject);
         const errors = await validate(dtoClass);
         if (errors.length) {
             throw getMessageFromValidationErrors(errors);

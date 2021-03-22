@@ -21,12 +21,12 @@ export class PhotoService extends BaseFieldService {
     }
 
     async validateBeforeCreate(dtoObject: Partial<CreatePhotoDto>): Promise<ValidationError[]> {
-        const dtoClass = this.transformObjectToClass(CreatePhotoDto, dtoObject);
+        const dtoClass = plainToClass(CreatePhotoDto, dtoObject);
         return await validate(dtoClass);
     }
 
     async validateAndCreate(dtoObject: Partial<CreatePhotoDto>): Promise<PhotoEntity> {
-        const dtoClass = this.transformObjectToClass(CreatePhotoDto, dtoObject);
+        const dtoClass = plainToClass(CreatePhotoDto, dtoObject);
         const errors = await validate(dtoClass);
         if (errors.length) {
             throw getMessageFromValidationErrors(errors);
@@ -37,12 +37,12 @@ export class PhotoService extends BaseFieldService {
     }
 
     async validateBeforeUpdate(dtoObject: Partial<UpdatePhotoDto>): Promise<ValidationError[]> {
-        const dtoClass = this.transformObjectToClass(UpdatePhotoDto, dtoObject);
+        const dtoClass = plainToClass(UpdatePhotoDto, dtoObject);
         return await validate(dtoClass);
     }
 
     async validateAndUpdate(dtoObject: Partial<UpdatePhotoDto>): Promise<PhotoEntity> {
-        const dtoClass = this.transformObjectToClass(UpdatePhotoDto, dtoObject);
+        const dtoClass = plainToClass(UpdatePhotoDto, dtoObject);
         const errors = await validate(dtoClass);
         if (errors.length) {
             throw getMessageFromValidationErrors(errors);

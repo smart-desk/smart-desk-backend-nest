@@ -21,13 +21,13 @@ export class TextareaService extends BaseFieldService {
     }
 
     async validateBeforeCreate(dtoObject: Partial<CreateTextareaDto>): Promise<ValidationError[]> {
-        const dtoClass = this.transformObjectToClass(CreateTextareaDto, dtoObject);
+        const dtoClass = plainToClass(CreateTextareaDto, dtoObject);
         return await validate(dtoClass);
     }
 
     // todo think one more time about api, maybe return { error, instance }
     async validateAndCreate(dtoObject: Partial<CreateTextareaDto>): Promise<TextareaEntity> {
-        const dtoClass = this.transformObjectToClass(CreateTextareaDto, dtoObject);
+        const dtoClass = plainToClass(CreateTextareaDto, dtoObject);
         const errors = await validate(dtoClass);
         if (errors.length) {
             throw getMessageFromValidationErrors(errors);
@@ -38,13 +38,13 @@ export class TextareaService extends BaseFieldService {
     }
 
     async validateBeforeUpdate(dtoObject: Partial<UpdateTextareaDto>): Promise<ValidationError[]> {
-        const dtoClass = this.transformObjectToClass(UpdateTextareaDto, dtoObject);
+        const dtoClass = plainToClass(UpdateTextareaDto, dtoObject);
         return await validate(dtoClass);
     }
 
     // todo think one more time about api, maybe return { error, instance }
     async validateAndUpdate(dtoObject: Partial<UpdateTextareaDto>): Promise<TextareaEntity> {
-        const dtoClass = this.transformObjectToClass(UpdateTextareaDto, dtoObject);
+        const dtoClass = plainToClass(UpdateTextareaDto, dtoObject);
         const errors = await validate(dtoClass);
         if (errors.length) {
             throw getMessageFromValidationErrors(errors);

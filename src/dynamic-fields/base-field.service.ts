@@ -1,6 +1,4 @@
-import { Type } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { plainToClass } from 'class-transformer';
 import { ValidationError } from 'class-validator';
 import { DynamicFieldsBaseCreateDto } from './dynamic-fields-base-create.dto';
 import { DynamicFieldsBaseUpdateDto } from './dynamic-fields-base-update.dto';
@@ -8,10 +6,6 @@ import { DynamicFieldsBaseEntity } from './dynamic-fields-base.entity';
 
 export abstract class BaseFieldService {
     abstract getRepository(): Repository<DynamicFieldsBaseEntity>;
-
-    transformObjectToClass<T>(resultType: Type<T>, dtoObject: Partial<DynamicFieldsBaseCreateDto>): T {
-        return plainToClass(resultType, dtoObject);
-    }
 
     abstract validateBeforeCreate(dtoObject: Partial<DynamicFieldsBaseCreateDto>): Promise<ValidationError[]>;
 

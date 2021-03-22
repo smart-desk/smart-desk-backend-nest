@@ -26,7 +26,7 @@ export class InputTextService extends BaseFieldService {
     }
 
     async validateAndCreate(dtoObject: Partial<CreateInputTextDto>): Promise<InputTextEntity> {
-        const dtoClass = this.transformObjectToClass<InputTextEntity>(InputTextEntity, dtoObject);
+        const dtoClass = plainToClass(InputTextEntity, dtoObject);
         const errors = await validate(dtoClass);
         if (errors.length) {
             throw getMessageFromValidationErrors(errors);
@@ -37,13 +37,13 @@ export class InputTextService extends BaseFieldService {
     }
 
     async validateBeforeUpdate(updateDtoObject: Partial<UpdateInputTextDto>): Promise<ValidationError[]> {
-        const dtoClass = this.transformObjectToClass(UpdateInputTextDto, updateDtoObject);
+        const dtoClass = plainToClass(UpdateInputTextDto, updateDtoObject);
         return await validate(dtoClass);
     }
 
     // todo think one more time about api, maybe return { error, instance }
     async validateAndUpdate(dtoObject: Partial<UpdateInputTextDto>): Promise<InputTextEntity> {
-        const dtoClass = this.transformObjectToClass(UpdateInputTextDto, dtoObject);
+        const dtoClass = plainToClass(UpdateInputTextDto, dtoObject);
         const errors = await validate(dtoClass);
         if (errors.length) {
             throw getMessageFromValidationErrors(errors);

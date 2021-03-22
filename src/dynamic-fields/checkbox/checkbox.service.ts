@@ -38,12 +38,12 @@ export class CheckboxService extends BaseFieldService {
     }
 
     async validateBeforeUpdate(dtoObject: Partial<UpdateCheckboxDto>): Promise<ValidationError[]> {
-        const dtoClass = this.transformObjectToClass(UpdateCheckboxDto, dtoObject);
+        const dtoClass = plainToClass(UpdateCheckboxDto, dtoObject);
         return await validate(dtoClass);
     }
 
     async validateAndUpdate(dtoObject: Partial<UpdateCheckboxDto>): Promise<CheckboxEntity> {
-        const dtoClass = this.transformObjectToClass(UpdateCheckboxDto, dtoObject);
+        const dtoClass = plainToClass(UpdateCheckboxDto, dtoObject);
         const errors = await validate(dtoClass);
         if (errors.length) {
             throw getMessageFromValidationErrors(errors);
