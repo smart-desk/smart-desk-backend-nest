@@ -12,24 +12,8 @@ import { TextareaParamsDto } from './dto/textarea-params.dto';
 
 @Injectable()
 export class TextareaService extends BaseFieldService {
-    constructor(@InjectRepository(TextareaEntity) private repository: Repository<TextareaEntity>) {
-        super(TextareaEntity, CreateTextareaDto);
-    }
-
-    getRepository(): Repository<TextareaEntity> {
-        return this.repository;
-    }
-
-    // todo think one more time about api, maybe return { error, instance }
-    async validateAndCreate(dtoObject: Partial<CreateTextareaDto>): Promise<TextareaEntity> {
-        const dtoClass = plainToClass(CreateTextareaDto, dtoObject);
-        const errors = await validate(dtoClass);
-        if (errors.length) {
-            throw getMessageFromValidationErrors(errors);
-        }
-
-        const instance = this.repository.create(dtoClass);
-        return this.repository.save(instance);
+    constructor(@InjectRepository(TextareaEntity) protected repository: Repository<TextareaEntity>) {
+        super(repository, TextareaEntity, CreateTextareaDto);
     }
 
     async validateBeforeUpdate(dtoObject: Partial<UpdateTextareaDto>): Promise<ValidationError[]> {

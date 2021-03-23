@@ -13,24 +13,8 @@ import { LocationFilterDto } from './dto/location-filter.dto';
 
 @Injectable()
 export class LocationService extends BaseFieldService {
-    constructor(@InjectRepository(LocationEntity) private repository: Repository<LocationEntity>) {
-        super(LocationEntity, CreateLocationDto);
-    }
-
-    getRepository(): Repository<LocationEntity> {
-        return this.repository;
-    }
-
-    // todo think one more time about api, maybe return { error, instance }
-    async validateAndCreate(dtoObject: Partial<CreateLocationDto>): Promise<LocationEntity> {
-        const dtoClass = plainToClass(CreateLocationDto, dtoObject);
-        const errors = await validate(dtoClass);
-        if (errors.length) {
-            throw getMessageFromValidationErrors(errors);
-        }
-
-        const instance = this.repository.create(dtoClass);
-        return this.repository.save(instance);
+    constructor(@InjectRepository(LocationEntity) protected repository: Repository<LocationEntity>) {
+        super(repository, LocationEntity, CreateLocationDto);
     }
 
     async validateBeforeUpdate(dtoObject: Partial<UpdateLocationDto>): Promise<ValidationError[]> {

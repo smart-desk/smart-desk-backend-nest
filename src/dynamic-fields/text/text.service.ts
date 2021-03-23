@@ -9,7 +9,7 @@ import { TextParamsDto } from './dto/text-params.dto';
 @Injectable()
 export class TextService extends BaseFieldService {
     constructor() {
-        super(null, null);
+        super(null, null, null);
     }
 
     getRepository(): Repository<DynamicFieldsBaseEntity> {

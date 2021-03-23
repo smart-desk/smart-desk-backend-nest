@@ -12,23 +12,8 @@ import { InputTextParamsDto } from './dto/input-text-params.dto';
 
 @Injectable()
 export class InputTextService extends BaseFieldService {
-    constructor(@InjectRepository(InputTextEntity) private repository: Repository<InputTextEntity>) {
-        super(InputTextEntity, CreateInputTextDto);
-    }
-
-    getRepository(): Repository<InputTextEntity> {
-        return this.repository;
-    }
-
-    async validateAndCreate(dtoObject: Partial<CreateInputTextDto>): Promise<InputTextEntity> {
-        const dtoClass = plainToClass(InputTextEntity, dtoObject);
-        const errors = await validate(dtoClass);
-        if (errors.length) {
-            throw getMessageFromValidationErrors(errors);
-        }
-
-        const instance = this.repository.create(dtoClass);
-        return this.repository.save(instance);
+    constructor(@InjectRepository(InputTextEntity) protected repository: Repository<InputTextEntity>) {
+        super(repository, InputTextEntity, CreateInputTextDto);
     }
 
     async validateBeforeUpdate(updateDtoObject: Partial<UpdateInputTextDto>): Promise<ValidationError[]> {
