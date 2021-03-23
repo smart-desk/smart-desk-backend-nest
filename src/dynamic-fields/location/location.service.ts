@@ -2,8 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { BaseFieldService } from '../base-field.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { validate, ValidationError } from 'class-validator';
-import { plainToClass } from 'class-transformer';
 import { LocationEntity } from './location.entity';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
@@ -13,12 +11,7 @@ import { LocationFilterDto } from './dto/location-filter.dto';
 @Injectable()
 export class LocationService extends BaseFieldService {
     constructor(@InjectRepository(LocationEntity) protected repository: Repository<LocationEntity>) {
-        super(repository, LocationEntity, CreateLocationDto, UpdateLocationDto);
-    }
-
-    async validateParams(dtoObject: Partial<LocationParamsDto>): Promise<ValidationError[]> {
-        const dtoClass = plainToClass(LocationParamsDto, dtoObject);
-        return await validate(dtoClass);
+        super(repository, LocationEntity, CreateLocationDto, UpdateLocationDto, LocationParamsDto);
     }
 
     async getAdvertIdsByFilter(fieldId: string, params: LocationFilterDto): Promise<string[]> {

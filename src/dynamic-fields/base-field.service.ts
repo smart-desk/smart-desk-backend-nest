@@ -12,7 +12,8 @@ export abstract class BaseFieldService {
         protected repository: Repository<DynamicFieldsBaseEntity>,
         private entityType: Type<DynamicFieldsBaseEntity>,
         private createDtoType: Type<DynamicFieldsBaseCreateDto>,
-        private updateDtoType: Type<DynamicFieldsBaseUpdateDto>
+        private updateDtoType: Type<DynamicFieldsBaseUpdateDto>,
+        private paramsDtoType: Type<Record<any, any>>
     ) {}
 
     getRepository(): Repository<DynamicFieldsBaseEntity> {
@@ -51,7 +52,11 @@ export abstract class BaseFieldService {
         return this.repository.save(instance);
     }
 
-    abstract validateParams(dtoObject: Record<any, any>): Promise<ValidationError[]>;
+    async validateParams(dtoObject: Record<any, any>): Promise<ValidationError[]> {
+        const dtoClass = plainToClass(this.paramsDtoType, dtoObject);
+        return await validate(dtoClass);
+    }
 
+    // todo create some basic implementation
     abstract async getAdvertIdsByFilter(fieldId: string, params: any): Promise<string[]>;
 }
