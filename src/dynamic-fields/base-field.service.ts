@@ -8,10 +8,11 @@ import { DynamicFieldsBaseEntity } from './dynamic-fields-base.entity';
 import { getMessageFromValidationErrors } from '../utils/validation';
 
 export abstract class BaseFieldService {
-    constructor(
+    protected constructor(
         protected repository: Repository<DynamicFieldsBaseEntity>,
         private entityType: Type<DynamicFieldsBaseEntity>,
-        private createDtoType: Type<DynamicFieldsBaseCreateDto>
+        private createDtoType: Type<DynamicFieldsBaseCreateDto>,
+        private updateDtoType: Type<DynamicFieldsBaseUpdateDto>
     ) {}
 
     getRepository(): Repository<DynamicFieldsBaseEntity> {
@@ -34,9 +35,21 @@ export abstract class BaseFieldService {
         return this.repository.save(instance);
     }
 
-    abstract validateBeforeUpdate(dtoObject: Partial<DynamicFieldsBaseUpdateDto>): Promise<ValidationError[]>;
+    async validateBeforeUpdate(dtoObject: Partial<DynamicFieldsBaseUpdateDto>): Promise<ValidationError[]> {
+        const dtoClass = plainToClass(this.updateDtoType, dtoObject);
+        return await validate(dtoClass);
+    }
 
-    abstract validateAndUpdate(dtoObject: Partial<DynamicFieldsBaseUpdateDto>): Promise<DynamicFieldsBaseEntity>;
+    async validateAndUpdate(dtoObject: Partial<DynamicFieldsBaseUpdateDto>): Promise<DynamicFieldsBaseEntity> {
+        const dtoClass = plainToClass(this.updateDtoType, dtoObject);
+        const errors = await validate(dtoClass);
+        if (errors.length) {
+            throw getMessageFromValidationErrors(errors);
+        }
+
+        const instance = this.repository.create(dtoClass);
+        return this.repository.save(instance);
+    }
 
     abstract validateParams(dtoObject: Record<any, any>): Promise<ValidationError[]>;
 

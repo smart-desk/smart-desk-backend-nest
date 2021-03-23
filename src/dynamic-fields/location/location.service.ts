@@ -6,7 +6,6 @@ import { validate, ValidationError } from 'class-validator';
 import { plainToClass } from 'class-transformer';
 import { LocationEntity } from './location.entity';
 import { CreateLocationDto } from './dto/create-location.dto';
-import { getMessageFromValidationErrors } from '../../utils/validation';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { LocationParamsDto } from './dto/location-params.dto';
 import { LocationFilterDto } from './dto/location-filter.dto';
@@ -14,24 +13,7 @@ import { LocationFilterDto } from './dto/location-filter.dto';
 @Injectable()
 export class LocationService extends BaseFieldService {
     constructor(@InjectRepository(LocationEntity) protected repository: Repository<LocationEntity>) {
-        super(repository, LocationEntity, CreateLocationDto);
-    }
-
-    async validateBeforeUpdate(dtoObject: Partial<UpdateLocationDto>): Promise<ValidationError[]> {
-        const dtoClass = plainToClass(UpdateLocationDto, dtoObject);
-        return await validate(dtoClass);
-    }
-
-    // todo think one more time about api, maybe return { error, instance }
-    async validateAndUpdate(dtoObject: Partial<UpdateLocationDto>): Promise<LocationEntity> {
-        const dtoClass = plainToClass(UpdateLocationDto, dtoObject);
-        const errors = await validate(dtoClass);
-        if (errors.length) {
-            throw getMessageFromValidationErrors(errors);
-        }
-
-        const instance = this.repository.create(dtoClass);
-        return this.repository.save(instance);
+        super(repository, LocationEntity, CreateLocationDto, UpdateLocationDto);
     }
 
     async validateParams(dtoObject: Partial<LocationParamsDto>): Promise<ValidationError[]> {

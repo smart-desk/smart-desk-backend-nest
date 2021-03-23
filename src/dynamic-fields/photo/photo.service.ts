@@ -6,30 +6,13 @@ import { validate, ValidationError } from 'class-validator';
 import { plainToClass } from 'class-transformer';
 import { PhotoEntity } from './photo.entity';
 import { CreatePhotoDto } from './dto/create-photo.dto';
-import { getMessageFromValidationErrors } from '../../utils/validation';
 import { UpdatePhotoDto } from './dto/update-photo.dto';
 import { PhotoParamsDto } from './dto/photo-params.dto';
 
 @Injectable()
 export class PhotoService extends BaseFieldService {
     constructor(@InjectRepository(PhotoEntity) protected repository: Repository<PhotoEntity>) {
-        super(repository, PhotoEntity, CreatePhotoDto);
-    }
-
-    async validateBeforeUpdate(dtoObject: Partial<UpdatePhotoDto>): Promise<ValidationError[]> {
-        const dtoClass = plainToClass(UpdatePhotoDto, dtoObject);
-        return await validate(dtoClass);
-    }
-
-    async validateAndUpdate(dtoObject: Partial<UpdatePhotoDto>): Promise<PhotoEntity> {
-        const dtoClass = plainToClass(UpdatePhotoDto, dtoObject);
-        const errors = await validate(dtoClass);
-        if (errors.length) {
-            throw getMessageFromValidationErrors(errors);
-        }
-
-        const instance = this.repository.create(dtoClass);
-        return this.repository.save(instance);
+        super(repository, PhotoEntity, CreatePhotoDto, UpdatePhotoDto);
     }
 
     async validateParams(dtoObject: Partial<PhotoParamsDto>): Promise<ValidationError[]> {

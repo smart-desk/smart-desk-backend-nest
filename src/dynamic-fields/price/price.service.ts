@@ -6,7 +6,6 @@ import { validate, ValidationError } from 'class-validator';
 import { plainToClass } from 'class-transformer';
 import { PriceEntity } from './price.entity';
 import { CreatePriceDto } from './dto/create-price.dto';
-import { getMessageFromValidationErrors } from '../../utils/validation';
 import { UpdatePriceDto } from './dto/update-price.dto';
 import { PriceParamsDto } from './dto/price-params.dto';
 import { PriceFilterDto } from './dto/price-filter.dto';
@@ -14,24 +13,7 @@ import { PriceFilterDto } from './dto/price-filter.dto';
 @Injectable()
 export class PriceService extends BaseFieldService {
     constructor(@InjectRepository(PriceEntity) protected repository: Repository<PriceEntity>) {
-        super(repository, PriceEntity, CreatePriceDto);
-    }
-
-    async validateBeforeUpdate(dtoObject: Partial<UpdatePriceDto>): Promise<ValidationError[]> {
-        const dtoClass = plainToClass(UpdatePriceDto, dtoObject);
-        return await validate(dtoClass);
-    }
-
-    // todo think one more time about api, maybe return { error, instance }
-    async validateAndUpdate(dtoObject: Partial<UpdatePriceDto>): Promise<PriceEntity> {
-        const dtoClass = plainToClass(UpdatePriceDto, dtoObject);
-        const errors = await validate(dtoClass);
-        if (errors.length) {
-            throw getMessageFromValidationErrors(errors);
-        }
-
-        const instance = this.repository.create(dtoClass);
-        return this.repository.save(instance);
+        super(repository, PriceEntity, CreatePriceDto, UpdatePriceDto);
     }
 
     async validateParams(dtoObject: Partial<PriceParamsDto>): Promise<ValidationError[]> {

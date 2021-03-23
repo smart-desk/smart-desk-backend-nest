@@ -1,12 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { BaseFieldService } from '../base-field.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Any, In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CheckboxEntity } from './checkbox.entity';
 import { validate, ValidationError } from 'class-validator';
 import { plainToClass } from 'class-transformer';
 import { CreateCheckboxDto } from './dto/create-checkbox.dto';
-import { getMessageFromValidationErrors } from '../../utils/validation';
 import { UpdateCheckboxDto } from './dto/update-checkbox.dto';
 import { CheckboxParamsDto } from './dto/checkbox-params.dto';
 import { CheckboxFilterDto } from './dto/checkbox-filter.dto';
@@ -14,23 +13,7 @@ import { CheckboxFilterDto } from './dto/checkbox-filter.dto';
 @Injectable()
 export class CheckboxService extends BaseFieldService {
     constructor(@InjectRepository(CheckboxEntity) protected repository: Repository<CheckboxEntity>) {
-        super(repository, CheckboxEntity, CreateCheckboxDto);
-    }
-
-    async validateBeforeUpdate(dtoObject: Partial<UpdateCheckboxDto>): Promise<ValidationError[]> {
-        const dtoClass = plainToClass(UpdateCheckboxDto, dtoObject);
-        return await validate(dtoClass);
-    }
-
-    async validateAndUpdate(dtoObject: Partial<UpdateCheckboxDto>): Promise<CheckboxEntity> {
-        const dtoClass = plainToClass(UpdateCheckboxDto, dtoObject);
-        const errors = await validate(dtoClass);
-        if (errors.length) {
-            throw getMessageFromValidationErrors(errors);
-        }
-
-        const instance = this.repository.create(dtoClass);
-        return this.repository.save(instance);
+        super(repository, CheckboxEntity, CreateCheckboxDto, UpdateCheckboxDto);
     }
 
     async validateParams(dtoObject: Partial<CheckboxParamsDto>): Promise<ValidationError[]> {
