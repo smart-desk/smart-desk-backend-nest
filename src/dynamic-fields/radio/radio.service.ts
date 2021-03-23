@@ -14,16 +14,11 @@ import { RadioFilterDto } from './dto/radio-filter.dto';
 @Injectable()
 export class RadioService extends BaseFieldService {
     constructor(@InjectRepository(RadioEntity) private repository: Repository<RadioEntity>) {
-        super();
+        super(RadioEntity, CreateRadioDto);
     }
 
     getRepository(): Repository<RadioEntity> {
         return this.repository;
-    }
-
-    async validateBeforeCreate(dtoObject: Partial<CreateRadioDto>): Promise<ValidationError[]> {
-        const dtoClass = plainToClass(CreateRadioDto, dtoObject);
-        return await validate(dtoClass);
     }
 
     async validateAndCreate(dtoObject: Partial<CreateRadioDto>): Promise<RadioEntity> {

@@ -1,37 +1,34 @@
 import { Injectable } from '@nestjs/common';
 import { BaseFieldService } from '../base-field.service';
-import { RadioEntity } from '../radio/radio.entity';
 import { Repository } from 'typeorm';
-import { CreateRadioDto } from '../radio/dto/create-radio.dto';
 import { plainToClass } from 'class-transformer';
 import { validate, ValidationError } from 'class-validator';
-import { UpdateRadioDto } from '../radio/dto/update-radio.dto';
 import { DynamicFieldsBaseEntity } from '../dynamic-fields-base.entity';
 import { TextParamsDto } from './dto/text-params.dto';
 
 @Injectable()
 export class TextService extends BaseFieldService {
     constructor() {
-        super();
+        super(null, null);
     }
 
-    getRepository(): Repository<RadioEntity> {
+    getRepository(): Repository<DynamicFieldsBaseEntity> {
         return;
     }
 
-    async validateBeforeCreate(dtoObject: Partial<CreateRadioDto>): Promise<ValidationError[]> {
+    async validateBeforeCreate(dtoObject: Partial<any>): Promise<ValidationError[]> {
         return;
     }
 
-    async validateAndCreate(dtoObject: Partial<CreateRadioDto>): Promise<DynamicFieldsBaseEntity> {
+    async validateAndCreate(dtoObject: Partial<any>): Promise<DynamicFieldsBaseEntity> {
         return;
     }
 
-    async validateBeforeUpdate(dtoObject: Partial<UpdateRadioDto>): Promise<ValidationError[]> {
+    async validateBeforeUpdate(dtoObject: Partial<any>): Promise<ValidationError[]> {
         return;
     }
 
-    async validateAndUpdate(dtoObject: Partial<UpdateRadioDto>): Promise<DynamicFieldsBaseEntity> {
+    async validateAndUpdate(dtoObject: Partial<any>): Promise<DynamicFieldsBaseEntity> {
         return;
     }
 

@@ -14,16 +14,11 @@ import { PriceFilterDto } from './dto/price-filter.dto';
 @Injectable()
 export class PriceService extends BaseFieldService {
     constructor(@InjectRepository(PriceEntity) private repository: Repository<PriceEntity>) {
-        super();
+        super(PriceEntity, CreatePriceDto);
     }
 
     getRepository(): Repository<PriceEntity> {
         return this.repository;
-    }
-
-    async validateBeforeCreate(dtoObject: Partial<CreatePriceDto>): Promise<ValidationError[]> {
-        const dtoClass = plainToClass(CreatePriceDto, dtoObject);
-        return await validate(dtoClass);
     }
 
     // todo think one more time about api, maybe return { error, instance }

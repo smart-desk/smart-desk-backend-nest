@@ -13,16 +13,11 @@ import { TextareaParamsDto } from './dto/textarea-params.dto';
 @Injectable()
 export class TextareaService extends BaseFieldService {
     constructor(@InjectRepository(TextareaEntity) private repository: Repository<TextareaEntity>) {
-        super();
+        super(TextareaEntity, CreateTextareaDto);
     }
 
     getRepository(): Repository<TextareaEntity> {
         return this.repository;
-    }
-
-    async validateBeforeCreate(dtoObject: Partial<CreateTextareaDto>): Promise<ValidationError[]> {
-        const dtoClass = plainToClass(CreateTextareaDto, dtoObject);
-        return await validate(dtoClass);
     }
 
     // todo think one more time about api, maybe return { error, instance }

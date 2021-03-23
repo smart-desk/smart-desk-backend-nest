@@ -14,16 +14,11 @@ import { LocationFilterDto } from './dto/location-filter.dto';
 @Injectable()
 export class LocationService extends BaseFieldService {
     constructor(@InjectRepository(LocationEntity) private repository: Repository<LocationEntity>) {
-        super();
+        super(LocationEntity, CreateLocationDto);
     }
 
     getRepository(): Repository<LocationEntity> {
         return this.repository;
-    }
-
-    async validateBeforeCreate(dtoObject: Partial<CreateLocationDto>): Promise<ValidationError[]> {
-        const dtoClass = plainToClass(CreateLocationDto, dtoObject);
-        return await validate(dtoClass);
     }
 
     // todo think one more time about api, maybe return { error, instance }

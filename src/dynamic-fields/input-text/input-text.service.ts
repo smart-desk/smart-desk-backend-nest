@@ -13,16 +13,11 @@ import { InputTextParamsDto } from './dto/input-text-params.dto';
 @Injectable()
 export class InputTextService extends BaseFieldService {
     constructor(@InjectRepository(InputTextEntity) private repository: Repository<InputTextEntity>) {
-        super();
+        super(InputTextEntity, CreateInputTextDto);
     }
 
     getRepository(): Repository<InputTextEntity> {
         return this.repository;
-    }
-
-    async validateBeforeCreate(dtoObject: Partial<CreateInputTextDto>): Promise<ValidationError[]> {
-        const dtoClass = plainToClass(CreateInputTextDto, dtoObject);
-        return await validate(dtoClass);
     }
 
     async validateAndCreate(dtoObject: Partial<CreateInputTextDto>): Promise<InputTextEntity> {

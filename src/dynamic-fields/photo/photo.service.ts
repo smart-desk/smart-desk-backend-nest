@@ -13,16 +13,11 @@ import { PhotoParamsDto } from './dto/photo-params.dto';
 @Injectable()
 export class PhotoService extends BaseFieldService {
     constructor(@InjectRepository(PhotoEntity) private repository: Repository<PhotoEntity>) {
-        super();
+        super(PhotoEntity, CreatePhotoDto);
     }
 
     getRepository(): Repository<PhotoEntity> {
         return this.repository;
-    }
-
-    async validateBeforeCreate(dtoObject: Partial<CreatePhotoDto>): Promise<ValidationError[]> {
-        const dtoClass = plainToClass(CreatePhotoDto, dtoObject);
-        return await validate(dtoClass);
     }
 
     async validateAndCreate(dtoObject: Partial<CreatePhotoDto>): Promise<PhotoEntity> {

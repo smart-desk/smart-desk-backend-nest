@@ -14,16 +14,11 @@ import { CheckboxFilterDto } from './dto/checkbox-filter.dto';
 @Injectable()
 export class CheckboxService extends BaseFieldService {
     constructor(@InjectRepository(CheckboxEntity) private repository: Repository<CheckboxEntity>) {
-        super();
+        super(CheckboxEntity, CreateCheckboxDto);
     }
 
     getRepository(): Repository<CheckboxEntity> {
         return this.repository;
-    }
-
-    async validateBeforeCreate(dtoObject: Partial<CreateCheckboxDto>): Promise<ValidationError[]> {
-        const dtoClass = plainToClass(CreateCheckboxDto, dtoObject);
-        return await validate(dtoClass);
     }
 
     async validateAndCreate(dtoObject: Partial<CreateCheckboxDto>): Promise<CheckboxEntity> {
