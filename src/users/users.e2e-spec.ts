@@ -17,7 +17,10 @@ import { BlockUserDto } from './dto/block-user.dto';
 describe('Users controller', () => {
     let app: INestApplication;
     const user = new User();
+    user.phone = '+71231231212';
+    user.isPhoneVerified = true;
 
+    const userRepositoryMock = createRepositoryMock<User>([user]);
     const JwtGuard = JwtAuthGuardMock;
 
     beforeAll(async () => {
@@ -25,9 +28,7 @@ describe('Users controller', () => {
             imports: [UsersModule, AccessControlModule.forRoles(roles)],
         })
             .overrideProvider(getRepositoryToken(User))
-            .useValue(
-                createRepositoryMock<User>([user])
-            )
+            .useValue(userRepositoryMock)
             .overrideGuard(JwtAuthGuard)
             .useValue(JwtGuard)
             .compile();
@@ -213,6 +214,42 @@ describe('Users controller', () => {
                 .patch(`/users/${uuid()}/block`)
                 .send({ value: true } as BlockUserDto)
                 .expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
+    describe("get user's phone", () => {
+        it(`successfully`, () => {
+            return request(app.getHttpServer()).get(`/users/${uuid()}/phone`).expect(HttpStatus.OK);
+        });
+
+        it(`with error - not found because user has no phone`, () => {
+            user.phone = null;
+            userRepositoryMock.findOne.mockReturnValueOnce(user);
+
+            return request(app.getHttpServer())
+                .get(`/users/${uuid()}/phone`)
+                .expect(HttpStatus.NOT_FOUND)
+                .expect(res => {
+                    expect(res.body.message).toContain('Phone not found');
+                });
+        });
+
+        it(`with error - not found because user hasn't verified it`, () => {
+            user.phone = '+796521234434';
+            user.isPhoneVerified = false;
+            userRepositoryMock.findOne.mockReturnValueOnce(user);
+
+            return request(app.getHttpServer())
+                .get(`/users/${uuid()}/phone`)
+                .expect(HttpStatus.NOT_FOUND)
+                .expect(res => {
+                    expect(res.body.message).toContain('Phone not found');
+                });
+        });
+
+        it(`with error - unauthorized`, () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+            return request(app.getHttpServer()).get(`/users/${uuid()}/phone`).expect(HttpStatus.FORBIDDEN);
         });
     });
 });
