@@ -1,4 +1,4 @@
-import { Body, Controller, ForbiddenException, Get, Param, ParseUUIDPipe, Patch, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, Get, NotFoundException, Param, ParseUUIDPipe, Patch, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
@@ -80,6 +80,22 @@ export class UsersController {
         const isAdmin = this.isAdmin(req.user);
         if (!isAdmin) throw new ForbiddenException();
         return this.usersService.blockUser(id, body.value);
+    }
+
+    @Get(':id/phone')
+    @ApiBearerAuth('access-token')
+    @UseGuards(JwtAuthGuard, ACGuard)
+    @UseRoles({
+        resource: ResourceEnum.USER,
+        action: 'read',
+    })
+    async getPhone(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<string> {
+        // todo count how many phones are requested by one user and set a limit
+        const user = await this.usersService.findOne(id);
+        if (!user.isPhoneVerified || !user.phone) {
+            throw new NotFoundException('Phone not found');
+        }
+        return user.phone;
     }
 
     private isAdmin(userPayload: JWTPayload): boolean {
