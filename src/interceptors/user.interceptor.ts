@@ -20,6 +20,10 @@ export class UserInterceptor implements NestInterceptor {
     }
 
     private serializeUser(user: User, requester: JWTPayload): Partial<User> {
+        if (!requester) {
+            return omit(user, EXCLUDED_USER_PROP);
+        }
+
         if (requester.roles.includes(RolesEnum.ADMIN) || requester.id === user.id) {
             return user;
         }
