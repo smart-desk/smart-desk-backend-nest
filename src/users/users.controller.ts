@@ -1,4 +1,16 @@
-import { Body, Controller, ForbiddenException, Get, NotFoundException, Param, ParseUUIDPipe, Patch, Req, UseGuards } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    ForbiddenException,
+    Get,
+    NotFoundException,
+    Param,
+    ParseUUIDPipe,
+    Patch,
+    Req,
+    UseGuards,
+    UseInterceptors,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
@@ -10,6 +22,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateUserRolesDto } from './dto/update-user-roles.dto';
 import { BlockedUserGuard } from '../guards/blocked-user.guard';
 import { BlockUserDto } from './dto/block-user.dto';
+import { UserInterceptor } from '../interceptors/user.interceptor';
 
 @Controller('users')
 @ApiTags('Users')
@@ -48,6 +61,9 @@ export class UsersController {
     }
 
     @Get(':id')
+    @ApiBearerAuth('access-token')
+    @UseInterceptors(UserInterceptor)
+    @UseGuards(new JwtAuthGuard({ allowNoToken: true }))
     async getUser(@Param('id', ParseUUIDPipe) id: string): Promise<User> {
         return await this.usersService.findOne(id);
     }

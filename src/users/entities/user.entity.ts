@@ -19,14 +19,14 @@ export class User {
     avatar: string;
 
     @Column('varchar', { length: 255 })
-    email: string; // todo hide for public
+    email: string;
 
     @Column('varchar', { length: 255, array: true })
     roles: string[]; // todo hide for public
 
     @Column('varchar', { length: 255 })
-    phone: string;  // todo hide for public
+    phone: string;
 
     @Column('boolean', { name: 'is_phone_verified' })
-    isPhoneVerified: boolean;  // todo hide for public
+    isPhoneVerified: boolean;
 }

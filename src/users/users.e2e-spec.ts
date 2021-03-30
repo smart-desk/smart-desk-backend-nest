@@ -13,12 +13,18 @@ import { JwtAuthGuardMock } from '../../test/mocks/jwt-auth.guard.mock';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateUserRolesDto } from './dto/update-user-roles.dto';
 import { BlockUserDto } from './dto/block-user.dto';
+import { UserStatus } from './user-status.enum';
 
 describe('Users controller', () => {
     let app: INestApplication;
     const user = new User();
+    user.id = uuid();
+    user.status = UserStatus.ACTIVE;
+    user.firstName = 'Peter';
+    user.lastName = 'Parker';
     user.phone = '+71231231212';
     user.isPhoneVerified = true;
+    user.email = 'email@email.com';
 
     const userRepositoryMock = createRepositoryMock<User>([user]);
     const JwtGuard = JwtAuthGuardMock;
@@ -59,6 +65,24 @@ describe('Users controller', () => {
 
         it(`with error - not enough permissions`, () => {
             return request(app.getHttpServer()).get('/users').expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
+    describe('get user', () => {
+        // todo add tests for user and profile owner
+        it(`successfully with incomplete info as a user`, () => {
+            return request(app.getHttpServer())
+                .get(`/users/${uuid()}`)
+                .expect(HttpStatus.OK)
+                .expect(res => {
+                    expect(res.body.id).toBe(user.id);
+                    expect(res.body.status).toBe(user.status);
+                    expect(res.body.firstName).toBe(user.firstName);
+                    expect(res.body.lastName).toBeUndefined();
+                    expect(res.body.email).toBeUndefined();
+                    expect(res.body.phone).toBeUndefined();
+                    expect(res.body.isPhoneVerified).toBeUndefined();
+                });
         });
     });
 
