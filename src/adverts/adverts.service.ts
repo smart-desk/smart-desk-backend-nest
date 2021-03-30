@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In, Repository, Raw } from 'typeorm';
 import { isUUID } from 'class-validator';
 import { Advert } from './entities/advert.entity';
 import { GetAdvertsDto, GetAdvertsResponseDto } from './dto/get-adverts.dto';
@@ -277,7 +277,7 @@ export class AdvertsService {
         let adverts: Advert[] = [];
         let totalCount: number = 0;
         if (advertIds && advertIds.length) {
-            const where = this.getWhereClause(options);
+            const where = this.getWhereClause(options, categoryId);
             where.id = In(advertIds);
 
             [adverts, totalCount] = await this.advertRepository.findAndCount({
@@ -312,6 +312,12 @@ export class AdvertsService {
 
         if (options.user) {
             where.userId = options.user;
+        }
+
+        if (options.search) {
+            where.title = Raw(title => `LOWER(${title} COLLATE "en_US") ILIKE :phrase`, {
+                phrase: `%${options.search.toLocaleLowerCase()}%`,
+            });
         }
 
         return where;
