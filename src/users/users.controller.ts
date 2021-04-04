@@ -114,7 +114,8 @@ export class UsersController {
         return user.phone;
     }
 
-    private isAdmin(user: User): boolean {
+    // todo fixme!!!
+    private isAdmin(user: any): boolean {
         return user.roles && user.roles.some(role => role === RolesEnum.ADMIN);
     }
 }

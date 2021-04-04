@@ -209,18 +209,21 @@ export class AdvertsController {
         return await this.advertsService.delete(id);
     }
 
-    private async isAdminOrOwner(advertId: string, user: User): Promise<boolean> {
+    // todo fixme!!!
+    private async isAdminOrOwner(advertId: string, user: any): Promise<boolean> {
         const isOwner = await this.isOwner(advertId, user);
         const isAdmin = this.isAdmin(user);
         return isOwner || isAdmin;
     }
 
-    private async isOwner(advertId: string, user: User): Promise<boolean> {
+    // todo fixme!!!
+    private async isOwner(advertId: string, user: any): Promise<boolean> {
         const owner = await this.advertsService.getAdvertOwner(advertId);
         return owner === user.id;
     }
 
-    private isAdmin(user: User): boolean {
+    // todo fixme!!!
+    private isAdmin(user: any): boolean {
         return user.roles && user.roles.some(role => role === RolesEnum.ADMIN);
     }
 }
