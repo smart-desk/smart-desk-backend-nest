@@ -3,17 +3,14 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { UsersService } from '../users/users.service';
 import { Request } from 'express';
+import { User } from '../users/entities/user.entity';
 
 export type RequestWithUserPayload = Request & JWTUserPayload;
 
-export type JWTPayload = {
-    id: string;
-    email: string;
-    roles: string[];
-};
+export type JWTPayload = { sub: string; email: string };
 
 export type JWTUserPayload = {
-    user: JWTPayload;
+    user: User;
 };
 
 @Injectable()
@@ -26,14 +23,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         });
     }
 
-    async validate(payload: { sub: string; email: string }): Promise<JWTPayload> {
+    async validate(payload: { sub: string; email: string }): Promise<User> {
         const id = payload.sub;
-        const user = await this.userService.findOne(id);
-
-        return {
-            id,
-            email: user.email,
-            roles: user.roles,
-        };
+        return await this.userService.findOne(id);
     }
 }
