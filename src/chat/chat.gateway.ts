@@ -20,7 +20,7 @@ const options = {
     },
 };
 
-enum ChatEvent {
+export enum ChatEvent {
     GET_MESSAGES = 'getMessages',
     NEW_MESSAGE = 'newMessage',
     JOIN_CHAT = 'joinChat',
