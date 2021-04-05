@@ -2,7 +2,8 @@ import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway } from
 import { Socket } from 'socket.io';
 import { UseGuards } from '@nestjs/common';
 import { WsJwtAuthGuard } from '../guards/ws-jwt-auth.guard';
-import { User } from '../users/entities/user.entity';
+import { ChatMessageDto } from './dto/chat-message.dto';
+import { ChatBaseEventDto } from './dto/chat-base-event.dto';
 
 const options = {
     handlePreflightRequest: (req, res) => {
@@ -18,29 +19,17 @@ const options = {
     },
 };
 
-export interface ChatBaseEvent {
-    user: User;
-}
-
-export interface ChatEvent extends ChatBaseEvent {
-    chatId: string;
-}
-
-export interface ChatMessage extends ChatEvent {
-    message: string;
-}
-
 @WebSocketGateway(options)
 export class ChatGateway {
     @UseGuards(WsJwtAuthGuard) // todo blocked user maybe too
     @SubscribeMessage('message')
-    handleMessage(@ConnectedSocket() client: Socket, @MessageBody() data: ChatMessage): void {
+    handleMessage(@ConnectedSocket() client: Socket, @MessageBody() data: ChatMessageDto): void {
         client.to(data.chatId).emit('message', data);
     }
 
     @UseGuards(WsJwtAuthGuard)
     @SubscribeMessage('joinChat')
-    joinChat(@ConnectedSocket() client: Socket, @MessageBody() data: ChatEvent): void {
+    joinChat(@ConnectedSocket() client: Socket, @MessageBody() data: ChatBaseEventDto): void {
         // todo check if user can join chat
         client.join(data.chatId);
         client.emit('joinChat', { chatId: data.chatId });

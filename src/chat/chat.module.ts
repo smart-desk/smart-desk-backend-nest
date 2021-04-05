@@ -3,11 +3,12 @@ import { ChatGateway } from './chat.gateway';
 import { JwtModule } from '@nestjs/jwt';
 import * as dotenv from 'dotenv';
 import { UsersModule } from '../users/users.module';
+import { ChatService } from './chat.service';
 
 dotenv.config();
 
 @Module({
-    providers: [ChatGateway],
+    providers: [ChatGateway, ChatService],
     imports: [
         UsersModule,
         JwtModule.register({
