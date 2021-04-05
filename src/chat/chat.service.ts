@@ -23,6 +23,10 @@ export class ChatService {
         return this.chatRepository.save(entity);
     }
 
+    async getChat(id: string): Promise<Chat> {
+        return this.chatRepository.findOne({ id });
+    }
+
     async getChatsByUser(userId: string): Promise<Chat[]> {
         return this.chatRepository.find({
             where: [{ user1: userId }, { user2: userId }],
@@ -30,7 +34,6 @@ export class ChatService {
     }
 
     async createMessage(body: CreateChatMessageDto): Promise<ChatMessage> {
-        // todo check if user can write to this chat
         const entity = this.chatMessageRepository.create(body);
         return this.chatMessageRepository.save(entity);
     }
