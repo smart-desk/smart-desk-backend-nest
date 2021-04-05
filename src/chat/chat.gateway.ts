@@ -2,7 +2,7 @@ import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway } from
 import { Socket } from 'socket.io';
 import { UseGuards } from '@nestjs/common';
 import { WsJwtAuthGuard } from '../guards/ws-jwt-auth.guard';
-import { ChatMessageDto } from './dto/chat-message.dto';
+import { CreateChatMessageDto } from './dto/create-chat-message.dto';
 import { ChatBaseEventDto } from './dto/chat-base-event.dto';
 
 const options = {
@@ -23,7 +23,7 @@ const options = {
 export class ChatGateway {
     @UseGuards(WsJwtAuthGuard) // todo blocked user maybe too
     @SubscribeMessage('message')
-    handleMessage(@ConnectedSocket() client: Socket, @MessageBody() data: ChatMessageDto): void {
+    handleMessage(@ConnectedSocket() client: Socket, @MessageBody() data: CreateChatMessageDto): void {
         client.to(data.chatId).emit('message', data);
     }
 

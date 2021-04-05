@@ -16,6 +16,7 @@ export enum ResourceEnum {
     FILE = 'file',
     BOOKMARK = 'bookmark',
     ADDRESS = 'address',
+    CHAT = 'chat',
 }
 
 export const roles = new RolesBuilder();
@@ -27,8 +28,8 @@ roles
     // User
     .grant(RolesEnum.USER)
     .extend(RolesEnum.VIEWER)
-    .read([ResourceEnum.BOOKMARK, ResourceEnum.ADDRESS])
-    .create([ResourceEnum.ADVERT, ResourceEnum.FILE, ResourceEnum.BOOKMARK, ResourceEnum.ADDRESS])
+    .read([ResourceEnum.BOOKMARK, ResourceEnum.ADDRESS, ResourceEnum.CHAT])
+    .create([ResourceEnum.ADVERT, ResourceEnum.FILE, ResourceEnum.BOOKMARK, ResourceEnum.ADDRESS, ResourceEnum.CHAT])
     .update([ResourceEnum.ADVERT, ResourceEnum.USER, ResourceEnum.BOOKMARK, ResourceEnum.ADDRESS])
     .delete([ResourceEnum.ADVERT, ResourceEnum.BOOKMARK, ResourceEnum.ADDRESS])
     // Admin
@@ -43,6 +44,7 @@ roles
         ResourceEnum.FILE,
         ResourceEnum.BOOKMARK,
         ResourceEnum.ADDRESS,
+        ResourceEnum.CHAT,
     ])
     .read([
         ResourceEnum.ADVERT,
@@ -54,6 +56,7 @@ roles
         ResourceEnum.FILE,
         ResourceEnum.BOOKMARK,
         ResourceEnum.ADDRESS,
+        ResourceEnum.CHAT,
     ])
     .update([
         ResourceEnum.ADVERT,
@@ -65,6 +68,7 @@ roles
         ResourceEnum.FILE,
         ResourceEnum.BOOKMARK,
         ResourceEnum.ADDRESS,
+        ResourceEnum.CHAT,
     ])
     .delete([
         ResourceEnum.ADVERT,
@@ -76,4 +80,5 @@ roles
         ResourceEnum.FILE,
         ResourceEnum.BOOKMARK,
         ResourceEnum.ADDRESS,
+        ResourceEnum.CHAT,
     ]);
