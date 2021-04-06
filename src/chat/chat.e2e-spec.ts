@@ -165,6 +165,8 @@ describe('Chat controller', () => {
         });
 
         describe('send message', () => {
+            let socket2;
+
             it(`successfully`, done => {
                 socket = io.connect(baseAddress);
                 const chatId = uuid();
@@ -172,7 +174,7 @@ describe('Chat controller', () => {
                 const message = { chatId, content };
                 chatMessageRepositoryMock.save.mockReturnValueOnce(message);
 
-                const socket2 = io.connect(baseAddress);
+                socket2 = io.connect(baseAddress);
 
                 socket.emit(ChatEvent.JOIN_CHAT, { chatId });
                 socket2.emit(ChatEvent.JOIN_CHAT, { chatId });
@@ -182,6 +184,10 @@ describe('Chat controller', () => {
                     expect(res.content).toBe(content);
                     done();
                 });
+            });
+
+            afterEach(() => {
+                socket2.close();
             });
         });
 
@@ -234,5 +240,9 @@ describe('Chat controller', () => {
         afterEach(() => {
             socket.close();
         });
+    });
+
+    afterAll(() => {
+        app.close();
     });
 });
