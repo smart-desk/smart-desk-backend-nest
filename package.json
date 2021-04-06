@@ -33,7 +33,7 @@
         "@nestjs/passport": "^7.1.0",
         "@nestjs/platform-express": "^7.0.0",
         "@nestjs/platform-socket.io": "^7.6.15",
-        "@nestjs/swagger": "^4.6.1",
+        "@nestjs/swagger": "^4.8.0",
         "@nestjs/typeorm": "^7.1.4",
         "@nestjs/websockets": "^7.6.15",
         "aws-sdk": "^2.799.0",

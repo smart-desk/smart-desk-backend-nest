@@ -65,21 +65,18 @@ export class BookmarksController {
         return await this.bookmarksService.deleteBookmark(id);
     }
 
-    // todo fixme!!!
-    private async isAdminOrOwner(bookmarkId: string, user: any): Promise<boolean> {
+    private async isAdminOrOwner(bookmarkId: string, user: User): Promise<boolean> {
         const isOwner = await this.isOwner(bookmarkId, user);
         const isAdmin = this.isAdmin(user);
         return isOwner || isAdmin;
     }
 
-    // todo fixme!!!
-    private async isOwner(bookmarkId: string, user: any): Promise<boolean> {
+    private async isOwner(bookmarkId: string, user: User): Promise<boolean> {
         const owner = await this.bookmarksService.getBookmarkOwner(bookmarkId);
         return owner === user.id;
     }
 
-    // todo fixme!!!
-    private isAdmin(user: any): boolean {
+    private isAdmin(user: User): boolean {
         return user.roles && user.roles.some(role => role === RolesEnum.ADMIN);
     }
 }
