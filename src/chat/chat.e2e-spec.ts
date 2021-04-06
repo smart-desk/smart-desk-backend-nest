@@ -16,9 +16,15 @@ import { Field } from '../fields/field.entity';
 import { Chat } from './enitities/chat.entity';
 import { Section } from '../sections/section.entity';
 import { ChatMessage } from './enitities/chat-message.entity';
+import * as io from 'socket.io-client';
+import { ChatEvent } from './chat.gateway';
+import { WsJwtAuthGuard } from '../guards/ws-jwt-auth.guard';
+import { WsJwtAuthGuardMock } from '../../test/mocks/ws-jwt-auth.guard.mock';
 
 describe('Chat controller', () => {
     let app: INestApplication;
+    let socket;
+    let baseAddress;
     const user = new User();
     user.id = uuid();
 
@@ -36,21 +42,25 @@ describe('Chat controller', () => {
 
     const chat = new Chat();
     chat.id = uuid();
+    chat.user1 = user.id;
+    chat.user2 = 'FromTestWsJwtAuthGuardMock';
 
     const chatMessage = new ChatMessage();
     chatMessage.id = uuid();
 
     const JwtGuard = JwtAuthGuardMock;
     const userServiceRepositoryMock = createRepositoryMock<User>([user]);
+    const chatMessageRepositoryMock = createRepositoryMock([chatMessage]);
+    const chatRepositoryMock = createRepositoryMock([chat]);
 
     beforeAll(async () => {
         let moduleBuilder = await Test.createTestingModule({
             imports: [ChatModule],
         })
             .overrideProvider(getRepositoryToken(Chat))
-            .useValue(createRepositoryMock([chat]))
+            .useValue(chatRepositoryMock)
             .overrideProvider(getRepositoryToken(ChatMessage))
-            .useValue(createRepositoryMock([chatMessage]))
+            .useValue(chatMessageRepositoryMock)
             .overrideProvider(getRepositoryToken(Advert))
             .useValue(createRepositoryMock([advert]))
             .overrideProvider(getRepositoryToken(Section))
@@ -62,12 +72,17 @@ describe('Chat controller', () => {
             .overrideGuard(ACGuard)
             .useValue(AcGuardMock)
             .overrideGuard(JwtAuthGuard)
-            .useValue(JwtGuard);
+            .useValue(JwtGuard)
+            .overrideGuard(WsJwtAuthGuard)
+            .useValue(WsJwtAuthGuardMock);
 
         moduleBuilder = declareDynamicFieldsProviders(moduleBuilder);
 
         const moduleRef = await moduleBuilder.compile();
         app = await createTestAppForModule(moduleRef);
+
+        const address = app.getHttpServer().listen().address();
+        baseAddress = `http://localhost:${address.port}`;
     });
 
     describe('create chat', () => {
@@ -111,6 +126,113 @@ describe('Chat controller', () => {
         it(`with error - unauthorized`, () => {
             JwtGuard.canActivate.mockReturnValueOnce(false);
             return request(app.getHttpServer()).get('/chats').expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
+    describe('chat gateway', () => {
+        describe('join chat', () => {
+            it(`successfully`, done => {
+                socket = io.connect(baseAddress);
+                const chatId = uuid();
+                socket.emit(ChatEvent.JOIN_CHAT, { chatId });
+                socket.on(ChatEvent.JOIN_CHAT, res => {
+                    expect(res.chatId).toBe(chatId);
+                    done();
+                });
+            });
+
+            it(`with error not authorized`, done => {
+                WsJwtAuthGuardMock.canActivate.mockReturnValueOnce(false);
+                socket = io.connect(baseAddress);
+                const chatId = uuid();
+                socket.emit(ChatEvent.JOIN_CHAT, { chatId });
+                socket.on('exception', res => {
+                    expect(res.message).toBe('Forbidden resource');
+                    done();
+                });
+            });
+
+            it(`with error not participant of a chat`, done => {
+                chatRepositoryMock.findOne.mockReturnValueOnce({ user1: '1', user2: '2' });
+                socket = io.connect(baseAddress);
+                const chatId = uuid();
+                socket.emit(ChatEvent.JOIN_CHAT, { chatId });
+                socket.on('exception', res => {
+                    expect(res.message).toBe('Forbidden');
+                    done();
+                });
+            });
+        });
+
+        describe('send message', () => {
+            it(`successfully`, done => {
+                socket = io.connect(baseAddress);
+                const chatId = uuid();
+                const content = 'test';
+                const message = { chatId, content };
+                chatMessageRepositoryMock.save.mockReturnValueOnce(message);
+
+                const socket2 = io.connect(baseAddress);
+
+                socket.emit(ChatEvent.JOIN_CHAT, { chatId });
+                socket2.emit(ChatEvent.JOIN_CHAT, { chatId });
+
+                socket.emit(ChatEvent.NEW_MESSAGE, message);
+                socket2.on(ChatEvent.NEW_MESSAGE, res => {
+                    expect(res.content).toBe(content);
+                    done();
+                });
+            });
+        });
+
+        describe('get all messages for chat', () => {
+            it(`successfully`, done => {
+                socket = io.connect(baseAddress);
+                const chatId = uuid();
+                socket.emit(ChatEvent.GET_MESSAGES, { chatId });
+                socket.on(ChatEvent.GET_MESSAGES, res => {
+                    expect(res.length).toBe(1);
+                    done();
+                });
+            });
+
+            it(`with error not authorized`, done => {
+                WsJwtAuthGuardMock.canActivate.mockReturnValueOnce(false);
+                socket = io.connect(baseAddress);
+                const chatId = uuid();
+                socket.emit(ChatEvent.GET_MESSAGES, { chatId });
+                socket.on('exception', res => {
+                    expect(res.message).toBe('Forbidden resource');
+                    done();
+                });
+            });
+
+            it(`with error not participant of a chat`, done => {
+                chatRepositoryMock.findOne.mockReturnValueOnce({ user1: '1', user2: '2' });
+                socket = io.connect(baseAddress);
+                const chatId = uuid();
+                socket.emit(ChatEvent.GET_MESSAGES, { chatId });
+                socket.on('exception', res => {
+                    expect(res.message).toBe('Forbidden');
+                    done();
+                });
+            });
+        });
+
+        describe('leave chat', () => {
+            it(`successfully`, done => {
+                socket = io.connect(baseAddress);
+                const chatId = uuid();
+                socket.emit(ChatEvent.LEAVE_CHAT, { chatId });
+                socket.on(ChatEvent.LEAVE_CHAT, res => {
+                    expect(res.chatId).toBe(chatId);
+                    done();
+                });
+            });
+        });
+
+        afterEach(() => {
+            socket.close();
         });
     });
 });
