@@ -132,7 +132,7 @@ describe('Chat controller', () => {
     describe('chat gateway', () => {
         describe('join chat', () => {
             it(`successfully`, done => {
-                socket = io.connect(baseAddress);
+                socket = io.connect(baseAddress, { path: '/socket' });
                 const chatId = uuid();
                 socket.emit(ChatEvent.JOIN_CHAT, { chatId });
                 socket.on(ChatEvent.JOIN_CHAT, res => {
@@ -143,7 +143,7 @@ describe('Chat controller', () => {
 
             it(`with error not authorized`, done => {
                 WsJwtAuthGuardMock.canActivate.mockReturnValueOnce(false);
-                socket = io.connect(baseAddress);
+                socket = io.connect(baseAddress, { path: '/socket' });
                 const chatId = uuid();
                 socket.emit(ChatEvent.JOIN_CHAT, { chatId });
                 socket.on('exception', res => {
@@ -154,7 +154,7 @@ describe('Chat controller', () => {
 
             it(`with error not participant of a chat`, done => {
                 chatRepositoryMock.findOne.mockReturnValueOnce({ user1: '1', user2: '2' });
-                socket = io.connect(baseAddress);
+                socket = io.connect(baseAddress, { path: '/socket' });
                 const chatId = uuid();
                 socket.emit(ChatEvent.JOIN_CHAT, { chatId });
                 socket.on('exception', res => {
@@ -168,13 +168,13 @@ describe('Chat controller', () => {
             let socket2;
 
             it(`successfully`, done => {
-                socket = io.connect(baseAddress);
+                socket = io.connect(baseAddress, { path: '/socket' });
                 const chatId = uuid();
                 const content = 'test';
                 const message = { chatId, content };
                 chatMessageRepositoryMock.save.mockReturnValueOnce(message);
 
-                socket2 = io.connect(baseAddress);
+                socket2 = io.connect(baseAddress, { path: '/socket' });
 
                 socket.emit(ChatEvent.JOIN_CHAT, { chatId });
                 socket2.emit(ChatEvent.JOIN_CHAT, { chatId });
@@ -193,7 +193,7 @@ describe('Chat controller', () => {
 
         describe('get all messages for chat', () => {
             it(`successfully`, done => {
-                socket = io.connect(baseAddress);
+                socket = io.connect(baseAddress, { path: '/socket' });
                 const chatId = uuid();
                 socket.emit(ChatEvent.GET_MESSAGES, { chatId });
                 socket.on(ChatEvent.GET_MESSAGES, res => {
@@ -204,7 +204,7 @@ describe('Chat controller', () => {
 
             it(`with error not authorized`, done => {
                 WsJwtAuthGuardMock.canActivate.mockReturnValueOnce(false);
-                socket = io.connect(baseAddress);
+                socket = io.connect(baseAddress, { path: '/socket' });
                 const chatId = uuid();
                 socket.emit(ChatEvent.GET_MESSAGES, { chatId });
                 socket.on('exception', res => {
@@ -215,7 +215,7 @@ describe('Chat controller', () => {
 
             it(`with error not participant of a chat`, done => {
                 chatRepositoryMock.findOne.mockReturnValueOnce({ user1: '1', user2: '2' });
-                socket = io.connect(baseAddress);
+                socket = io.connect(baseAddress, { path: '/socket' });
                 const chatId = uuid();
                 socket.emit(ChatEvent.GET_MESSAGES, { chatId });
                 socket.on('exception', res => {
@@ -227,7 +227,7 @@ describe('Chat controller', () => {
 
         describe('leave chat', () => {
             it(`successfully`, done => {
-                socket = io.connect(baseAddress);
+                socket = io.connect(baseAddress, { path: '/socket' });
                 const chatId = uuid();
                 socket.emit(ChatEvent.LEAVE_CHAT, { chatId });
                 socket.on(ChatEvent.LEAVE_CHAT, res => {

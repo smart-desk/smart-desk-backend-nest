@@ -7,7 +7,7 @@ import { ChatBaseEventDto } from './dto/chat-base-event.dto';
 import { ChatService } from './chat.service';
 
 const options = {
-    path: 'api',
+    path: '/socket',
     handlePreflightRequest: (req, res) => {
         const headers = {
             'Access-Control-Allow-Headers': 'Content-Type, authorization',
