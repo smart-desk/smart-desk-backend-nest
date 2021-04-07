@@ -14,13 +14,14 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { JWTPayload, RequestWithUserPayload } from '../auth/jwt.strategy';
+import { RequestWithUserPayload } from '../auth/jwt.strategy';
 import { ACGuard, UseRoles } from 'nest-access-control';
 import { ResourceEnum, RolesEnum } from '../app/app.roles';
 import { BookmarksService } from './bookmarks.service';
 import { Bookmark } from './entities/bookmark.entity';
 import { CreateBookmarkDto } from './dto/create-bookmark.dto';
 import { BlockedUserGuard } from '../guards/blocked-user.guard';
+import { User } from '../users/entities/user.entity';
 
 @ApiTags('Bookmarks')
 @Controller('bookmarks')
@@ -64,18 +65,18 @@ export class BookmarksController {
         return await this.bookmarksService.deleteBookmark(id);
     }
 
-    private async isAdminOrOwner(bookmarkId: string, userPayload: JWTPayload): Promise<boolean> {
-        const isOwner = await this.isOwner(bookmarkId, userPayload);
-        const isAdmin = this.isAdmin(userPayload);
+    private async isAdminOrOwner(bookmarkId: string, user: User): Promise<boolean> {
+        const isOwner = await this.isOwner(bookmarkId, user);
+        const isAdmin = this.isAdmin(user);
         return isOwner || isAdmin;
     }
 
-    private async isOwner(bookmarkId: string, userPayload: JWTPayload): Promise<boolean> {
+    private async isOwner(bookmarkId: string, user: User): Promise<boolean> {
         const owner = await this.bookmarksService.getBookmarkOwner(bookmarkId);
-        return owner === userPayload.id;
+        return owner === user.id;
     }
 
-    private isAdmin(userPayload: JWTPayload): boolean {
-        return userPayload.roles && userPayload.roles.some(role => role === RolesEnum.ADMIN);
+    private isAdmin(user: User): boolean {
+        return user.roles && user.roles.some(role => role === RolesEnum.ADMIN);
     }
 }

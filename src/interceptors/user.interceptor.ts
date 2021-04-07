@@ -2,7 +2,7 @@ import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nes
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { omit } from 'lodash';
-import { JWTPayload, RequestWithUserPayload } from '../auth/jwt.strategy';
+import { RequestWithUserPayload } from '../auth/jwt.strategy';
 import { RolesEnum } from '../app/app.roles';
 import { User } from '../users/entities/user.entity';
 
@@ -19,7 +19,7 @@ export class UserInterceptor implements NestInterceptor {
         );
     }
 
-    private serializeUser(user: User, requester: JWTPayload): Partial<User> {
+    private serializeUser(user: User, requester: User): Partial<User> {
         if (!requester) {
             return omit(user, EXCLUDED_USER_PROP);
         }

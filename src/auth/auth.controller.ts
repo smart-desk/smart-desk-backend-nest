@@ -5,6 +5,7 @@ import { UsersService } from '../users/users.service';
 import { ApiTags } from '@nestjs/swagger';
 import { RolesEnum } from '../app/app.roles';
 import { UserStatus } from '../users/user-status.enum';
+import { JWTPayload } from './jwt.strategy';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -37,8 +38,7 @@ export class AuthController {
             });
         }
 
-        // todo create jwtPayload interface
-        const jwtPayload = { sub: user.id, email: user.email };
+        const jwtPayload: JWTPayload = { sub: user.id, email: user.email };
         return {
             access_token: this.jwtService.sign(jwtPayload),
         };

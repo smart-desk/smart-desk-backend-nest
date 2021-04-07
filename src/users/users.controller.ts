@@ -17,7 +17,7 @@ import { User } from './entities/user.entity';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ACGuard, UseRoles } from 'nest-access-control';
 import { ResourceEnum, RolesEnum } from '../app/app.roles';
-import { JWTPayload, RequestWithUserPayload } from '../auth/jwt.strategy';
+import { RequestWithUserPayload } from '../auth/jwt.strategy';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateUserRolesDto } from './dto/update-user-roles.dto';
 import { BlockedUserGuard } from '../guards/blocked-user.guard';
@@ -114,7 +114,7 @@ export class UsersController {
         return user.phone;
     }
 
-    private isAdmin(userPayload: JWTPayload): boolean {
-        return userPayload.roles && userPayload.roles.some(role => role === RolesEnum.ADMIN);
+    private isAdmin(user: User): boolean {
+        return user.roles && user.roles.some(role => role === RolesEnum.ADMIN);
     }
 }

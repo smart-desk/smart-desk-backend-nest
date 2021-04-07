@@ -19,13 +19,14 @@ import { ACGuard, UseRoles } from 'nest-access-control';
 import { AdvertsService } from './adverts.service';
 import { Advert } from './entities/advert.entity';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { JWTPayload, RequestWithUserPayload } from '../auth/jwt.strategy';
+import { RequestWithUserPayload } from '../auth/jwt.strategy';
 import { ResourceEnum, RolesEnum } from '../app/app.roles';
 import { CreateAdvertDto } from './dto/create-advert.dto';
 import { UpdateAdvertDto } from './dto/update-advert.dto';
 import { GetAdvertsDto, GetAdvertsResponseDto } from './dto/get-adverts.dto';
 import { BlockedUserGuard } from '../guards/blocked-user.guard';
 import { AdvertStatus } from './advert-status.enum';
+import { User } from '../users/entities/user.entity';
 
 @Controller('adverts')
 @ApiTags('Adverts')
@@ -208,18 +209,18 @@ export class AdvertsController {
         return await this.advertsService.delete(id);
     }
 
-    private async isAdminOrOwner(advertId: string, userPayload: JWTPayload): Promise<boolean> {
-        const isOwner = await this.isOwner(advertId, userPayload);
-        const isAdmin = this.isAdmin(userPayload);
+    private async isAdminOrOwner(advertId: string, user: User): Promise<boolean> {
+        const isOwner = await this.isOwner(advertId, user);
+        const isAdmin = this.isAdmin(user);
         return isOwner || isAdmin;
     }
 
-    private async isOwner(advertId: string, userPayload: JWTPayload): Promise<boolean> {
+    private async isOwner(advertId: string, user: User): Promise<boolean> {
         const owner = await this.advertsService.getAdvertOwner(advertId);
-        return owner === userPayload.id;
+        return owner === user.id;
     }
 
-    private isAdmin(userPayload: JWTPayload): boolean {
-        return userPayload.roles && userPayload.roles.some(role => role === RolesEnum.ADMIN);
+    private isAdmin(user: User): boolean {
+        return user.roles && user.roles.some(role => role === RolesEnum.ADMIN);
     }
 }

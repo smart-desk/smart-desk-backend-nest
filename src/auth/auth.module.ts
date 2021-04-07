@@ -9,12 +9,15 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 @Module({
-  imports: [UsersModule, PassportModule, JwtModule.register({
-    secret: process.env.JWT_SECRET,
-    signOptions: { expiresIn: '7d' },
-  })],
-  providers: [JwtStrategy],
-  controllers: [AuthController],
+    imports: [
+        UsersModule,
+        PassportModule,
+        JwtModule.register({
+            secret: process.env.JWT_SECRET,
+            signOptions: { expiresIn: '7d' },
+        }),
+    ],
+    providers: [JwtStrategy],
+    controllers: [AuthController],
 })
-export class AuthModule {
-}
+export class AuthModule {}
