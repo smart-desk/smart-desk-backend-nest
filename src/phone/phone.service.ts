@@ -22,6 +22,7 @@ export class PhoneService {
                     number: phone,
                     brand: 'Smart Desk', // todo use site's name
                     code_length: 4,
+                    workflow_id: 6,
                 },
                 (err, result) => {
                     if (err) {
