@@ -85,6 +85,7 @@ describe('Chat controller', () => {
     });
 
     describe('create chat', () => {
+        // todo add test case that NEW_CHAT is triggering for another user
         it(`successfully`, done => {
             socket = io.connect(baseAddress, { path: '/socket' });
             const id = uuid();
@@ -126,6 +127,27 @@ describe('Chat controller', () => {
         });
     });
 
+    describe('init chats', () => {
+        it(`successfully`, done => {
+            socket = io.connect(baseAddress, { path: '/socket' });
+            socket.emit(ChatEvent.INIT_CHATS, {});
+            socket.on(ChatEvent.INIT_CHATS, res => {
+                expect(res).toBeUndefined();
+                done();
+            });
+        });
+
+        it(`with error - unauthorized`, done => {
+            WsJwtAuthGuardMock.canActivate.mockReturnValueOnce(false);
+            socket = io.connect(baseAddress, { path: '/socket' });
+            socket.emit(ChatEvent.INIT_CHATS, {});
+            socket.on('exception', res => {
+                expect(res.message).toBe('Forbidden resource');
+                done();
+            });
+        });
+    });
+
     describe('get profile chats', () => {
         it(`successfully`, done => {
             socket = io.connect(baseAddress, { path: '/socket' });
@@ -150,117 +172,115 @@ describe('Chat controller', () => {
         });
     });
 
-    describe('chat gateway', () => {
-        describe('join chat', () => {
-            it(`successfully`, done => {
-                socket = io.connect(baseAddress, { path: '/socket' });
-                const chatId = uuid();
-                socket.emit(ChatEvent.JOIN_CHAT, { chatId });
-                socket.on(ChatEvent.JOIN_CHAT, res => {
-                    expect(res.chatId).toBe(chatId);
-                    done();
-                });
-            });
-
-            it(`with error not authorized`, done => {
-                WsJwtAuthGuardMock.canActivate.mockReturnValueOnce(false);
-                socket = io.connect(baseAddress, { path: '/socket' });
-                const chatId = uuid();
-                socket.emit(ChatEvent.JOIN_CHAT, { chatId });
-                socket.on('exception', res => {
-                    expect(res.message).toBe('Forbidden resource');
-                    done();
-                });
-            });
-
-            it(`with error not participant of a chat`, done => {
-                chatRepositoryMock.findOne.mockReturnValueOnce({ user1: '1', user2: '2' });
-                socket = io.connect(baseAddress, { path: '/socket' });
-                const chatId = uuid();
-                socket.emit(ChatEvent.JOIN_CHAT, { chatId });
-                socket.on('exception', res => {
-                    expect(res.message).toBe('Forbidden');
-                    done();
-                });
+    describe('join chat', () => {
+        it(`successfully`, done => {
+            socket = io.connect(baseAddress, { path: '/socket' });
+            const chatId = uuid();
+            socket.emit(ChatEvent.JOIN_CHAT, { chatId });
+            socket.on(ChatEvent.JOIN_CHAT, res => {
+                expect(res.chatId).toBe(chatId);
+                done();
             });
         });
 
-        describe('send message', () => {
-            let socket2;
-
-            it(`successfully`, done => {
-                socket = io.connect(baseAddress, { path: '/socket' });
-                const chatId = uuid();
-                const content = 'test';
-                const message = { chatId, content };
-                chatMessageRepositoryMock.save.mockReturnValueOnce(message);
-
-                socket2 = io.connect(baseAddress, { path: '/socket' });
-
-                socket.emit(ChatEvent.JOIN_CHAT, { chatId });
-                socket2.emit(ChatEvent.JOIN_CHAT, { chatId });
-
-                socket.emit(ChatEvent.NEW_MESSAGE, message);
-                socket2.on(ChatEvent.NEW_MESSAGE, res => {
-                    expect(res.content).toBe(content);
-                    done();
-                });
-            });
-
-            afterEach(() => {
-                socket2.close();
+        it(`with error not authorized`, done => {
+            WsJwtAuthGuardMock.canActivate.mockReturnValueOnce(false);
+            socket = io.connect(baseAddress, { path: '/socket' });
+            const chatId = uuid();
+            socket.emit(ChatEvent.JOIN_CHAT, { chatId });
+            socket.on('exception', res => {
+                expect(res.message).toBe('Forbidden resource');
+                done();
             });
         });
 
-        describe('get all messages for chat', () => {
-            it(`successfully`, done => {
-                socket = io.connect(baseAddress, { path: '/socket' });
-                const chatId = uuid();
-                socket.emit(ChatEvent.GET_MESSAGES, { chatId });
-                socket.on(ChatEvent.GET_MESSAGES, res => {
-                    expect(res.length).toBe(1);
-                    done();
-                });
-            });
-
-            it(`with error not authorized`, done => {
-                WsJwtAuthGuardMock.canActivate.mockReturnValueOnce(false);
-                socket = io.connect(baseAddress, { path: '/socket' });
-                const chatId = uuid();
-                socket.emit(ChatEvent.GET_MESSAGES, { chatId });
-                socket.on('exception', res => {
-                    expect(res.message).toBe('Forbidden resource');
-                    done();
-                });
-            });
-
-            it(`with error not participant of a chat`, done => {
-                chatRepositoryMock.findOne.mockReturnValueOnce({ user1: '1', user2: '2' });
-                socket = io.connect(baseAddress, { path: '/socket' });
-                const chatId = uuid();
-                socket.emit(ChatEvent.GET_MESSAGES, { chatId });
-                socket.on('exception', res => {
-                    expect(res.message).toBe('Forbidden');
-                    done();
-                });
+        it(`with error not participant of a chat`, done => {
+            chatRepositoryMock.findOne.mockReturnValueOnce({ user1: '1', user2: '2' });
+            socket = io.connect(baseAddress, { path: '/socket' });
+            const chatId = uuid();
+            socket.emit(ChatEvent.JOIN_CHAT, { chatId });
+            socket.on('exception', res => {
+                expect(res.message).toBe('Forbidden');
+                done();
             });
         });
+    });
 
-        describe('leave chat', () => {
-            it(`successfully`, done => {
-                socket = io.connect(baseAddress, { path: '/socket' });
-                const chatId = uuid();
-                socket.emit(ChatEvent.LEAVE_CHAT, { chatId });
-                socket.on(ChatEvent.LEAVE_CHAT, res => {
-                    expect(res.chatId).toBe(chatId);
-                    done();
-                });
+    describe('send message', () => {
+        let socket2;
+
+        it(`successfully`, done => {
+            socket = io.connect(baseAddress, { path: '/socket' });
+            const chatId = uuid();
+            const content = 'test';
+            const message = { chatId, content };
+            chatMessageRepositoryMock.save.mockReturnValueOnce(message);
+
+            socket2 = io.connect(baseAddress, { path: '/socket' });
+
+            socket.emit(ChatEvent.JOIN_CHAT, { chatId });
+            socket2.emit(ChatEvent.JOIN_CHAT, { chatId });
+
+            socket.emit(ChatEvent.NEW_MESSAGE, message);
+            socket2.on(ChatEvent.NEW_MESSAGE, res => {
+                expect(res.content).toBe(content);
+                done();
             });
         });
 
         afterEach(() => {
-            socket.close();
+            socket2.close();
         });
+    });
+
+    describe('get all messages for chat', () => {
+        it(`successfully`, done => {
+            socket = io.connect(baseAddress, { path: '/socket' });
+            const chatId = uuid();
+            socket.emit(ChatEvent.GET_MESSAGES, { chatId });
+            socket.on(ChatEvent.GET_MESSAGES, res => {
+                expect(res.length).toBe(1);
+                done();
+            });
+        });
+
+        it(`with error not authorized`, done => {
+            WsJwtAuthGuardMock.canActivate.mockReturnValueOnce(false);
+            socket = io.connect(baseAddress, { path: '/socket' });
+            const chatId = uuid();
+            socket.emit(ChatEvent.GET_MESSAGES, { chatId });
+            socket.on('exception', res => {
+                expect(res.message).toBe('Forbidden resource');
+                done();
+            });
+        });
+
+        it(`with error not participant of a chat`, done => {
+            chatRepositoryMock.findOne.mockReturnValueOnce({ user1: '1', user2: '2' });
+            socket = io.connect(baseAddress, { path: '/socket' });
+            const chatId = uuid();
+            socket.emit(ChatEvent.GET_MESSAGES, { chatId });
+            socket.on('exception', res => {
+                expect(res.message).toBe('Forbidden');
+                done();
+            });
+        });
+    });
+
+    describe('leave chat', () => {
+        it(`successfully`, done => {
+            socket = io.connect(baseAddress, { path: '/socket' });
+            const chatId = uuid();
+            socket.emit(ChatEvent.LEAVE_CHAT, { chatId });
+            socket.on(ChatEvent.LEAVE_CHAT, res => {
+                expect(res.chatId).toBe(chatId);
+                done();
+            });
+        });
+    });
+
+    afterEach(() => {
+        socket.close();
     });
 
     afterAll(() => {
