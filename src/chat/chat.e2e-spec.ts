@@ -1,7 +1,6 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import * as request from 'supertest';
 import { v4 as uuid } from 'uuid';
 import { createRepositoryMock, createTestAppForModule, declareDynamicFieldsProviders } from '../../test/test.utils';
 import { User } from '../users/entities/user.entity';
@@ -10,7 +9,6 @@ import { JwtAuthGuardMock } from '../../test/mocks/jwt-auth.guard.mock';
 import { ACGuard } from 'nest-access-control';
 import { AcGuardMock } from '../../test/mocks/ac.guard.mock';
 import { ChatModule } from './chat.module';
-import { CreateChatDto } from './dto/create-chat.dto';
 import { Advert } from '../adverts/entities/advert.entity';
 import { Field } from '../fields/field.entity';
 import { Chat } from './enitities/chat.entity';
@@ -44,6 +42,7 @@ describe('Chat controller', () => {
     chat.id = uuid();
     chat.user1 = user.id;
     chat.user2 = 'FromTestWsJwtAuthGuardMock';
+    chat.advertId = uuid();
 
     const chatMessage = new ChatMessage();
     chatMessage.id = uuid();
@@ -86,46 +85,68 @@ describe('Chat controller', () => {
     });
 
     describe('create chat', () => {
-        it(`successfully`, () => {
-            return request(app.getHttpServer())
-                .post('/chats')
-                .send({
-                    advertId: uuid(),
-                } as CreateChatDto)
-                .expect(HttpStatus.CREATED);
+        it(`successfully`, done => {
+            socket = io.connect(baseAddress, { path: '/socket' });
+            const id = uuid();
+            const advertId = uuid();
+            socket.emit(ChatEvent.CREATE_CHAT, { id, advertId });
+            socket.on(ChatEvent.CREATE_CHAT, res => {
+                expect(res.id).toBe(id);
+                expect(res.data.advertId).toBe(chat.advertId);
+                done();
+            });
         });
 
-        it(`with error - unauthorized`, () => {
-            JwtGuard.canActivate.mockReturnValueOnce(false);
-            return request(app.getHttpServer()).post('/chats').expect(HttpStatus.FORBIDDEN);
+        it(`with error - unauthorized`, done => {
+            WsJwtAuthGuardMock.canActivate.mockReturnValueOnce(false);
+            socket = io.connect(baseAddress, { path: '/socket' });
+            const id = uuid();
+            const advertId = uuid();
+            socket.emit(ChatEvent.CREATE_CHAT, { id, advertId });
+            socket.on('exception', res => {
+                expect(res.message).toBe('Forbidden resource');
+                done();
+            });
         });
 
-        it(`with error - same user`, () => {
-            JwtGuard.canActivate.mockImplementationOnce(context => {
-                const req = context.switchToHttp().getRequest();
-                req.user = user;
+        it(`with error - same user`, done => {
+            WsJwtAuthGuardMock.canActivate.mockImplementationOnce(context => {
+                context.switchToWs().getData().user = user;
                 return true;
             });
-            return request(app.getHttpServer())
-                .post('/chats')
-                .send({
-                    advertId: uuid(),
-                } as CreateChatDto)
-                .expect(HttpStatus.BAD_REQUEST)
-                .expect(res => {
-                    expect(res.body.message).toContain("Chat participants can't be the same user");
-                });
+
+            socket = io.connect(baseAddress, { path: '/socket' });
+            const id = uuid();
+            const advertId = uuid();
+            socket.emit(ChatEvent.CREATE_CHAT, { id, advertId });
+            socket.on('exception', res => {
+                expect(res.message).toContain("Chat participants can't be the same user");
+                done();
+            });
         });
     });
 
     describe('get profile chats', () => {
-        it(`successfully`, () => {
-            return request(app.getHttpServer()).get('/chats').expect(HttpStatus.OK);
+        it(`successfully`, done => {
+            socket = io.connect(baseAddress, { path: '/socket' });
+            const id = uuid();
+            socket.emit(ChatEvent.GET_CHATS, { id });
+            socket.on(ChatEvent.GET_CHATS, res => {
+                expect(res.id).toBe(id);
+                expect(res.data.length).toBeTruthy();
+                done();
+            });
         });
 
-        it(`with error - unauthorized`, () => {
-            JwtGuard.canActivate.mockReturnValueOnce(false);
-            return request(app.getHttpServer()).get('/chats').expect(HttpStatus.FORBIDDEN);
+        it(`with error - unauthorized`, done => {
+            WsJwtAuthGuardMock.canActivate.mockReturnValueOnce(false);
+            socket = io.connect(baseAddress, { path: '/socket' });
+            const id = uuid();
+            socket.emit(ChatEvent.GET_CHATS, { id });
+            socket.on('exception', res => {
+                expect(res.message).toBe('Forbidden resource');
+                done();
+            });
         });
     });
 
