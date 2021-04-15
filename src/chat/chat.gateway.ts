@@ -5,6 +5,9 @@ import { WsJwtAuthGuard } from '../guards/ws-jwt-auth.guard';
 import { CreateChatMessageDto } from './dto/create-chat-message.dto';
 import { ChatBaseEventDto } from './dto/chat-base-event.dto';
 import { ChatService } from './chat.service';
+import { GetChatsDto } from './dto/get-chats.dto';
+import { CreateChatDto } from './dto/create-chat.dto';
+import { AdvertsService } from '../adverts/adverts.service';
 
 const options = {
     path: '/socket',
@@ -22,17 +25,52 @@ const options = {
 };
 
 export enum ChatEvent {
+    GET_CHATS = 'getChats',
+    CREATE_CHAT = 'createChat',
+    INIT_CHATS = 'initChats',
+    NEW_CHAT = 'newChat',
     GET_MESSAGES = 'getMessages',
     NEW_MESSAGE = 'newMessage',
     JOIN_CHAT = 'joinChat',
     LEAVE_CHAT = 'leaveChat',
 }
 
+// todo blocked user maybe too
 @WebSocketGateway(options)
+@UseGuards(WsJwtAuthGuard)
 export class ChatGateway {
-    constructor(private chatService: ChatService) {}
+    constructor(private chatService: ChatService, private advertsService: AdvertsService) {}
 
-    @UseGuards(WsJwtAuthGuard) // todo blocked user maybe too
+    @SubscribeMessage(ChatEvent.CREATE_CHAT)
+    async createChat(@ConnectedSocket() client: Socket, @MessageBody() data: CreateChatDto): Promise<void> {
+        const advert = await this.advertsService.getById(data.advertId);
+        data.user1 = data.user.id;
+        data.user2 = advert.userId;
+
+        if (data.user1 === data.user2) {
+            throw new WsException("Chat participants can't be the same user");
+        }
+
+        const chat = await this.chatService.createChat(data);
+        const response = {
+            id: data.id,
+            data: chat,
+        };
+        client.emit(ChatEvent.CREATE_CHAT, response);
+        client.to(data.user2).emit(ChatEvent.NEW_CHAT, chat);
+    }
+
+    @SubscribeMessage(ChatEvent.GET_CHATS)
+    async getChats(@ConnectedSocket() client: Socket, @MessageBody() data: GetChatsDto): Promise<void> {
+        const chats = await this.chatService.getChatsByUser(data.user.id);
+        const response = {
+            id: data.id,
+            data: chats,
+        };
+        client.emit(ChatEvent.GET_CHATS, response);
+    }
+
+    @UseGuards(WsJwtAuthGuard)
     @SubscribeMessage(ChatEvent.NEW_MESSAGE)
     async newMessage(@ConnectedSocket() client: Socket, @MessageBody() data: CreateChatMessageDto): Promise<void> {
         const isUserInChat = await this.isUserInChat(data.user.id, data.chatId);
@@ -45,7 +83,6 @@ export class ChatGateway {
         client.to(data.chatId).emit(ChatEvent.NEW_MESSAGE, chatMessage);
     }
 
-    @UseGuards(WsJwtAuthGuard)
     @SubscribeMessage(ChatEvent.GET_MESSAGES)
     async getMessages(@ConnectedSocket() client: Socket, @MessageBody() data: ChatBaseEventDto): Promise<void> {
         const isUserInChat = await this.isUserInChat(data.user.id, data.chatId);
@@ -56,7 +93,13 @@ export class ChatGateway {
         client.emit(ChatEvent.GET_MESSAGES, messages); // todo check
     }
 
-    @UseGuards(WsJwtAuthGuard)
+    // todo probably makes sense to do it on connect event
+    @SubscribeMessage(ChatEvent.INIT_CHATS)
+    async initChats(@ConnectedSocket() client: Socket, @MessageBody() data: ChatBaseEventDto): Promise<void> {
+        client.join(data.user.id);
+        client.emit(ChatEvent.INIT_CHATS);
+    }
+
     @SubscribeMessage(ChatEvent.JOIN_CHAT)
     async joinChat(@ConnectedSocket() client: Socket, @MessageBody() data: ChatBaseEventDto): Promise<void> {
         const isUserInChat = await this.isUserInChat(data.user.id, data.chatId);
@@ -67,7 +110,6 @@ export class ChatGateway {
         client.emit(ChatEvent.JOIN_CHAT, { chatId: data.chatId });
     }
 
-    @UseGuards(WsJwtAuthGuard)
     @SubscribeMessage(ChatEvent.LEAVE_CHAT)
     async leaveChat(@ConnectedSocket() client: Socket, @MessageBody() data: ChatBaseEventDto): Promise<void> {
         const isUserInChat = await this.isUserInChat(data.user.id, data.chatId);

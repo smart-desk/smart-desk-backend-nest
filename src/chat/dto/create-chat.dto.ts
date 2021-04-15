@@ -1,7 +1,12 @@
 import { IsNotEmpty, IsUUID } from 'class-validator';
 import { Exclude } from 'class-transformer';
+import { Userable } from './userable';
 
-export class CreateChatDto {
+export class CreateChatDto extends Userable {
+    @IsUUID()
+    @IsNotEmpty()
+    id: string;
+
     @IsUUID()
     @IsNotEmpty()
     advertId: string;
