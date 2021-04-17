@@ -5,22 +5,28 @@ import { Chat } from './enitities/chat.entity';
 import { ChatMessage } from './enitities/chat-message.entity';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { CreateChatMessageDto } from './dto/create-chat-message.dto';
+import { UsersService } from '../users/users.service';
+import { AdvertsService } from '../adverts/adverts.service';
+import { serializeUser } from '../utils/user.serializer';
 
 @Injectable()
 export class ChatService {
     constructor(
         @InjectRepository(Chat) private chatRepository: Repository<Chat>,
-        @InjectRepository(ChatMessage) private chatMessageRepository: Repository<ChatMessage>
+        @InjectRepository(ChatMessage) private chatMessageRepository: Repository<ChatMessage>,
+        private userService: UsersService,
+        private advertService: AdvertsService
     ) {}
 
     async createChat(body: CreateChatDto): Promise<Chat> {
-        const chat = await this.findChatByParams(body);
+        let chat = await this.findChatByParams(body);
         if (chat) {
-            return chat;
+            return await this.addEntitiesToChat(chat);
         }
 
         const entity = this.chatRepository.create(body);
-        return this.chatRepository.save(entity);
+        chat = await this.chatRepository.save(entity);
+        return this.addEntitiesToChat(chat);
     }
 
     async getChat(id: string): Promise<Chat> {
@@ -28,9 +34,10 @@ export class ChatService {
     }
 
     async getChatsByUser(userId: string): Promise<Chat[]> {
-        return this.chatRepository.find({
+        const chats = await this.chatRepository.find({
             where: [{ user1: userId }, { user2: userId }],
         });
+        return Promise.all(chats.map(chat => this.addEntitiesToChat(chat)));
     }
 
     async createMessage(body: CreateChatMessageDto): Promise<ChatMessage> {
@@ -49,5 +56,17 @@ export class ChatService {
                 { user1: params.user2, user2: params.user1, advertId: params.advertId },
             ],
         });
+    }
+
+    private async addEntitiesToChat(chat: Chat): Promise<Chat> {
+        const advert = await this.advertService.getById(chat.advertId, false);
+        const user1 = await this.userService.findOne(chat.user1);
+        const user2 = await this.userService.findOne(chat.user2);
+
+        chat.advertData = advert;
+        chat.user1Data = serializeUser(user1);
+        chat.user2Data = serializeUser(user2);
+
+        return chat;
     }
 }
