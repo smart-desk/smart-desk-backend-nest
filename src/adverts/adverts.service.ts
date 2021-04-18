@@ -41,9 +41,9 @@ export class AdvertsService {
         return this.getAdverts(options, categoryId);
     }
 
-    async getById(id: string): Promise<Advert> {
+    async getById(id: string, loadFieldData = true): Promise<Advert> {
         const advert = await this.findOneOrThrowException(id);
-        return this.loadFieldDataForAdvert(advert);
+        return loadFieldData ? this.loadFieldDataForAdvert(advert) : advert;
     }
 
     async getRecommendedById(id: string): Promise<GetAdvertsResponseDto> {

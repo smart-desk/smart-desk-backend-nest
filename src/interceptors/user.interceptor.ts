@@ -5,6 +5,7 @@ import { omit } from 'lodash';
 import { RequestWithUserPayload } from '../auth/jwt.strategy';
 import { RolesEnum } from '../app/app.roles';
 import { User } from '../users/entities/user.entity';
+import { serializeUser } from '../utils/user.serializer';
 
 const EXCLUDED_USER_PROP = ['phone', 'isPhoneVerified', 'email', 'lastName'];
 
@@ -14,19 +15,19 @@ export class UserInterceptor implements NestInterceptor {
         return next.handle().pipe(
             map((data: User) => {
                 const req = context.switchToHttp().getRequest<RequestWithUserPayload>();
-                return this.serializeUser(data, req.user);
+                return this.serializeUserBasedOnRole(data, req.user);
             })
         );
     }
 
-    private serializeUser(user: User, requester: User): Partial<User> {
+    private serializeUserBasedOnRole(user: User, requester: User): Partial<User> {
         if (!requester) {
-            return omit(user, EXCLUDED_USER_PROP);
+            return serializeUser(user);
         }
 
         if (requester.roles.includes(RolesEnum.ADMIN) || requester.id === user.id) {
             return user;
         }
-        return omit(user, EXCLUDED_USER_PROP);
+        return serializeUser(user);
     }
 }
