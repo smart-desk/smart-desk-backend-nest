@@ -267,18 +267,6 @@ describe('Chat controller', () => {
         });
     });
 
-    describe('leave chat', () => {
-        it(`successfully`, done => {
-            socket = io.connect(baseAddress, { path: '/socket' });
-            const chatId = uuid();
-            socket.emit(ChatEvent.LEAVE_CHAT, { chatId });
-            socket.on(ChatEvent.LEAVE_CHAT, res => {
-                expect(res.chatId).toBe(chatId);
-                done();
-            });
-        });
-    });
-
     afterEach(() => {
         socket.close();
     });

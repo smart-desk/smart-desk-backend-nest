@@ -29,6 +29,7 @@ export enum ChatEvent {
     CREATE_CHAT = 'createChat',
     INIT_CHATS = 'initChats',
     NEW_CHAT = 'newChat',
+    READ_CHAT = 'readChat',
     GET_MESSAGES = 'getMessages',
     NEW_MESSAGE = 'newMessage',
     JOIN_CHAT = 'joinChat',
@@ -81,7 +82,12 @@ export class ChatGateway {
         client.emit(ChatEvent.GET_CHATS, response);
     }
 
-    @UseGuards(WsJwtAuthGuard)
+    @SubscribeMessage(ChatEvent.READ_CHAT)
+    async readChat(@ConnectedSocket() client: Socket, @MessageBody() data: ChatBaseEventDto): Promise<void> {
+        await this.chatService.readMessagesByUser(data.chatId, data.user.id);
+        client.emit(ChatEvent.READ_CHAT);
+    }
+
     @SubscribeMessage(ChatEvent.NEW_MESSAGE)
     async newMessage(@ConnectedSocket() client: Socket, @MessageBody() data: CreateChatMessageDto): Promise<void> {
         const isUserInChat = await this.isUserInChat(data.user.id, data.chatId);
