@@ -1,5 +1,5 @@
-import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WsException } from '@nestjs/websockets';
-import { Socket } from 'socket.io';
+import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
 import { UseGuards } from '@nestjs/common';
 import { WsJwtAuthGuard } from '../guards/ws-jwt-auth.guard';
 import { CreateChatMessageDto } from './dto/create-chat-message.dto';
@@ -39,7 +39,17 @@ export enum ChatEvent {
 @WebSocketGateway(options)
 @UseGuards(WsJwtAuthGuard)
 export class ChatGateway {
+    @WebSocketServer() server: Server;
+
     constructor(private chatService: ChatService, private advertsService: AdvertsService) {}
+
+    @SubscribeMessage(ChatEvent.INIT_CHATS)
+    async initChats(@ConnectedSocket() client: Socket, @MessageBody() data: ChatBaseEventDto): Promise<void> {
+        const chats = await this.chatService.getChatsByUser(data.user.id);
+        const rooms = chats.map(chat => chat.id);
+        client.join([data.user.id, ...rooms]);
+        client.emit(ChatEvent.INIT_CHATS);
+    }
 
     @SubscribeMessage(ChatEvent.CREATE_CHAT)
     async createChat(@ConnectedSocket() client: Socket, @MessageBody() data: CreateChatDto): Promise<void> {
@@ -56,6 +66,7 @@ export class ChatGateway {
             id: data.id,
             data: chat,
         };
+        client.join(chat.id);
         client.emit(ChatEvent.CREATE_CHAT, response);
         client.to(data.user2).emit(ChatEvent.NEW_CHAT, chat);
     }
@@ -90,14 +101,7 @@ export class ChatGateway {
             throw new WsException('Forbidden');
         }
         const messages = await this.chatService.getMessages(data.chatId);
-        client.emit(ChatEvent.GET_MESSAGES, messages); // todo check
-    }
-
-    // todo probably makes sense to do it on connect event
-    @SubscribeMessage(ChatEvent.INIT_CHATS)
-    async initChats(@ConnectedSocket() client: Socket, @MessageBody() data: ChatBaseEventDto): Promise<void> {
-        client.join(data.user.id);
-        client.emit(ChatEvent.INIT_CHATS);
+        client.emit(ChatEvent.GET_MESSAGES, messages);
     }
 
     @SubscribeMessage(ChatEvent.JOIN_CHAT)
@@ -108,16 +112,6 @@ export class ChatGateway {
         }
         client.join(data.chatId);
         client.emit(ChatEvent.JOIN_CHAT, { chatId: data.chatId });
-    }
-
-    @SubscribeMessage(ChatEvent.LEAVE_CHAT)
-    async leaveChat(@ConnectedSocket() client: Socket, @MessageBody() data: ChatBaseEventDto): Promise<void> {
-        const isUserInChat = await this.isUserInChat(data.user.id, data.chatId);
-        if (!isUserInChat) {
-            throw new WsException('Forbidden');
-        }
-        client.leave(data.chatId);
-        client.emit(ChatEvent.LEAVE_CHAT, { chatId: data.chatId });
     }
 
     private async isUserInChat(userId: string, chatId: string): Promise<boolean> {
