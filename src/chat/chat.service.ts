@@ -37,7 +37,7 @@ export class ChatService {
         const chats = await this.chatRepository.find({
             where: [{ user1: userId }, { user2: userId }],
         });
-        return Promise.all(chats.map(async chat => this.fillAdditionalProperties(chat, userId)));
+        return Promise.all(chats.map(chat => this.fillAdditionalProperties(chat, userId)));
     }
 
     async createMessage(body: CreateChatMessageDto): Promise<ChatMessage> {

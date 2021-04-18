@@ -84,6 +84,10 @@ export class ChatGateway {
 
     @SubscribeMessage(ChatEvent.READ_CHAT)
     async readChat(@ConnectedSocket() client: Socket, @MessageBody() data: ChatBaseEventDto): Promise<void> {
+        const isUserInChat = await this.isUserInChat(data.user.id, data.chatId);
+        if (!isUserInChat) {
+            throw new WsException('Forbidden');
+        }
         await this.chatService.readMessagesByUser(data.chatId, data.user.id);
         client.emit(ChatEvent.READ_CHAT);
     }
