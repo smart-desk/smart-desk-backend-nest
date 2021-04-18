@@ -21,4 +21,6 @@ export class Chat {
     user1Data: User;
 
     user2Data: User;
+
+    unreadMessagesCount: number;
 }

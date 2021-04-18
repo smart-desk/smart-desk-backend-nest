@@ -19,7 +19,7 @@ import { ChatEvent } from './chat.gateway';
 import { WsJwtAuthGuard } from '../guards/ws-jwt-auth.guard';
 import { WsJwtAuthGuardMock } from '../../test/mocks/ws-jwt-auth.guard.mock';
 
-describe('Chat controller', () => {
+describe('Chat gateway', () => {
     let app: INestApplication;
     let socket;
     let baseAddress;
@@ -267,13 +267,35 @@ describe('Chat controller', () => {
         });
     });
 
-    describe('leave chat', () => {
+    describe('read chat', () => {
         it(`successfully`, done => {
             socket = io.connect(baseAddress, { path: '/socket' });
             const chatId = uuid();
-            socket.emit(ChatEvent.LEAVE_CHAT, { chatId });
-            socket.on(ChatEvent.LEAVE_CHAT, res => {
-                expect(res.chatId).toBe(chatId);
+            socket.emit(ChatEvent.READ_CHAT, { chatId });
+            socket.on(ChatEvent.READ_CHAT, res => {
+                expect(res).toBeUndefined();
+                done();
+            });
+        });
+
+        it(`with error not authorized`, done => {
+            WsJwtAuthGuardMock.canActivate.mockReturnValueOnce(false);
+            socket = io.connect(baseAddress, { path: '/socket' });
+            const chatId = uuid();
+            socket.emit(ChatEvent.READ_CHAT, { chatId });
+            socket.on('exception', res => {
+                expect(res.message).toBe('Forbidden resource');
+                done();
+            });
+        });
+
+        it(`with error not participant of a chat`, done => {
+            chatRepositoryMock.findOne.mockReturnValueOnce({ user1: '1', user2: '2' });
+            socket = io.connect(baseAddress, { path: '/socket' });
+            const chatId = uuid();
+            socket.emit(ChatEvent.READ_CHAT, { chatId });
+            socket.on('exception', res => {
+                expect(res.message).toBe('Forbidden');
                 done();
             });
         });
