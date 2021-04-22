@@ -16,6 +16,8 @@ import { LocationService } from './location/location.service';
 import { LocationModule } from './location/location.module';
 import { CheckboxService } from './checkbox/checkbox.service';
 import { CheckboxModule } from './checkbox/checkbox.module';
+import { CalendarService } from './calendar/calendar.service';
+import { CalendarModule } from './calendar/calendar.module';
 
 export enum FieldType {
     INPUT_TEXT = 'input_text',
@@ -26,6 +28,7 @@ export enum FieldType {
     PRICE = 'price',
     LOCATION = 'location',
     CHECKBOX = 'checkbox',
+    CALENDAR = 'calendar',
 }
 
 @Module({
@@ -63,8 +66,22 @@ export enum FieldType {
             provide: FieldType.CHECKBOX,
             useExisting: CheckboxService,
         },
+        {
+            provide: FieldType.CALENDAR,
+            useExisting: CalendarService,
+        },
     ],
-    imports: [InputTextModule, TextareaModule, RadioModule, TextModule, PhotoModule, PriceModule, LocationModule, CheckboxModule],
+    imports: [
+        InputTextModule,
+        TextareaModule,
+        RadioModule,
+        TextModule,
+        PhotoModule,
+        PriceModule,
+        LocationModule,
+        CheckboxModule,
+        CalendarModule,
+    ],
     exports: [DynamicFieldsService],
 })
 export class DynamicFieldsModule {}
