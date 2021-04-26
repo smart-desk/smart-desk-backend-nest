@@ -1,16 +1,15 @@
 import { IsBoolean, IsDate, IsNotEmpty, IsOptional } from 'class-validator';
 import { DynamicFieldsBaseUpdateDto } from '../../dynamic-fields-base-update.dto';
+import { Type } from 'class-transformer';
 
 export class UpdateCalendarDto extends DynamicFieldsBaseUpdateDto {
-    @IsBoolean()
-    @IsOptional()
-    range: boolean = false;
-
     @IsDate()
+    @Type(() => Date)
     @IsNotEmpty()
     date1: Date;
 
     @IsDate()
+    @Type(() => Date)
     @IsOptional()
     date2: Date;
 }

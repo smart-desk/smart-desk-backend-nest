@@ -4,15 +4,13 @@ import { Type } from 'class-transformer';
 import { Column } from 'typeorm';
 
 export class CreateCalendarDto extends DynamicFieldsBaseCreateDto {
-    @IsBoolean()
-    @IsOptional()
-    range: boolean = false;
-
     @IsDate()
+    @Type(() => Date)
     @IsNotEmpty()
     date1: Date;
 
     @IsDate()
+    @Type(() => Date)
     @IsOptional()
     date2: Date;
 }

@@ -89,16 +89,12 @@ describe('Calendar field', () => {
                         fields: [
                             {
                                 field_id: uuid(),
-                                range: true,
                                 date1: new Date(),
                                 date2: new Date(),
                             } as CreateCalendarDto,
                         ],
                     } as CreateAdvertDto)
-                    // .expect(HttpStatus.CREATED);
-                    .expect(res => {
-                        console.log(res.body)
-                    });
+                    .expect(HttpStatus.CREATED);
             });
 
             it(`with error - not valid field`, () => {
@@ -112,10 +108,8 @@ describe('Calendar field', () => {
                     } as CreateAdvertDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('title must be shorter than or equal to 255 characters');
-                        expect(res.body.message).toContain('title must be a string');
-                        expect(res.body.message).toContain('lat must be a number conforming to the specified constraints');
-                        expect(res.body.message).toContain('lng must be a number conforming to the specified constraints');
+                        expect(res.body.message).toContain('date1 should not be empty');
+                        expect(res.body.message).toContain('date1 must be a Date instance');
                     });
             });
         });
@@ -129,7 +123,6 @@ describe('Calendar field', () => {
                         fields: [
                             {
                                 field_id: uuid(),
-                                range: true,
                                 date1: new Date(),
                                 date2: new Date(),
                             } as UpdateCalendarDto,
@@ -146,18 +139,13 @@ describe('Calendar field', () => {
                         fields: [
                             {
                                 field_id: uuid(),
-                                range: true,
-                                date1: new Date(),
-                                date2: new Date(),
                             } as any,
                         ],
                     } as CreateAdvertDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('title must be shorter than or equal to 255 characters');
-                        expect(res.body.message).toContain('title must be a string');
-                        expect(res.body.message).toContain('lat must be a number conforming to the specified constraints');
-                        expect(res.body.message).toContain('lng must be a number conforming to the specified constraints');
+                        expect(res.body.message).toContain('date1 should not be empty');
+                        expect(res.body.message).toContain('date1 must be a Date instance');
                     });
             });
         });
@@ -178,7 +166,7 @@ describe('Calendar field', () => {
                         section_id: uuid(),
                         title: 'some title',
                         type: FieldType.CALENDAR,
-                        params: {} as CalendarParamsDto,
+                        params: { range: true } as CalendarParamsDto,
                     } as FieldCreateDto)
                     .expect(HttpStatus.CREATED);
             });
@@ -198,10 +186,8 @@ describe('Calendar field', () => {
                         title: 'some title',
                         type: FieldType.CALENDAR,
                         params: {
-                            range: true,
-                            date1: new Date(),
-                            date2: new Date()
-                        } as UpdateCalendarDto,
+                            range: false,
+                        } as CalendarParamsDto,
                     } as FieldUpdateDto)
                     .expect(HttpStatus.OK);
             });
