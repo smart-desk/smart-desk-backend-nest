@@ -25,7 +25,7 @@ import { CreateAdvertDto } from './dto/create-advert.dto';
 import { UpdateAdvertDto } from './dto/update-advert.dto';
 import { GetAdvertsDto, GetAdvertsResponseDto } from './dto/get-adverts.dto';
 import { BlockedUserGuard } from '../guards/blocked-user.guard';
-import { AdvertStatus } from './advert-status.enum';
+import { AdvertStatus } from './models/advert-status.enum';
 import { User } from '../users/entities/user.entity';
 
 @Controller('adverts')

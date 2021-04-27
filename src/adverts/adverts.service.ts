@@ -11,7 +11,7 @@ import { DynamicFieldsService } from '../dynamic-fields/dynamic-fields.service';
 import { FieldType } from '../dynamic-fields/dynamic-fields.module';
 import { CreateAdvertDto } from './dto/create-advert.dto';
 import { UpdateAdvertDto } from './dto/update-advert.dto';
-import { AdvertStatus } from './advert-status.enum';
+import { AdvertStatus } from './models/advert-status.enum';
 
 interface FieldDataDtoInstance {
     type: FieldType;

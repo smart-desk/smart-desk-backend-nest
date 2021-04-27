@@ -1,5 +1,6 @@
-import { IsArray, IsNotEmpty, IsString, IsUUID, MaxLength } from 'class-validator';
+import { IsArray, IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 import { DynamicFieldsBaseCreateDto } from '../../dynamic-fields/dynamic-fields-base-create.dto';
+import { PreferContact } from '../models/prefer-contact.enum';
 
 export class CreateAdvertDto {
     @IsUUID()
@@ -18,4 +19,8 @@ export class CreateAdvertDto {
     @IsNotEmpty()
     @IsArray()
     fields: DynamicFieldsBaseCreateDto[];
+
+    @IsOptional()
+    @IsEnum(PreferContact)
+    preferContact?: PreferContact;
 }

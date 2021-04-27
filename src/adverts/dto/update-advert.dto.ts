@@ -1,5 +1,6 @@
-import { IsArray, IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { IsArray, IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 import { DynamicFieldsBaseUpdateDto } from '../../dynamic-fields/dynamic-fields-base-update.dto';
+import { PreferContact } from '../models/prefer-contact.enum';
 
 export class UpdateAdvertDto {
     @IsString()
@@ -10,4 +11,8 @@ export class UpdateAdvertDto {
     @IsNotEmpty()
     @IsArray()
     fields: DynamicFieldsBaseUpdateDto[];
+
+    @IsOptional()
+    @IsEnum(PreferContact)
+    preferContact?: PreferContact;
 }

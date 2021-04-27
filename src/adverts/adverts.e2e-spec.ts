@@ -32,6 +32,7 @@ import { User } from '../users/entities/user.entity';
 import { UserStatus } from '../users/user-status.enum';
 import { BlockedUserGuard } from '../guards/blocked-user.guard';
 import { BlockedUserGuardMock } from '../../test/mocks/blocked-user.guard.mock';
+import { PreferContact } from './models/prefer-contact.enum';
 
 describe('Adverts controller', () => {
     let app: INestApplication;
@@ -344,18 +345,20 @@ describe('Adverts controller', () => {
                     model_id: uuid(),
                     category_id: uuid(),
                     title: 'some advert',
+                    preferContact: PreferContact.PHONE,
                     fields: [],
                 } as CreateAdvertDto)
                 .expect(HttpStatus.CREATED);
         });
 
-        it(`with error - not valid model_id, category_id and empty title`, () => {
+        it(`with error - not valid advert params`, () => {
             return request(app.getHttpServer())
                 .post(`/adverts`)
                 .send({
                     model_id: '12312',
                     category_id: '123123',
                     title: '',
+                    preferContact: 'left' as PreferContact,
                     fields: [],
                 } as CreateAdvertDto)
                 .expect(HttpStatus.BAD_REQUEST)
@@ -363,6 +366,7 @@ describe('Adverts controller', () => {
                     expect(res.body.message).toContain('category_id must be an UUID');
                     expect(res.body.message).toContain('model_id must be an UUID');
                     expect(res.body.message).toContain('title should not be empty');
+                    expect(res.body.message).toContain('preferContact must be a valid enum value');
                 });
         });
 
