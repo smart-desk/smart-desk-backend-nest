@@ -3,7 +3,7 @@ import { Test } from '@nestjs/testing';
 import * as request from 'supertest';
 import { v4 as uuid } from 'uuid';
 import { AccessControlModule } from 'nest-access-control';
-import { createRepositoryMock, createTestAppForModule, declareDynamicFieldsProviders } from '../../test/test.utils';
+import { createRepositoryMock, createTestAppForModule, declareCommonProviders } from '../../test/test.utils';
 import { JwtAuthGuardMock } from '../../test/mocks/jwt-auth.guard.mock';
 import { BookmarksModule } from './bookmarks.module';
 import { CreateBookmarkDto } from './dto/create-bookmark.dto';
@@ -59,7 +59,9 @@ describe('Bookmarks controller', () => {
     beforeAll(async () => {
         let moduleBuilder = Test.createTestingModule({
             imports: [BookmarksModule, AdvertsModule, TypeOrmModule.forRoot(), AccessControlModule.forRoles(roles)],
-        })
+        });
+
+        const moduleRef = await declareCommonProviders(moduleBuilder)
             .overrideProvider(getRepositoryToken(Advert))
             .useValue(advertRepositoryMock)
             .overrideProvider(getRepositoryToken(Section))
@@ -73,11 +75,9 @@ describe('Bookmarks controller', () => {
             .overrideProvider(Connection)
             .useValue(connectionMock)
             .overrideGuard(JwtAuthGuard)
-            .useValue(JwtGuard);
+            .useValue(JwtGuard)
+            .compile();
 
-        moduleBuilder = declareDynamicFieldsProviders(moduleBuilder);
-
-        const moduleRef = await moduleBuilder.compile();
         app = await createTestAppForModule(moduleRef);
     });
 

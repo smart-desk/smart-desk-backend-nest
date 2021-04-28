@@ -4,7 +4,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import * as request from 'supertest';
 import { v4 as uuid } from 'uuid';
 import { AccessControlModule, ACGuard } from 'nest-access-control';
-import { createRepositoryMock, createTestAppForModule, declareDynamicFieldsProviders } from '../../test/test.utils';
+import { createRepositoryMock, createTestAppForModule, declareCommonProviders } from '../../test/test.utils';
 import { FieldsModule } from './fields.module';
 import { Field } from './field.entity';
 import { FieldCreateDto, FieldUpdateDto } from './dto/field.dto';
@@ -32,7 +32,9 @@ describe('Fields controller', () => {
     beforeAll(async () => {
         let moduleBuilder = Test.createTestingModule({
             imports: [FieldsModule, SectionsModule],
-        })
+        });
+
+        const moduleRef = await declareCommonProviders(moduleBuilder)
             .overrideProvider(getRepositoryToken(Field))
             .useValue(fieldsRepositoryMock)
             .overrideProvider(getRepositoryToken(Section))
@@ -40,11 +42,9 @@ describe('Fields controller', () => {
             .overrideGuard(JwtAuthGuard)
             .useValue(JwtAuthGuardMock)
             .overrideGuard(ACGuard)
-            .useValue(AcGuardMock);
+            .useValue(AcGuardMock)
+            .compile();
 
-        moduleBuilder = declareDynamicFieldsProviders(moduleBuilder);
-
-        const moduleRef = await moduleBuilder.compile();
         app = await createTestAppForModule(moduleRef);
     });
 
@@ -115,7 +115,7 @@ describe('Fields controller', () => {
                     section_id: uuid(),
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
-                    order: "test" as any,
+                    order: 'test' as any,
                     params: { label: 'some label' } as InputTextParamsDto,
                 } as FieldCreateDto)
                 .expect(HttpStatus.BAD_REQUEST)
@@ -571,7 +571,7 @@ describe('Fields controller with ACL enabled', () => {
             .overrideGuard(JwtAuthGuard)
             .useValue(JwtGuard);
 
-        moduleBuilder = declareDynamicFieldsProviders(moduleBuilder);
+        moduleBuilder = declareCommonProviders(moduleBuilder);
 
         const moduleRef = await moduleBuilder.compile();
         app = await createTestAppForModule(moduleRef);

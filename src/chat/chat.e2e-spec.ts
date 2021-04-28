@@ -2,7 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { v4 as uuid } from 'uuid';
-import { createRepositoryMock, createTestAppForModule, declareDynamicFieldsProviders } from '../../test/test.utils';
+import { createRepositoryMock, createTestAppForModule, declareCommonProviders } from '../../test/test.utils';
 import { User } from '../users/entities/user.entity';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { JwtAuthGuardMock } from '../../test/mocks/jwt-auth.guard.mock';
@@ -55,7 +55,10 @@ describe('Chat gateway', () => {
     beforeAll(async () => {
         let moduleBuilder = await Test.createTestingModule({
             imports: [ChatModule],
-        })
+        });
+
+        // todo check
+        const moduleRef = await declareCommonProviders(moduleBuilder)
             .overrideProvider(getRepositoryToken(Chat))
             .useValue(chatRepositoryMock)
             .overrideProvider(getRepositoryToken(ChatMessage))
@@ -73,11 +76,9 @@ describe('Chat gateway', () => {
             .overrideGuard(JwtAuthGuard)
             .useValue(JwtGuard)
             .overrideGuard(WsJwtAuthGuard)
-            .useValue(WsJwtAuthGuardMock);
+            .useValue(WsJwtAuthGuardMock)
+            .compile();
 
-        moduleBuilder = declareDynamicFieldsProviders(moduleBuilder);
-
-        const moduleRef = await moduleBuilder.compile();
         app = await createTestAppForModule(moduleRef);
 
         const address = app.getHttpServer().listen().address();

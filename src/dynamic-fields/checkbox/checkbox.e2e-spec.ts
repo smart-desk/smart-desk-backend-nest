@@ -5,7 +5,7 @@ import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { v4 as uuid } from 'uuid';
 import { Connection } from 'typeorm';
 import { AccessControlModule } from 'nest-access-control';
-import { createRepositoryMock, createTestAppForModule, declareDynamicFieldsProviders } from '../../../test/test.utils';
+import { createRepositoryMock, createTestAppForModule, declareCommonProviders } from '../../../test/test.utils';
 import { Advert } from '../../adverts/entities/advert.entity';
 import { AdvertsModule } from '../../adverts/adverts.module';
 import { Field } from '../../fields/field.entity';
@@ -56,7 +56,10 @@ describe('Checkbox field', () => {
     beforeAll(async () => {
         let moduleBuilder = Test.createTestingModule({
             imports: [AdvertsModule, TypeOrmModule.forRoot(), AccessControlModule.forRoles(roles), UsersModule],
-        })
+        });
+
+        // todo check
+        const moduleRef = await declareCommonProviders(moduleBuilder)
             .overrideProvider(getRepositoryToken(Advert))
             .useValue(advertRepositoryMock)
             .overrideProvider(getRepositoryToken(Section))
@@ -68,11 +71,9 @@ describe('Checkbox field', () => {
             .overrideProvider(Connection)
             .useValue(connectionMock)
             .overrideGuard(JwtAuthGuard)
-            .useValue(JwtGuard);
+            .useValue(JwtGuard)
+            .compile();
 
-        moduleBuilder = declareDynamicFieldsProviders(moduleBuilder);
-
-        const moduleRef = await moduleBuilder.compile();
         app = await createTestAppForModule(moduleRef);
     });
 

@@ -5,7 +5,7 @@ import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { v4 as uuid } from 'uuid';
 import { Connection } from 'typeorm';
 import { AccessControlModule, ACGuard } from 'nest-access-control';
-import { createRepositoryMock, createTestAppForModule, declareDynamicFieldsProviders } from '../../test/test.utils';
+import { createRepositoryMock, createTestAppForModule, declareCommonProviders } from '../../test/test.utils';
 import { Advert } from './entities/advert.entity';
 import { AdvertsModule } from './adverts.module';
 import { Field } from '../fields/field.entity';
@@ -65,15 +65,15 @@ describe('Adverts controller', () => {
     beforeAll(async () => {
         let moduleBuilder = await Test.createTestingModule({
             imports: [AdvertsModule, TypeOrmModule.forRoot()],
-        })
+        });
+
+        const moduleRef = await declareCommonProviders(moduleBuilder)
             .overrideProvider(getRepositoryToken(Advert))
             .useValue(advertRepositoryMock)
             .overrideProvider(getRepositoryToken(Section))
             .useValue(sectionRepositoryMock)
             .overrideProvider(getRepositoryToken(Field))
             .useValue(fieldRepositoryMock)
-            .overrideProvider(getRepositoryToken(User))
-            .useValue(createRepositoryMock())
             .overrideProvider(Connection)
             .useValue(connectionMock)
             .overrideGuard(JwtAuthGuard)
@@ -81,11 +81,9 @@ describe('Adverts controller', () => {
             .overrideGuard(ACGuard)
             .useValue(AcGuardMock)
             .overrideGuard(BlockedUserGuard)
-            .useValue(BlockedUserGuardMock);
+            .useValue(BlockedUserGuardMock)
+            .compile();
 
-        moduleBuilder = declareDynamicFieldsProviders(moduleBuilder);
-
-        const moduleRef = await moduleBuilder.compile();
         app = await createTestAppForModule(moduleRef);
     });
 
@@ -1436,7 +1434,9 @@ describe('Adverts controller with ACL enabled', () => {
     beforeAll(async () => {
         let moduleBuilder = Test.createTestingModule({
             imports: [AdvertsModule, TypeOrmModule.forRoot(), AccessControlModule.forRoles(roles), UsersModule],
-        })
+        });
+
+        const moduleRef = await declareCommonProviders(moduleBuilder)
             .overrideProvider(getRepositoryToken(Advert))
             .useValue(advertRepositoryMock)
             .overrideProvider(getRepositoryToken(Section))
@@ -1448,11 +1448,8 @@ describe('Adverts controller with ACL enabled', () => {
             .overrideProvider(Connection)
             .useValue(connectionMock)
             .overrideGuard(JwtAuthGuard)
-            .useValue(JwtGuard);
-
-        moduleBuilder = declareDynamicFieldsProviders(moduleBuilder);
-
-        const moduleRef = await moduleBuilder.compile();
+            .useValue(JwtGuard)
+            .compile();
 
         app = await createTestAppForModule(moduleRef);
     });

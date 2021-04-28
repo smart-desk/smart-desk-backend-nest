@@ -5,7 +5,7 @@ import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { v4 as uuid } from 'uuid';
 import { Connection } from 'typeorm';
 import { AccessControlModule } from 'nest-access-control';
-import { createRepositoryMock, createTestAppForModule, declareDynamicFieldsProviders } from '../../../test/test.utils';
+import { createRepositoryMock, createTestAppForModule, declareCommonProviders } from '../../../test/test.utils';
 import { Advert } from '../../adverts/entities/advert.entity';
 import { AdvertsModule } from '../../adverts/adverts.module';
 import { Field } from '../../fields/field.entity';
@@ -71,7 +71,7 @@ describe('Calendar field', () => {
             .overrideGuard(JwtAuthGuard)
             .useValue(JwtGuard);
 
-        moduleBuilder = declareDynamicFieldsProviders(moduleBuilder);
+        moduleBuilder = declareCommonProviders(moduleBuilder);
 
         const moduleRef = await moduleBuilder.compile();
         app = await createTestAppForModule(moduleRef);

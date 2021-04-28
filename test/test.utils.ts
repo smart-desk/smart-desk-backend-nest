@@ -10,6 +10,10 @@ import { LocationEntity } from '../src/dynamic-fields/location/location.entity';
 import { PriceEntity } from '../src/dynamic-fields/price/price.entity';
 import { CheckboxEntity } from '../src/dynamic-fields/checkbox/checkbox.entity';
 import { CalendarEntity } from '../src/dynamic-fields/calendar/calendar.entity';
+import { Advert } from '../src/adverts/entities/advert.entity';
+import { Section } from '../src/sections/section.entity';
+import { Field } from '../src/fields/field.entity';
+import { User } from '../src/users/entities/user.entity';
 
 export async function createTestAppForModule(moduleRef: TestingModule) {
     const app = moduleRef.createNestApplication();
@@ -50,8 +54,16 @@ export function createRepositoryMock<T>(values?: T[]) {
     };
 }
 
-export function declareDynamicFieldsProviders(moduleRef: TestingModuleBuilder): TestingModuleBuilder {
+export function declareCommonProviders(moduleRef: TestingModuleBuilder): TestingModuleBuilder {
     return moduleRef
+        .overrideProvider(getRepositoryToken(User))
+        .useValue(createRepositoryMock())
+        .overrideProvider(getRepositoryToken(Advert))
+        .useValue(createRepositoryMock())
+        .overrideProvider(getRepositoryToken(Section))
+        .useValue(createRepositoryMock())
+        .overrideProvider(getRepositoryToken(Field))
+        .useValue(createRepositoryMock())
         .overrideProvider(getRepositoryToken(InputTextEntity))
         .useValue(createRepositoryMock())
         .overrideProvider(getRepositoryToken(TextareaEntity))

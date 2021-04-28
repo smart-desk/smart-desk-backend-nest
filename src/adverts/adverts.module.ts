@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AdvertsService } from './adverts.service';
 import { AdvertsController } from './adverts.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -9,7 +9,7 @@ import { DynamicFieldsModule } from '../dynamic-fields/dynamic-fields.module';
 import { UsersModule } from '../users/users.module';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Advert]), SectionsModule, FieldsModule, DynamicFieldsModule, UsersModule],
+    imports: [TypeOrmModule.forFeature([Advert]), SectionsModule, FieldsModule, DynamicFieldsModule, forwardRef(() => UsersModule)],
     providers: [AdvertsService],
     controllers: [AdvertsController],
     exports: [AdvertsService],
