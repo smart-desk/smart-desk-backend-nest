@@ -33,7 +33,6 @@ import { User } from '../users/entities/user.entity';
 export class AdvertsController {
     constructor(private advertsService: AdvertsService) {}
 
-    // todo make it accessible only for admin
     @Get()
     @ApiBearerAuth('access-token')
     @UseGuards(new JwtAuthGuard({ allowNoToken: true }))

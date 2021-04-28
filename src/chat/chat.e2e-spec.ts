@@ -57,7 +57,6 @@ describe('Chat gateway', () => {
             imports: [ChatModule],
         });
 
-        // todo check
         const moduleRef = await declareCommonProviders(moduleBuilder)
             .overrideProvider(getRepositoryToken(Chat))
             .useValue(chatRepositoryMock)

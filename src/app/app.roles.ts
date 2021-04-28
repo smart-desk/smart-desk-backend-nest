@@ -24,7 +24,7 @@ export const roles = new RolesBuilder();
 roles
     // Viewer
     .grant(RolesEnum.VIEWER)
-    .read([ResourceEnum.ADVERT, ResourceEnum.CATEGORY, ResourceEnum.USER]) // todo hidden profile fields
+    .read([ResourceEnum.ADVERT, ResourceEnum.CATEGORY, ResourceEnum.USER])
     // User
     .grant(RolesEnum.USER)
     .extend(RolesEnum.VIEWER)
