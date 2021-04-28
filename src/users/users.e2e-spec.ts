@@ -3,7 +3,7 @@ import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as request from 'supertest';
 import { v4 as uuid } from 'uuid';
-import { createRepositoryMock, createTestAppForModule } from '../../test/test.utils';
+import { createRepositoryMock, createTestAppForModule, declareCommonProviders } from '../../test/test.utils';
 import { User } from './entities/user.entity';
 import { UsersModule } from './users.module';
 import { AccessControlModule } from 'nest-access-control';
@@ -14,6 +14,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateUserRolesDto } from './dto/update-user-roles.dto';
 import { BlockUserDto } from './dto/block-user.dto';
 import { UserStatus } from './user-status.enum';
+import { Advert } from '../adverts/entities/advert.entity';
+import { PreferContact } from '../adverts/models/prefer-contact.enum';
 
 describe('Users controller', () => {
     let app: INestApplication;
@@ -26,19 +28,30 @@ describe('Users controller', () => {
     user.isPhoneVerified = true;
     user.email = 'email@email.com';
 
+    const advertEntity = new Advert();
+    advertEntity.id = uuid();
+    advertEntity.sections = [];
+
+    const advertRepositoryMock = createRepositoryMock<Advert>([advertEntity]);
     const userRepositoryMock = createRepositoryMock<User>([user]);
     const JwtGuard = JwtAuthGuardMock;
 
     beforeAll(async () => {
-        const moduleRef = await Test.createTestingModule({
+        let moduleBuilder = await Test.createTestingModule({
             imports: [UsersModule, AccessControlModule.forRoles(roles)],
-        })
+        });
+
+        moduleBuilder = declareCommonProviders(moduleBuilder);
+
+        moduleBuilder
+            .overrideProvider(getRepositoryToken(Advert))
+            .useValue(advertRepositoryMock)
             .overrideProvider(getRepositoryToken(User))
             .useValue(userRepositoryMock)
             .overrideGuard(JwtAuthGuard)
-            .useValue(JwtGuard)
-            .compile();
+            .useValue(JwtGuard);
 
+        const moduleRef = await moduleBuilder.compile();
         app = await createTestAppForModule(moduleRef);
     });
 
@@ -243,7 +256,29 @@ describe('Users controller', () => {
 
     describe("get user's phone", () => {
         it(`successfully`, () => {
-            return request(app.getHttpServer()).get(`/users/${uuid()}/phone`).expect(HttpStatus.OK);
+            return request(app.getHttpServer()).get(`/users/${uuid()}/phone?advert=${uuid()}`).expect(HttpStatus.OK);
+        });
+
+        it(`with error - no advert provided`, () => {
+            return request(app.getHttpServer())
+                .get(`/users/${uuid()}/phone`)
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('advert should not be empty');
+                    expect(res.body.message).toContain('advert must be an UUID');
+                });
+        });
+
+        it(`with error - user prefers chat`, () => {
+            advertEntity.preferContact = PreferContact.CHAT;
+            advertRepositoryMock.findOne.mockReturnValueOnce(advertEntity);
+
+            return request(app.getHttpServer())
+                .get(`/users/${uuid()}/phone?advert=${uuid()}`)
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('User prefers chat');
+                });
         });
 
         it(`with error - not found because user has no phone`, () => {
@@ -251,7 +286,7 @@ describe('Users controller', () => {
             userRepositoryMock.findOne.mockReturnValueOnce(user);
 
             return request(app.getHttpServer())
-                .get(`/users/${uuid()}/phone`)
+                .get(`/users/${uuid()}/phone?advert=${uuid()}`)
                 .expect(HttpStatus.NOT_FOUND)
                 .expect(res => {
                     expect(res.body.message).toContain('Phone not found');
@@ -264,7 +299,7 @@ describe('Users controller', () => {
             userRepositoryMock.findOne.mockReturnValueOnce(user);
 
             return request(app.getHttpServer())
-                .get(`/users/${uuid()}/phone`)
+                .get(`/users/${uuid()}/phone?advert=${uuid()}`)
                 .expect(HttpStatus.NOT_FOUND)
                 .expect(res => {
                     expect(res.body.message).toContain('Phone not found');
@@ -273,7 +308,7 @@ describe('Users controller', () => {
 
         it(`with error - unauthorized`, () => {
             JwtGuard.canActivate.mockReturnValueOnce(false);
-            return request(app.getHttpServer()).get(`/users/${uuid()}/phone`).expect(HttpStatus.FORBIDDEN);
+            return request(app.getHttpServer()).get(`/users/${uuid()}/phone?advert=${uuid()}`).expect(HttpStatus.FORBIDDEN);
         });
     });
 });

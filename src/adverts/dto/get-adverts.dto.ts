@@ -1,7 +1,7 @@
 import { IsNumber, IsObject, IsOptional, IsPositive, IsString, IsUUID, Max, MaxLength } from 'class-validator';
 import { Exclude, Transform } from 'class-transformer';
 import { Advert } from '../entities/advert.entity';
-import { AdvertStatus } from '../advert-status.enum';
+import { AdvertStatus } from '../models/advert-status.enum';
 
 export class GetAdvertsDto {
     @IsOptional()

@@ -1,5 +1,6 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Section } from '../../sections/section.entity';
+import { PreferContact } from '../models/prefer-contact.enum';
 
 @Entity('adverts')
 export class Advert {
@@ -23,6 +24,9 @@ export class Advert {
 
     @Column('integer')
     views: number;
+
+    @Column('varchar', { name: 'prefer_contact', length: 100 })
+    preferContact: PreferContact;
 
     @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })
     createdAt: Date;

@@ -8,6 +8,7 @@ import { ChatService } from './chat.service';
 import { GetChatsDto } from './dto/get-chats.dto';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { AdvertsService } from '../adverts/adverts.service';
+import { PreferContact } from '../adverts/models/prefer-contact.enum';
 
 const options = {
     path: '/socket',
@@ -55,6 +56,10 @@ export class ChatGateway {
     @SubscribeMessage(ChatEvent.CREATE_CHAT)
     async createChat(@ConnectedSocket() client: Socket, @MessageBody() data: CreateChatDto): Promise<void> {
         const advert = await this.advertsService.getById(data.advertId);
+        if (advert.preferContact === PreferContact.PHONE) {
+            throw new WsException('User prefers phone');
+        }
+
         data.user1 = data.user.id;
         data.user2 = advert.userId;
 

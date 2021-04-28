@@ -5,7 +5,7 @@ import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { v4 as uuid } from 'uuid';
 import { Connection } from 'typeorm';
 import { AccessControlModule, ACGuard } from 'nest-access-control';
-import { createRepositoryMock, createTestAppForModule, declareDynamicFieldsProviders } from '../../test/test.utils';
+import { createRepositoryMock, createTestAppForModule, declareCommonProviders } from '../../test/test.utils';
 import { Advert } from './entities/advert.entity';
 import { AdvertsModule } from './adverts.module';
 import { Field } from '../fields/field.entity';
@@ -32,6 +32,7 @@ import { User } from '../users/entities/user.entity';
 import { UserStatus } from '../users/user-status.enum';
 import { BlockedUserGuard } from '../guards/blocked-user.guard';
 import { BlockedUserGuardMock } from '../../test/mocks/blocked-user.guard.mock';
+import { PreferContact } from './models/prefer-contact.enum';
 
 describe('Adverts controller', () => {
     let app: INestApplication;
@@ -64,15 +65,15 @@ describe('Adverts controller', () => {
     beforeAll(async () => {
         let moduleBuilder = await Test.createTestingModule({
             imports: [AdvertsModule, TypeOrmModule.forRoot()],
-        })
+        });
+
+        const moduleRef = await declareCommonProviders(moduleBuilder)
             .overrideProvider(getRepositoryToken(Advert))
             .useValue(advertRepositoryMock)
             .overrideProvider(getRepositoryToken(Section))
             .useValue(sectionRepositoryMock)
             .overrideProvider(getRepositoryToken(Field))
             .useValue(fieldRepositoryMock)
-            .overrideProvider(getRepositoryToken(User))
-            .useValue(createRepositoryMock())
             .overrideProvider(Connection)
             .useValue(connectionMock)
             .overrideGuard(JwtAuthGuard)
@@ -80,11 +81,9 @@ describe('Adverts controller', () => {
             .overrideGuard(ACGuard)
             .useValue(AcGuardMock)
             .overrideGuard(BlockedUserGuard)
-            .useValue(BlockedUserGuardMock);
+            .useValue(BlockedUserGuardMock)
+            .compile();
 
-        moduleBuilder = declareDynamicFieldsProviders(moduleBuilder);
-
-        const moduleRef = await moduleBuilder.compile();
         app = await createTestAppForModule(moduleRef);
     });
 
@@ -344,18 +343,20 @@ describe('Adverts controller', () => {
                     model_id: uuid(),
                     category_id: uuid(),
                     title: 'some advert',
+                    preferContact: PreferContact.PHONE,
                     fields: [],
                 } as CreateAdvertDto)
                 .expect(HttpStatus.CREATED);
         });
 
-        it(`with error - not valid model_id, category_id and empty title`, () => {
+        it(`with error - not valid advert params`, () => {
             return request(app.getHttpServer())
                 .post(`/adverts`)
                 .send({
                     model_id: '12312',
                     category_id: '123123',
                     title: '',
+                    preferContact: 'left' as PreferContact,
                     fields: [],
                 } as CreateAdvertDto)
                 .expect(HttpStatus.BAD_REQUEST)
@@ -363,6 +364,7 @@ describe('Adverts controller', () => {
                     expect(res.body.message).toContain('category_id must be an UUID');
                     expect(res.body.message).toContain('model_id must be an UUID');
                     expect(res.body.message).toContain('title should not be empty');
+                    expect(res.body.message).toContain('preferContact must be a valid enum value');
                 });
         });
 
@@ -1432,7 +1434,9 @@ describe('Adverts controller with ACL enabled', () => {
     beforeAll(async () => {
         let moduleBuilder = Test.createTestingModule({
             imports: [AdvertsModule, TypeOrmModule.forRoot(), AccessControlModule.forRoles(roles), UsersModule],
-        })
+        });
+
+        const moduleRef = await declareCommonProviders(moduleBuilder)
             .overrideProvider(getRepositoryToken(Advert))
             .useValue(advertRepositoryMock)
             .overrideProvider(getRepositoryToken(Section))
@@ -1444,11 +1448,8 @@ describe('Adverts controller with ACL enabled', () => {
             .overrideProvider(Connection)
             .useValue(connectionMock)
             .overrideGuard(JwtAuthGuard)
-            .useValue(JwtGuard);
-
-        moduleBuilder = declareDynamicFieldsProviders(moduleBuilder);
-
-        const moduleRef = await moduleBuilder.compile();
+            .useValue(JwtGuard)
+            .compile();
 
         app = await createTestAppForModule(moduleRef);
     });

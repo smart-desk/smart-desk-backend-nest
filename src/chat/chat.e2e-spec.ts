@@ -2,7 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { v4 as uuid } from 'uuid';
-import { createRepositoryMock, createTestAppForModule, declareDynamicFieldsProviders } from '../../test/test.utils';
+import { createRepositoryMock, createTestAppForModule, declareCommonProviders } from '../../test/test.utils';
 import { User } from '../users/entities/user.entity';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { JwtAuthGuardMock } from '../../test/mocks/jwt-auth.guard.mock';
@@ -18,6 +18,7 @@ import * as io from 'socket.io-client';
 import { ChatEvent } from './chat.gateway';
 import { WsJwtAuthGuard } from '../guards/ws-jwt-auth.guard';
 import { WsJwtAuthGuardMock } from '../../test/mocks/ws-jwt-auth.guard.mock';
+import { PreferContact } from '../adverts/models/prefer-contact.enum';
 
 describe('Chat gateway', () => {
     let app: INestApplication;
@@ -48,6 +49,7 @@ describe('Chat gateway', () => {
     chatMessage.id = uuid();
 
     const JwtGuard = JwtAuthGuardMock;
+    const advertServiceRepositoryMock = createRepositoryMock([advert]);
     const userServiceRepositoryMock = createRepositoryMock<User>([user]);
     const chatMessageRepositoryMock = createRepositoryMock([chatMessage]);
     const chatRepositoryMock = createRepositoryMock([chat]);
@@ -55,13 +57,15 @@ describe('Chat gateway', () => {
     beforeAll(async () => {
         let moduleBuilder = await Test.createTestingModule({
             imports: [ChatModule],
-        })
+        });
+
+        const moduleRef = await declareCommonProviders(moduleBuilder)
             .overrideProvider(getRepositoryToken(Chat))
             .useValue(chatRepositoryMock)
             .overrideProvider(getRepositoryToken(ChatMessage))
             .useValue(chatMessageRepositoryMock)
             .overrideProvider(getRepositoryToken(Advert))
-            .useValue(createRepositoryMock([advert]))
+            .useValue(advertServiceRepositoryMock)
             .overrideProvider(getRepositoryToken(Section))
             .useValue(createRepositoryMock([section]))
             .overrideProvider(getRepositoryToken(Field))
@@ -73,11 +77,9 @@ describe('Chat gateway', () => {
             .overrideGuard(JwtAuthGuard)
             .useValue(JwtGuard)
             .overrideGuard(WsJwtAuthGuard)
-            .useValue(WsJwtAuthGuardMock);
+            .useValue(WsJwtAuthGuardMock)
+            .compile();
 
-        moduleBuilder = declareDynamicFieldsProviders(moduleBuilder);
-
-        const moduleRef = await moduleBuilder.compile();
         app = await createTestAppForModule(moduleRef);
 
         const address = app.getHttpServer().listen().address();
@@ -122,6 +124,20 @@ describe('Chat gateway', () => {
             socket.emit(ChatEvent.CREATE_CHAT, { id, advertId });
             socket.on('exception', res => {
                 expect(res.message).toContain("Chat participants can't be the same user");
+                done();
+            });
+        });
+
+        it(`with error - user prefers phone`, done => {
+            advert.preferContact = PreferContact.PHONE;
+            advertServiceRepositoryMock.findOne.mockReturnValueOnce(advert);
+
+            socket = io.connect(baseAddress, { path: '/socket' });
+            const id = uuid();
+            const advertId = uuid();
+            socket.emit(ChatEvent.CREATE_CHAT, { id, advertId });
+            socket.on('exception', res => {
+                expect(res.message).toContain('User prefers phone');
                 done();
             });
         });

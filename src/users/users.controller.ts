@@ -1,4 +1,5 @@
 import {
+    BadRequestException,
     Body,
     Controller,
     ForbiddenException,
@@ -7,6 +8,7 @@ import {
     Param,
     ParseUUIDPipe,
     Patch,
+    Query,
     Req,
     UseGuards,
     UseInterceptors,
@@ -23,11 +25,14 @@ import { UpdateUserRolesDto } from './dto/update-user-roles.dto';
 import { BlockedUserGuard } from '../guards/blocked-user.guard';
 import { BlockUserDto } from './dto/block-user.dto';
 import { UserInterceptor } from '../interceptors/user.interceptor';
+import { GetUserPhoneDto } from './dto/get-user-phone.dto';
+import { AdvertsService } from '../adverts/adverts.service';
+import { PreferContact } from '../adverts/models/prefer-contact.enum';
 
 @Controller('users')
 @ApiTags('Users')
 export class UsersController {
-    constructor(private usersService: UsersService) {}
+    constructor(private usersService: UsersService, private advertService: AdvertsService) {}
 
     @Get('profile')
     @ApiBearerAuth('access-token')
@@ -105,11 +110,20 @@ export class UsersController {
         resource: ResourceEnum.USER,
         action: 'read',
     })
-    async getPhone(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<string> {
+    async getPhone(
+        @Param('id', ParseUUIDPipe) id: string,
+        @Query() params: GetUserPhoneDto,
+        @Req() req: RequestWithUserPayload
+    ): Promise<string> {
         // todo count how many phones are requested by one user and set a limit
         const user = await this.usersService.findOne(id);
         if (!user.isPhoneVerified || !user.phone) {
             throw new NotFoundException('Phone not found');
+        }
+
+        const advert = await this.advertService.getById(params.advert, false);
+        if (advert.preferContact === PreferContact.CHAT) {
+            throw new BadRequestException('User prefers chat');
         }
         return user.phone;
     }

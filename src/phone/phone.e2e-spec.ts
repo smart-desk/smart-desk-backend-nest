@@ -2,7 +2,7 @@ import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as request from 'supertest';
-import { createRepositoryMock, createTestAppForModule } from '../../test/test.utils';
+import { createRepositoryMock, createTestAppForModule, declareCommonProviders } from '../../test/test.utils';
 import { User } from '../users/entities/user.entity';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { JwtAuthGuardMock } from '../../test/mocks/jwt-auth.guard.mock';
@@ -24,9 +24,11 @@ describe('Phone controller', () => {
     const userServiceRepositoryMock = createRepositoryMock<User>([user]);
 
     beforeAll(async () => {
-        const moduleRef = await Test.createTestingModule({
+        let moduleBuilder = await Test.createTestingModule({
             imports: [PhoneModule],
-        })
+        });
+
+        const moduleRef = await declareCommonProviders(moduleBuilder)
             .overrideProvider(PhoneService)
             .useValue(phoneServiceMock)
             .overrideProvider(getRepositoryToken(User))
@@ -42,7 +44,6 @@ describe('Phone controller', () => {
 
     describe('verify phone number', () => {
         describe('request', () => {
-
             it(`request success`, () => {
                 userServiceRepositoryMock.findOne.mockReturnValue(user);
                 return request(app.getHttpServer()).post('/phone/verify/request').expect(HttpStatus.OK);
