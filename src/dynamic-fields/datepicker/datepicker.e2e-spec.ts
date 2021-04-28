@@ -19,16 +19,16 @@ import { UsersModule } from '../../users/users.module';
 import { User } from '../../users/entities/user.entity';
 import { UpdateAdvertDto } from '../../adverts/dto/update-advert.dto';
 import { FieldCreateDto, FieldUpdateDto } from '../../fields/dto/field.dto';
-import { CreateCalendarDto } from './dto/create-calendar.dto';
-import { UpdateCalendarDto } from './dto/update-calendar.dto';
-import { CalendarParamsDto } from './dto/calendar-params.dto';
+import { CreateDatepickerDto } from './dto/create-datepicker.dto';
+import { UpdateDatepickerDto } from './dto/update-datepicker.dto';
+import { DatepickerParamsDto } from './dto/datepicker-params.dto';
 import { IsBoolean, IsDate, IsNotEmpty, IsOptional } from 'class-validator';
 
-describe('Calendar field', () => {
+describe('Datepicker field', () => {
     let app: INestApplication;
 
     const fieldEntity = new Field();
-    fieldEntity.type = FieldType.CALENDAR;
+    fieldEntity.type = FieldType.DATEPICKER;
     fieldEntity.id = uuid();
     fieldEntity.section_id = uuid();
     fieldEntity.title = 'test';
@@ -91,7 +91,7 @@ describe('Calendar field', () => {
                                 field_id: uuid(),
                                 date1: new Date(),
                                 date2: new Date(),
-                            } as CreateCalendarDto,
+                            } as CreateDatepickerDto,
                         ],
                     } as CreateAdvertDto)
                     .expect(HttpStatus.CREATED);
@@ -125,7 +125,7 @@ describe('Calendar field', () => {
                                 field_id: uuid(),
                                 date1: new Date(),
                                 date2: new Date(),
-                            } as UpdateCalendarDto,
+                            } as UpdateDatepickerDto,
                         ],
                     } as UpdateAdvertDto)
                     .expect(HttpStatus.OK);
@@ -165,8 +165,8 @@ describe('Calendar field', () => {
                     .send({
                         section_id: uuid(),
                         title: 'some title',
-                        type: FieldType.CALENDAR,
-                        params: { range: true } as CalendarParamsDto,
+                        type: FieldType.DATEPICKER,
+                        params: { range: true } as DatepickerParamsDto,
                     } as FieldCreateDto)
                     .expect(HttpStatus.CREATED);
             });
@@ -184,10 +184,10 @@ describe('Calendar field', () => {
                     .put(`/fields/${uuid()}`)
                     .send({
                         title: 'some title',
-                        type: FieldType.CALENDAR,
+                        type: FieldType.DATEPICKER,
                         params: {
                             range: false,
-                        } as CalendarParamsDto,
+                        } as DatepickerParamsDto,
                     } as FieldUpdateDto)
                     .expect(HttpStatus.OK);
             });

@@ -1,6 +1,6 @@
 import { IsDate, IsOptional } from 'class-validator';
 
-export class CalendarFilterDto {
+export class DatepickerFilterDto {
     @IsDate()
     @IsOptional()
     from: Date;
