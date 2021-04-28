@@ -3,7 +3,7 @@ import { DynamicFieldsBaseCreateDto } from '../../dynamic-fields-base-create.dto
 import { Type } from 'class-transformer';
 import { Column } from 'typeorm';
 
-export class CreateCalendarDto extends DynamicFieldsBaseCreateDto {
+export class CreateDatepickerDto extends DynamicFieldsBaseCreateDto {
     @IsDate()
     @Type(() => Date)
     @IsNotEmpty()
