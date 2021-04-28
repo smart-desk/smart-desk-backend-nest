@@ -1,6 +1,6 @@
 import { IsBoolean, IsOptional } from 'class-validator';
 
-export class CalendarParamsDto {
+export class DatepickerParamsDto {
     @IsBoolean()
     @IsOptional()
     range: boolean = false;
