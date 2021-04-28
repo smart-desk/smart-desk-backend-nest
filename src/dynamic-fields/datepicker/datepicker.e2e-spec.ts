@@ -57,7 +57,8 @@ describe('Datepicker field', () => {
     beforeAll(async () => {
         let moduleBuilder = Test.createTestingModule({
             imports: [AdvertsModule, TypeOrmModule.forRoot(), AccessControlModule.forRoles(roles), UsersModule],
-        })
+        });
+        const moduleRef = await declareCommonProviders(moduleBuilder)
             .overrideProvider(getRepositoryToken(Advert))
             .useValue(advertRepositoryMock)
             .overrideProvider(getRepositoryToken(Section))
@@ -69,11 +70,9 @@ describe('Datepicker field', () => {
             .overrideProvider(Connection)
             .useValue(connectionMock)
             .overrideGuard(JwtAuthGuard)
-            .useValue(JwtGuard);
+            .useValue(JwtGuard)
+            .compile();
 
-        moduleBuilder = declareCommonProviders(moduleBuilder);
-
-        const moduleRef = await moduleBuilder.compile();
         app = await createTestAppForModule(moduleRef);
     });
 
