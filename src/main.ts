@@ -1,7 +1,7 @@
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { AppModule } from './app/app.module';
+import { AppModule } from './modules/app/app.module';
 import { config as awsConfig } from 'aws-sdk';
 
 async function bootstrap() {

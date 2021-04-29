@@ -3,8 +3,8 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthGuard } from '@nestjs/passport';
 import { Socket } from 'socket.io';
 import { WsException } from '@nestjs/websockets';
-import { UsersService } from '../users/users.service';
-import { JWTPayload } from '../auth/jwt.strategy';
+import { UsersService } from '../modules/users/users.service';
+import { JWTPayload } from '../modules/auth/jwt.strategy';
 
 @Injectable()
 export class WsJwtAuthGuard extends AuthGuard('jwt') {
