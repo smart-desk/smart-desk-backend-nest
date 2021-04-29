@@ -242,41 +242,6 @@ describe('Fields controller', () => {
                     });
             });
         });
-
-        describe('type price', () => {
-            it(`successfully`, () => {
-                return request(app.getHttpServer())
-                    .post('/fields')
-                    .send({
-                        section_id: uuid(),
-                        title: 'some title',
-                        type: FieldType.PRICE,
-                        params: {
-                            currency: 'USD',
-                        } as PriceParamsDto,
-                    } as FieldCreateDto)
-                    .expect(HttpStatus.CREATED);
-            });
-
-            it(`with errors - not empty, must be a string and shorter then 10`, () => {
-                return request(app.getHttpServer())
-                    .post('/fields')
-                    .send({
-                        section_id: uuid(),
-                        title: 'some title',
-                        type: FieldType.PRICE,
-                        params: {
-                            currency: null,
-                        } as PriceParamsDto,
-                    } as FieldCreateDto)
-                    .expect(HttpStatus.BAD_REQUEST)
-                    .expect(res => {
-                        expect(res.body.message).toContain('currency must be a string');
-                        expect(res.body.message).toContain('currency should not be empty');
-                        expect(res.body.message).toContain('currency must be shorter than or equal to 10 characters');
-                    });
-            });
-        });
     });
 
     describe('update field', () => {
@@ -430,35 +395,6 @@ describe('Fields controller', () => {
                     .expect(res => {
                         expect(res.body.message).toContain('label should not be empty');
                         expect(res.body.message).toContain('value should not be empty');
-                    });
-            });
-        });
-
-        describe('type price', () => {
-            it(`successfully`, () => {
-                return request(app.getHttpServer())
-                    .put(`/fields/${uuid()}`)
-                    .send({
-                        title: 'some title',
-                        type: FieldType.PRICE,
-                        params: { currency: 'USD' } as PriceParamsDto,
-                    } as FieldUpdateDto)
-                    .expect(HttpStatus.OK);
-            });
-
-            it(`with errors - not empty, must be a string and shorter then 10`, () => {
-                return request(app.getHttpServer())
-                    .put(`/fields/${uuid()}`)
-                    .send({
-                        title: 'some title',
-                        type: FieldType.PRICE,
-                        params: { currency: null } as PriceParamsDto,
-                    } as FieldUpdateDto)
-                    .expect(HttpStatus.BAD_REQUEST)
-                    .expect(res => {
-                        expect(res.body.message).toContain('currency must be a string');
-                        expect(res.body.message).toContain('currency should not be empty');
-                        expect(res.body.message).toContain('currency must be shorter than or equal to 10 characters');
                     });
             });
         });
