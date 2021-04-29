@@ -246,6 +246,7 @@ export class AdvertsService {
         return advertResponse;
     }
 
+    // todo add tests for filtering
     private async getAdvertsWithFilters(options: GetAdvertsDto, categoryId?: string): Promise<GetAdvertsResponseDto> {
         const { filters } = options;
         if (typeof filters !== 'object') {
