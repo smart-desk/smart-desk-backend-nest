@@ -161,35 +161,6 @@ describe('Fields controller', () => {
                     });
             });
         });
-
-        describe('type text', () => {
-            it(`successfully`, () => {
-                return request(app.getHttpServer())
-                    .post('/fields')
-                    .send({
-                        section_id: uuid(),
-                        title: 'some title',
-                        type: FieldType.TEXT,
-                        params: { value: 'some string' } as TextParamsDto,
-                    } as FieldCreateDto)
-                    .expect(HttpStatus.CREATED);
-            });
-
-            it(`with error - no empty value`, () => {
-                return request(app.getHttpServer())
-                    .post('/fields')
-                    .send({
-                        section_id: uuid(),
-                        title: 'some title',
-                        type: FieldType.TEXT,
-                        params: { value: '' } as TextParamsDto,
-                    } as FieldCreateDto)
-                    .expect(HttpStatus.BAD_REQUEST)
-                    .expect(res => {
-                        expect(res.body.message).toContain('value should not be empty');
-                    });
-            });
-        });
     });
 
     describe('update field', () => {
@@ -265,33 +236,6 @@ describe('Fields controller', () => {
                     .expect(res => {
                         expect(res.body.message).toContain('label should not be empty');
                         expect(res.body.message).toContain('required must be a boolean value');
-                    });
-            });
-        });
-
-        describe('type text', () => {
-            it(`successfully`, () => {
-                return request(app.getHttpServer())
-                    .put(`/fields/${uuid()}`)
-                    .send({
-                        title: 'some title',
-                        type: FieldType.TEXT,
-                        params: { value: 'some string' } as TextParamsDto,
-                    } as FieldUpdateDto)
-                    .expect(HttpStatus.OK);
-            });
-
-            it(`with error - no empty value`, () => {
-                return request(app.getHttpServer())
-                    .put(`/fields/${uuid()}`)
-                    .send({
-                        title: 'some title',
-                        type: FieldType.TEXT,
-                        params: { value: '' } as TextParamsDto,
-                    } as FieldUpdateDto)
-                    .expect(HttpStatus.BAD_REQUEST)
-                    .expect(res => {
-                        expect(res.body.message).toContain('value should not be empty');
                     });
             });
         });
