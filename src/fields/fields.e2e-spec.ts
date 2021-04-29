@@ -11,11 +11,7 @@ import { FieldCreateDto, FieldUpdateDto } from './dto/field.dto';
 import { SectionsModule } from '../sections/sections.module';
 import { Section } from '../sections/section.entity';
 import { InputTextParamsDto } from '../dynamic-fields/input-text/dto/input-text-params.dto';
-import { TextareaParamsDto } from '../dynamic-fields/textarea/dto/textarea-params.dto';
-import { TextParamsDto } from '../dynamic-fields/text/dto/text-params.dto';
-import { RadioParamsDto } from '../dynamic-fields/radio/dto/radio-params.dto';
 import { FieldType } from '../dynamic-fields/dynamic-fields.module';
-import { PriceParamsDto } from '../dynamic-fields/price/dto/price-params.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { JwtAuthGuardMock } from '../../test/mocks/jwt-auth.guard.mock';
 import { AcGuardMock } from '../../test/mocks/ac.guard.mock';
@@ -123,44 +119,6 @@ describe('Fields controller', () => {
                     expect(res.body.message).toContain('order must be an integer number');
                 });
         });
-
-        describe('type textarea', () => {
-            it(`successfully`, () => {
-                return request(app.getHttpServer())
-                    .post('/fields')
-                    .send({
-                        section_id: uuid(),
-                        title: 'some title',
-                        type: FieldType.TEXTAREA,
-                        params: {
-                            label: 'some label',
-                            placeholder: 'some place',
-                            required: true,
-                        } as TextareaParamsDto,
-                    } as FieldCreateDto)
-                    .expect(HttpStatus.CREATED);
-            });
-
-            it(`with errors - no label provided, required must be boolean`, () => {
-                return request(app.getHttpServer())
-                    .post('/fields')
-                    .send({
-                        section_id: uuid(),
-                        title: 'some title',
-                        type: FieldType.TEXTAREA,
-                        params: {
-                            label: '',
-                            placeholder: 'some place',
-                            required: 'string' as any,
-                        } as TextareaParamsDto,
-                    } as FieldCreateDto)
-                    .expect(HttpStatus.BAD_REQUEST)
-                    .expect(res => {
-                        expect(res.body.message).toContain('label should not be empty');
-                        expect(res.body.message).toContain('required must be a boolean value');
-                    });
-            });
-        });
     });
 
     describe('update field', () => {
@@ -203,42 +161,6 @@ describe('Fields controller', () => {
                     expect(res.body.message).toContain('Field not found');
                 });
         });
-
-        describe('type textarea', () => {
-            it(`successfully`, () => {
-                return request(app.getHttpServer())
-                    .put(`/fields/${uuid()}`)
-                    .send({
-                        title: 'some title',
-                        type: FieldType.TEXTAREA,
-                        params: {
-                            label: 'some label',
-                            placeholder: 'some place',
-                            required: true,
-                        } as TextareaParamsDto,
-                    } as FieldUpdateDto)
-                    .expect(HttpStatus.OK);
-            });
-
-            it(`with errors - no label provided, required must be boolean`, () => {
-                return request(app.getHttpServer())
-                    .put(`/fields/${uuid()}`)
-                    .send({
-                        title: 'some title',
-                        type: FieldType.TEXTAREA,
-                        params: {
-                            label: '',
-                            placeholder: 'some place',
-                            required: 'string' as any,
-                        } as TextareaParamsDto,
-                    } as FieldUpdateDto)
-                    .expect(HttpStatus.BAD_REQUEST)
-                    .expect(res => {
-                        expect(res.body.message).toContain('label should not be empty');
-                        expect(res.body.message).toContain('required must be a boolean value');
-                    });
-            });
-        });
     });
 
     describe('delete field by id', () => {
@@ -257,6 +179,7 @@ describe('Fields controller', () => {
     });
 });
 
+// todo put it together
 describe('Fields controller with ACL enabled', () => {
     let app: INestApplication;
     const field = new Field();

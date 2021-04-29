@@ -19,15 +19,15 @@ import { UsersModule } from '../../users/users.module';
 import { User } from '../../users/entities/user.entity';
 import { UpdateAdvertDto } from '../../adverts/dto/update-advert.dto';
 import { FieldCreateDto, FieldUpdateDto } from '../../fields/dto/field.dto';
-import { CreateInputTextDto } from './dto/create-input-text.dto';
-import { UpdateInputTextDto } from './dto/update-input-text.dto';
-import { InputTextParamsDto } from './dto/input-text-params.dto';
+import { CreateTextareaDto } from './dto/create-textarea.dto';
+import { UpdateTextareaDto } from './dto/update-textarea.dto';
+import { TextareaParamsDto } from './dto/textarea-params.dto';
 
-describe('Input text field', () => {
+describe('Textarea field', () => {
     let app: INestApplication;
 
     const fieldEntity = new Field();
-    fieldEntity.type = FieldType.INPUT_TEXT;
+    fieldEntity.type = FieldType.TEXTAREA;
     fieldEntity.id = uuid();
     fieldEntity.section_id = uuid();
     fieldEntity.title = 'test';
@@ -78,7 +78,11 @@ describe('Input text field', () => {
 
     describe('Adverts controller', () => {
         describe('create advert', () => {
+            const textareaField = new Field();
+            textareaField.type = FieldType.TEXTAREA;
+
             it(`successfully`, () => {
+                fieldRepositoryMock.findOne.mockReturnValueOnce(textareaField);
                 return request(app.getHttpServer())
                     .post(`/adverts`)
                     .send({
@@ -89,7 +93,7 @@ describe('Input text field', () => {
                             {
                                 field_id: uuid(),
                                 value: 'test',
-                            } as CreateInputTextDto,
+                            } as CreateTextareaDto,
                         ],
                     } as CreateAdvertDto)
                     .expect(HttpStatus.CREATED);
@@ -105,8 +109,8 @@ describe('Input text field', () => {
                         fields: [
                             {
                                 field_id: '123',
-                                value: '',
-                            } as CreateInputTextDto,
+                                value: 'test',
+                            } as CreateTextareaDto,
                         ],
                     } as CreateAdvertDto)
                     .expect(HttpStatus.BAD_REQUEST)
@@ -116,6 +120,7 @@ describe('Input text field', () => {
             });
 
             it(`with error - not valid value`, () => {
+                fieldRepositoryMock.findOne.mockReturnValueOnce(textareaField);
                 return request(app.getHttpServer())
                     .post(`/adverts`)
                     .send({
@@ -125,19 +130,23 @@ describe('Input text field', () => {
                         fields: [
                             {
                                 field_id: uuid(),
-                                value: '',
-                            } as CreateInputTextDto,
+                                value: Array(1001).fill('a').join(''),
+                            } as CreateTextareaDto,
                         ],
                     } as CreateAdvertDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('value should not be empty');
+                        expect(res.body.message).toContain('value must be shorter than or equal to 1000 characters');
                     });
             });
         });
 
-        describe('update advert with input_text field', () => {
+        describe('update advert', () => {
+            const textareaField = new Field();
+            textareaField.type = FieldType.TEXTAREA;
+
             it(`successfully`, () => {
+                fieldRepositoryMock.findOne.mockReturnValueOnce(textareaField);
                 return request(app.getHttpServer())
                     .patch(`/adverts/${uuid()}`)
                     .send({
@@ -147,7 +156,7 @@ describe('Input text field', () => {
                                 id: uuid(),
                                 field_id: uuid(),
                                 value: 'new text',
-                            } as UpdateInputTextDto,
+                            } as UpdateTextareaDto,
                         ],
                     } as UpdateAdvertDto)
                     .expect(HttpStatus.OK);
@@ -163,7 +172,7 @@ describe('Input text field', () => {
                                 id: uuid(),
                                 field_id: '123',
                                 value: 'new text',
-                            } as UpdateInputTextDto,
+                            } as UpdateTextareaDto,
                         ],
                     } as UpdateAdvertDto)
                     .expect(HttpStatus.BAD_REQUEST)
@@ -173,18 +182,17 @@ describe('Input text field', () => {
             });
 
             it(`with error - not valid value`, () => {
+                fieldRepositoryMock.findOne.mockReturnValueOnce(textareaField);
                 return request(app.getHttpServer())
                     .patch(`/adverts/${uuid()}`)
                     .send({
-                        model_id: uuid(),
-                        category_id: uuid(),
                         title: 'some advert',
                         fields: [
                             {
                                 id: uuid(),
                                 field_id: uuid(),
                                 value: '',
-                            } as UpdateInputTextDto,
+                            } as UpdateTextareaDto,
                         ],
                     } as UpdateAdvertDto)
                     .expect(HttpStatus.BAD_REQUEST)
@@ -194,23 +202,22 @@ describe('Input text field', () => {
             });
 
             it(`with error - value is too long`, () => {
+                fieldRepositoryMock.findOne.mockReturnValueOnce(textareaField);
                 return request(app.getHttpServer())
                     .patch(`/adverts/${uuid()}`)
                     .send({
-                        model_id: uuid(),
-                        category_id: uuid(),
                         title: 'some advert',
                         fields: [
                             {
                                 id: uuid(),
                                 field_id: uuid(),
-                                value: Array(300).fill('a').join(''),
-                            } as UpdateInputTextDto,
+                                value: Array(1001).fill('a').join(''),
+                            } as UpdateTextareaDto,
                         ],
                     } as UpdateAdvertDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('value must be shorter than or equal to 255 characters');
+                        expect(res.body.message).toContain('value must be shorter than or equal to 1000 characters');
                     });
             });
 
@@ -218,15 +225,13 @@ describe('Input text field', () => {
                 return request(app.getHttpServer())
                     .patch(`/adverts/${uuid()}`)
                     .send({
-                        model_id: uuid(),
-                        category_id: uuid(),
                         title: 'some advert',
                         fields: [
                             {
                                 id: '123',
                                 field_id: uuid(),
                                 value: '1234',
-                            } as UpdateInputTextDto,
+                            } as UpdateTextareaDto,
                         ],
                     } as UpdateAdvertDto)
                     .expect(HttpStatus.BAD_REQUEST)
@@ -237,19 +242,16 @@ describe('Input text field', () => {
 
             it(`with error - field not found`, () => {
                 fieldRepositoryMock.findOne.mockReturnValueOnce(undefined);
-
                 return request(app.getHttpServer())
                     .patch(`/adverts/${uuid()}`)
                     .send({
-                        model_id: uuid(),
-                        category_id: uuid(),
                         title: 'some advert',
                         fields: [
                             {
                                 id: uuid(),
                                 field_id: uuid(),
                                 value: '1234',
-                            } as UpdateInputTextDto,
+                            } as UpdateTextareaDto,
                         ],
                     } as UpdateAdvertDto)
                     .expect(HttpStatus.NOT_FOUND)
@@ -261,7 +263,7 @@ describe('Input text field', () => {
     });
 
     describe('Fields controller', () => {
-        describe('create input_text field', () => {
+        describe('create textarea field', () => {
             it(`successfully`, () => {
                 JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
                     const req = context.switchToHttp().getRequest();
@@ -274,12 +276,12 @@ describe('Input text field', () => {
                     .send({
                         section_id: uuid(),
                         title: 'some title',
-                        type: FieldType.INPUT_TEXT,
+                        type: FieldType.TEXTAREA,
                         params: {
                             label: 'some label',
                             placeholder: 'some place',
                             required: true,
-                        } as InputTextParamsDto,
+                        } as TextareaParamsDto,
                     } as FieldCreateDto)
                     .expect(HttpStatus.CREATED);
             });
@@ -296,12 +298,12 @@ describe('Input text field', () => {
                     .send({
                         section_id: uuid(),
                         title: 'some title',
-                        type: FieldType.INPUT_TEXT,
+                        type: FieldType.TEXTAREA,
                         params: {
                             label: '',
                             placeholder: 'some place',
                             required: 'string' as any,
-                        } as InputTextParamsDto,
+                        } as TextareaParamsDto,
                     } as FieldCreateDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
@@ -311,7 +313,13 @@ describe('Input text field', () => {
             });
         });
 
-        describe('update input_text field', () => {
+        describe('update type textarea', () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: [RolesEnum.USER, RolesEnum.ADMIN] };
+                return true;
+            });
+
             it(`successfully`, () => {
                 JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
                     const req = context.switchToHttp().getRequest();
@@ -323,12 +331,12 @@ describe('Input text field', () => {
                     .put(`/fields/${uuid()}`)
                     .send({
                         title: 'some title',
-                        type: FieldType.INPUT_TEXT,
+                        type: FieldType.TEXTAREA,
                         params: {
                             label: 'some label',
                             placeholder: 'some place',
                             required: true,
-                        } as InputTextParamsDto,
+                        } as TextareaParamsDto,
                     } as FieldUpdateDto)
                     .expect(HttpStatus.OK);
             });
@@ -344,12 +352,12 @@ describe('Input text field', () => {
                     .put(`/fields/${uuid()}`)
                     .send({
                         title: 'some title',
-                        type: FieldType.INPUT_TEXT,
+                        type: FieldType.TEXTAREA,
                         params: {
                             label: '',
                             placeholder: 'some place',
                             required: 'string' as any,
-                        } as InputTextParamsDto,
+                        } as TextareaParamsDto,
                     } as FieldUpdateDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {

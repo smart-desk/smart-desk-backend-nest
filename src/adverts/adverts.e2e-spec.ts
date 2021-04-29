@@ -12,17 +12,7 @@ import { Field } from '../fields/field.entity';
 import { Section, SectionType } from '../sections/section.entity';
 import { CreateAdvertDto } from './dto/create-advert.dto';
 import { UpdateAdvertDto } from './dto/update-advert.dto';
-import { UpdateInputTextDto } from '../dynamic-fields/input-text/dto/update-input-text.dto';
-import { UpdateTextareaDto } from '../dynamic-fields/textarea/dto/update-textarea.dto';
-import { UpdateRadioDto } from '../dynamic-fields/radio/dto/update-radio.dto';
-import { CreateInputTextDto } from '../dynamic-fields/input-text/dto/create-input-text.dto';
-import { CreateTextareaDto } from '../dynamic-fields/textarea/dto/create-textarea.dto';
-import { CreateRadioDto } from '../dynamic-fields/radio/dto/create-radio.dto';
 import { FieldType } from '../dynamic-fields/dynamic-fields.module';
-import { CreatePhotoDto } from '../dynamic-fields/photo/dto/create-photo.dto';
-import { UpdatePhotoDto } from '../dynamic-fields/photo/dto/update-photo.dto';
-import { CreatePriceDto } from '../dynamic-fields/price/dto/create-price.dto';
-import { UpdatePriceDto } from '../dynamic-fields/price/dto/update-price.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { JwtAuthGuardMock } from '../../test/mocks/jwt-auth.guard.mock';
 import { AcGuardMock } from '../../test/mocks/ac.guard.mock';
@@ -397,70 +387,6 @@ describe('Adverts controller', () => {
                     expect(res.body.message).toContain('title must be shorter than or equal to 255 characters');
                 });
         });
-
-        describe('create advert with textarea field', () => {
-            const textareaField = new Field();
-            textareaField.type = FieldType.TEXTAREA;
-
-            it(`successfully`, () => {
-                fieldRepositoryMock.findOne.mockReturnValueOnce(textareaField);
-                return request(app.getHttpServer())
-                    .post(`/adverts`)
-                    .send({
-                        model_id: uuid(),
-                        category_id: uuid(),
-                        title: 'some advert',
-                        fields: [
-                            {
-                                field_id: uuid(),
-                                value: 'test',
-                            } as CreateTextareaDto,
-                        ],
-                    } as CreateAdvertDto)
-                    .expect(HttpStatus.CREATED);
-            });
-
-            it(`with error - not valid field_id`, () => {
-                return request(app.getHttpServer())
-                    .post(`/adverts`)
-                    .send({
-                        model_id: uuid(),
-                        category_id: uuid(),
-                        title: 'some advert',
-                        fields: [
-                            {
-                                field_id: '123',
-                                value: 'test',
-                            } as CreateTextareaDto,
-                        ],
-                    } as CreateAdvertDto)
-                    .expect(HttpStatus.BAD_REQUEST)
-                    .expect(res => {
-                        expect(res.body.message).toContain('field_id must be an UUID');
-                    });
-            });
-
-            it(`with error - not valid value`, () => {
-                fieldRepositoryMock.findOne.mockReturnValueOnce(textareaField);
-                return request(app.getHttpServer())
-                    .post(`/adverts`)
-                    .send({
-                        model_id: uuid(),
-                        category_id: uuid(),
-                        title: 'some advert',
-                        fields: [
-                            {
-                                field_id: uuid(),
-                                value: Array(1001).fill('a').join(''),
-                            } as CreateTextareaDto,
-                        ],
-                    } as CreateAdvertDto)
-                    .expect(HttpStatus.BAD_REQUEST)
-                    .expect(res => {
-                        expect(res.body.message).toContain('value must be shorter than or equal to 1000 characters');
-                    });
-            });
-        });
     });
 
     describe('update advert', () => {
@@ -522,126 +448,6 @@ describe('Adverts controller', () => {
                 .expect(res => {
                     expect(res.body.message).toContain('title must be shorter than or equal to 255 characters');
                 });
-        });
-
-        describe('update advert with textarea field', () => {
-            const textareaField = new Field();
-            textareaField.type = FieldType.TEXTAREA;
-
-            it(`successfully`, () => {
-                fieldRepositoryMock.findOne.mockReturnValueOnce(textareaField);
-                return request(app.getHttpServer())
-                    .patch(`/adverts/${uuid()}`)
-                    .send({
-                        title: 'some advert',
-                        fields: [
-                            {
-                                id: uuid(),
-                                field_id: uuid(),
-                                value: 'new text',
-                            } as UpdateTextareaDto,
-                        ],
-                    } as UpdateAdvertDto)
-                    .expect(HttpStatus.OK);
-            });
-
-            it(`with error - not valid field_id`, () => {
-                return request(app.getHttpServer())
-                    .patch(`/adverts/${uuid()}`)
-                    .send({
-                        title: 'some advert',
-                        fields: [
-                            {
-                                id: uuid(),
-                                field_id: '123',
-                                value: 'new text',
-                            } as UpdateTextareaDto,
-                        ],
-                    } as UpdateAdvertDto)
-                    .expect(HttpStatus.BAD_REQUEST)
-                    .expect(res => {
-                        expect(res.body.message).toContain('field_id must be an UUID');
-                    });
-            });
-
-            it(`with error - not valid value`, () => {
-                fieldRepositoryMock.findOne.mockReturnValueOnce(textareaField);
-                return request(app.getHttpServer())
-                    .patch(`/adverts/${uuid()}`)
-                    .send({
-                        title: 'some advert',
-                        fields: [
-                            {
-                                id: uuid(),
-                                field_id: uuid(),
-                                value: '',
-                            } as UpdateTextareaDto,
-                        ],
-                    } as UpdateAdvertDto)
-                    .expect(HttpStatus.BAD_REQUEST)
-                    .expect(res => {
-                        expect(res.body.message).toContain('value should not be empty');
-                    });
-            });
-
-            it(`with error - value is too long`, () => {
-                fieldRepositoryMock.findOne.mockReturnValueOnce(textareaField);
-                return request(app.getHttpServer())
-                    .patch(`/adverts/${uuid()}`)
-                    .send({
-                        title: 'some advert',
-                        fields: [
-                            {
-                                id: uuid(),
-                                field_id: uuid(),
-                                value: Array(1001).fill('a').join(''),
-                            } as UpdateTextareaDto,
-                        ],
-                    } as UpdateAdvertDto)
-                    .expect(HttpStatus.BAD_REQUEST)
-                    .expect(res => {
-                        expect(res.body.message).toContain('value must be shorter than or equal to 1000 characters');
-                    });
-            });
-
-            it(`with error - id is not valid`, () => {
-                return request(app.getHttpServer())
-                    .patch(`/adverts/${uuid()}`)
-                    .send({
-                        title: 'some advert',
-                        fields: [
-                            {
-                                id: '123',
-                                field_id: uuid(),
-                                value: '1234',
-                            } as UpdateTextareaDto,
-                        ],
-                    } as UpdateAdvertDto)
-                    .expect(HttpStatus.BAD_REQUEST)
-                    .expect(res => {
-                        expect(res.body.message).toContain('id must be an UUID');
-                    });
-            });
-
-            it(`with error - field not found`, () => {
-                fieldRepositoryMock.findOne.mockReturnValueOnce(undefined);
-                return request(app.getHttpServer())
-                    .patch(`/adverts/${uuid()}`)
-                    .send({
-                        title: 'some advert',
-                        fields: [
-                            {
-                                id: uuid(),
-                                field_id: uuid(),
-                                value: '1234',
-                            } as UpdateTextareaDto,
-                        ],
-                    } as UpdateAdvertDto)
-                    .expect(HttpStatus.NOT_FOUND)
-                    .expect(res => {
-                        expect(res.body.message).toContain('Field not found');
-                    });
-            });
         });
     });
 
