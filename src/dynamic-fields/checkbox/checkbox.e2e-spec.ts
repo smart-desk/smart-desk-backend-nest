@@ -201,7 +201,7 @@ describe('Checkbox field', () => {
     });
 
     describe('Fields controller', () => {
-        describe('create field', () => {
+        describe('create checkbox field', () => {
             it(`successfully`, () => {
                 JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
                     const req = context.switchToHttp().getRequest();
@@ -260,7 +260,7 @@ describe('Checkbox field', () => {
             });
         });
 
-        describe('update field', () => {
+        describe('update checkbox field', () => {
             it(`successfully`, () => {
                 JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
                     const req = context.switchToHttp().getRequest();

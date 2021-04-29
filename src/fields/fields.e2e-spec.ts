@@ -190,58 +190,6 @@ describe('Fields controller', () => {
                     });
             });
         });
-
-        describe('type radio', () => {
-            it(`successfully`, () => {
-                return request(app.getHttpServer())
-                    .post('/fields')
-                    .send({
-                        section_id: uuid(),
-                        title: 'some title',
-                        type: FieldType.RADIO,
-                        params: {
-                            radios: [
-                                {
-                                    label: 'some label',
-                                    value: 'some value',
-                                },
-                                {
-                                    label: 'some label 1',
-                                    value: 'some value 1',
-                                },
-                            ],
-                        } as RadioParamsDto,
-                    } as FieldCreateDto)
-                    .expect(HttpStatus.CREATED);
-            });
-
-            it(`with errors - no empty title, no empty label, no empty value`, () => {
-                return request(app.getHttpServer())
-                    .post('/fields')
-                    .send({
-                        section_id: uuid(),
-                        title: 'some title',
-                        type: FieldType.RADIO,
-                        params: {
-                            radios: [
-                                {
-                                    label: '',
-                                    value: 'some value',
-                                },
-                                {
-                                    label: 'some label 1',
-                                    value: '',
-                                },
-                            ],
-                        } as RadioParamsDto,
-                    } as FieldCreateDto)
-                    .expect(HttpStatus.BAD_REQUEST)
-                    .expect(res => {
-                        expect(res.body.message).toContain('label should not be empty');
-                        expect(res.body.message).toContain('value should not be empty');
-                    });
-            });
-        });
     });
 
     describe('update field', () => {
@@ -343,57 +291,6 @@ describe('Fields controller', () => {
                     } as FieldUpdateDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('value should not be empty');
-                    });
-            });
-        });
-
-        describe('type radio', () => {
-            it(`successfully`, () => {
-                return request(app.getHttpServer())
-                    .put(`/fields/${uuid()}`)
-                    .send({
-                        title: 'some title',
-                        type: FieldType.RADIO,
-                        params: {
-                            title: 'some title',
-                            radios: [
-                                {
-                                    label: 'some label',
-                                    value: 'some value',
-                                },
-                                {
-                                    label: 'some label 1',
-                                    value: 'some value 1',
-                                },
-                            ],
-                        } as RadioParamsDto,
-                    } as FieldUpdateDto)
-                    .expect(HttpStatus.OK);
-            });
-
-            it(`with errors - no empty title, no empty label, no empty value`, () => {
-                return request(app.getHttpServer())
-                    .put(`/fields/${uuid()}`)
-                    .send({
-                        title: 'some title',
-                        type: FieldType.RADIO,
-                        params: {
-                            radios: [
-                                {
-                                    label: '',
-                                    value: 'some value',
-                                },
-                                {
-                                    label: 'some label 1',
-                                    value: '',
-                                },
-                            ],
-                        } as RadioParamsDto,
-                    } as FieldUpdateDto)
-                    .expect(HttpStatus.BAD_REQUEST)
-                    .expect(res => {
-                        expect(res.body.message).toContain('label should not be empty');
                         expect(res.body.message).toContain('value should not be empty');
                     });
             });

@@ -19,15 +19,15 @@ import { UsersModule } from '../../users/users.module';
 import { User } from '../../users/entities/user.entity';
 import { UpdateAdvertDto } from '../../adverts/dto/update-advert.dto';
 import { FieldCreateDto, FieldUpdateDto } from '../../fields/dto/field.dto';
-import { CreateInputTextDto } from './dto/create-input-text.dto';
-import { UpdateInputTextDto } from './dto/update-input-text.dto';
-import { InputTextParamsDto } from './dto/input-text-params.dto';
+import { CreateRadioDto } from './dto/create-radio.dto';
+import { UpdateRadioDto } from './dto/update-radio.dto';
+import { RadioParamsDto } from './dto/radio-params.dto';
 
-describe('Input text field', () => {
+describe('Radio field', () => {
     let app: INestApplication;
 
     const fieldEntity = new Field();
-    fieldEntity.type = FieldType.INPUT_TEXT;
+    fieldEntity.type = FieldType.RADIO;
     fieldEntity.id = uuid();
     fieldEntity.section_id = uuid();
     fieldEntity.title = 'test';
@@ -78,7 +78,11 @@ describe('Input text field', () => {
 
     describe('Adverts controller', () => {
         describe('create advert', () => {
+            const radioField = new Field();
+            radioField.type = FieldType.RADIO;
+
             it(`successfully`, () => {
+                fieldRepositoryMock.findOne.mockReturnValueOnce(radioField);
                 return request(app.getHttpServer())
                     .post(`/adverts`)
                     .send({
@@ -89,7 +93,7 @@ describe('Input text field', () => {
                             {
                                 field_id: uuid(),
                                 value: 'test',
-                            } as CreateInputTextDto,
+                            } as CreateRadioDto,
                         ],
                     } as CreateAdvertDto)
                     .expect(HttpStatus.CREATED);
@@ -105,8 +109,8 @@ describe('Input text field', () => {
                         fields: [
                             {
                                 field_id: '123',
-                                value: '',
-                            } as CreateInputTextDto,
+                                value: 'test',
+                            } as CreateRadioDto,
                         ],
                     } as CreateAdvertDto)
                     .expect(HttpStatus.BAD_REQUEST)
@@ -116,6 +120,7 @@ describe('Input text field', () => {
             });
 
             it(`with error - not valid value`, () => {
+                fieldRepositoryMock.findOne.mockReturnValueOnce(radioField);
                 return request(app.getHttpServer())
                     .post(`/adverts`)
                     .send({
@@ -125,19 +130,23 @@ describe('Input text field', () => {
                         fields: [
                             {
                                 field_id: uuid(),
-                                value: '',
-                            } as CreateInputTextDto,
+                                value: Array(256).fill('a').join(''),
+                            } as CreateRadioDto,
                         ],
                     } as CreateAdvertDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('value should not be empty');
+                        expect(res.body.message).toContain('value must be shorter than or equal to 255 characters');
                     });
             });
         });
 
-        describe('update advert with input_text field', () => {
+        describe('update advert', () => {
+            const radioField = new Field();
+            radioField.type = FieldType.RADIO;
+
             it(`successfully`, () => {
+                fieldRepositoryMock.findOne.mockReturnValueOnce(radioField);
                 return request(app.getHttpServer())
                     .patch(`/adverts/${uuid()}`)
                     .send({
@@ -147,7 +156,7 @@ describe('Input text field', () => {
                                 id: uuid(),
                                 field_id: uuid(),
                                 value: 'new text',
-                            } as UpdateInputTextDto,
+                            } as UpdateRadioDto,
                         ],
                     } as UpdateAdvertDto)
                     .expect(HttpStatus.OK);
@@ -163,7 +172,7 @@ describe('Input text field', () => {
                                 id: uuid(),
                                 field_id: '123',
                                 value: 'new text',
-                            } as UpdateInputTextDto,
+                            } as UpdateRadioDto,
                         ],
                     } as UpdateAdvertDto)
                     .expect(HttpStatus.BAD_REQUEST)
@@ -173,18 +182,17 @@ describe('Input text field', () => {
             });
 
             it(`with error - not valid value`, () => {
+                fieldRepositoryMock.findOne.mockReturnValueOnce(radioField);
                 return request(app.getHttpServer())
                     .patch(`/adverts/${uuid()}`)
                     .send({
-                        model_id: uuid(),
-                        category_id: uuid(),
                         title: 'some advert',
                         fields: [
                             {
                                 id: uuid(),
                                 field_id: uuid(),
                                 value: '',
-                            } as UpdateInputTextDto,
+                            } as UpdateRadioDto,
                         ],
                     } as UpdateAdvertDto)
                     .expect(HttpStatus.BAD_REQUEST)
@@ -194,18 +202,17 @@ describe('Input text field', () => {
             });
 
             it(`with error - value is too long`, () => {
+                fieldRepositoryMock.findOne.mockReturnValueOnce(radioField);
                 return request(app.getHttpServer())
                     .patch(`/adverts/${uuid()}`)
                     .send({
-                        model_id: uuid(),
-                        category_id: uuid(),
                         title: 'some advert',
                         fields: [
                             {
                                 id: uuid(),
                                 field_id: uuid(),
-                                value: Array(300).fill('a').join(''),
-                            } as UpdateInputTextDto,
+                                value: Array(256).fill('a').join(''),
+                            } as UpdateRadioDto,
                         ],
                     } as UpdateAdvertDto)
                     .expect(HttpStatus.BAD_REQUEST)
@@ -218,15 +225,13 @@ describe('Input text field', () => {
                 return request(app.getHttpServer())
                     .patch(`/adverts/${uuid()}`)
                     .send({
-                        model_id: uuid(),
-                        category_id: uuid(),
                         title: 'some advert',
                         fields: [
                             {
                                 id: '123',
                                 field_id: uuid(),
                                 value: '1234',
-                            } as UpdateInputTextDto,
+                            } as UpdateRadioDto,
                         ],
                     } as UpdateAdvertDto)
                     .expect(HttpStatus.BAD_REQUEST)
@@ -237,19 +242,16 @@ describe('Input text field', () => {
 
             it(`with error - field not found`, () => {
                 fieldRepositoryMock.findOne.mockReturnValueOnce(undefined);
-
                 return request(app.getHttpServer())
                     .patch(`/adverts/${uuid()}`)
                     .send({
-                        model_id: uuid(),
-                        category_id: uuid(),
                         title: 'some advert',
                         fields: [
                             {
                                 id: uuid(),
                                 field_id: uuid(),
                                 value: '1234',
-                            } as UpdateInputTextDto,
+                            } as UpdateRadioDto,
                         ],
                     } as UpdateAdvertDto)
                     .expect(HttpStatus.NOT_FOUND)
@@ -261,30 +263,37 @@ describe('Input text field', () => {
     });
 
     describe('Fields controller', () => {
-        describe('create input_text field', () => {
-            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
-                const req = context.switchToHttp().getRequest();
-                req.user = { id: '007', email: 'test@email.com', roles: [RolesEnum.USER, RolesEnum.ADMIN] };
-                return true;
-            });
-
+        describe('create type radio', () => {
             it(`successfully`, () => {
+                JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                    const req = context.switchToHttp().getRequest();
+                    req.user = { id: '007', email: 'test@email.com', roles: [RolesEnum.USER, RolesEnum.ADMIN] };
+                    return true;
+                });
+
                 return request(app.getHttpServer())
                     .post('/fields')
                     .send({
                         section_id: uuid(),
                         title: 'some title',
-                        type: FieldType.INPUT_TEXT,
+                        type: FieldType.RADIO,
                         params: {
-                            label: 'some label',
-                            placeholder: 'some place',
-                            required: true,
-                        } as InputTextParamsDto,
+                            radios: [
+                                {
+                                    label: 'some label',
+                                    value: 'some value',
+                                },
+                                {
+                                    label: 'some label 1',
+                                    value: 'some value 1',
+                                },
+                            ],
+                        } as RadioParamsDto,
                     } as FieldCreateDto)
                     .expect(HttpStatus.CREATED);
             });
 
-            it(`with errors - no label provided, required must be boolean`, () => {
+            it(`with errors - no empty title, no empty label, no empty value`, () => {
                 JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
                     const req = context.switchToHttp().getRequest();
                     req.user = { id: '007', email: 'test@email.com', roles: [RolesEnum.USER, RolesEnum.ADMIN] };
@@ -296,22 +305,29 @@ describe('Input text field', () => {
                     .send({
                         section_id: uuid(),
                         title: 'some title',
-                        type: FieldType.INPUT_TEXT,
+                        type: FieldType.RADIO,
                         params: {
-                            label: '',
-                            placeholder: 'some place',
-                            required: 'string' as any,
-                        } as InputTextParamsDto,
+                            radios: [
+                                {
+                                    label: '',
+                                    value: 'some value',
+                                },
+                                {
+                                    label: 'some label 1',
+                                    value: '',
+                                },
+                            ],
+                        } as RadioParamsDto,
                     } as FieldCreateDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
                         expect(res.body.message).toContain('label should not be empty');
-                        expect(res.body.message).toContain('required must be a boolean value');
+                        expect(res.body.message).toContain('value should not be empty');
                     });
             });
         });
 
-        describe('update input_text field', () => {
+        describe('update radio field', () => {
             it(`successfully`, () => {
                 JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
                     const req = context.switchToHttp().getRequest();
@@ -323,17 +339,25 @@ describe('Input text field', () => {
                     .put(`/fields/${uuid()}`)
                     .send({
                         title: 'some title',
-                        type: FieldType.INPUT_TEXT,
+                        type: FieldType.RADIO,
                         params: {
-                            label: 'some label',
-                            placeholder: 'some place',
-                            required: true,
-                        } as InputTextParamsDto,
+                            title: 'some title',
+                            radios: [
+                                {
+                                    label: 'some label',
+                                    value: 'some value',
+                                },
+                                {
+                                    label: 'some label 1',
+                                    value: 'some value 1',
+                                },
+                            ],
+                        } as RadioParamsDto,
                     } as FieldUpdateDto)
                     .expect(HttpStatus.OK);
             });
 
-            it(`with errors - no label provided, required must be boolean`, () => {
+            it(`with errors - no empty title, no empty label, no empty value`, () => {
                 JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
                     const req = context.switchToHttp().getRequest();
                     req.user = { id: '007', email: 'test@email.com', roles: [RolesEnum.USER, RolesEnum.ADMIN] };
@@ -344,17 +368,24 @@ describe('Input text field', () => {
                     .put(`/fields/${uuid()}`)
                     .send({
                         title: 'some title',
-                        type: FieldType.INPUT_TEXT,
+                        type: FieldType.RADIO,
                         params: {
-                            label: '',
-                            placeholder: 'some place',
-                            required: 'string' as any,
-                        } as InputTextParamsDto,
+                            radios: [
+                                {
+                                    label: '',
+                                    value: 'some value',
+                                },
+                                {
+                                    label: 'some label 1',
+                                    value: '',
+                                },
+                            ],
+                        } as RadioParamsDto,
                     } as FieldUpdateDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
                         expect(res.body.message).toContain('label should not be empty');
-                        expect(res.body.message).toContain('required must be a boolean value');
+                        expect(res.body.message).toContain('value should not be empty');
                     });
             });
         });
