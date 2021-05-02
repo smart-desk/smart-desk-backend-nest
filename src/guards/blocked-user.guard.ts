@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
-import { RequestWithUserPayload } from '../auth/jwt.strategy';
+import { UsersService } from '../modules/users/users.service';
+import { RequestWithUserPayload } from '../modules/auth/jwt.strategy';
 
 @Injectable()
 export class BlockedUserGuard implements CanActivate {

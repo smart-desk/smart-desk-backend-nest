@@ -2,9 +2,9 @@ import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nes
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { omit } from 'lodash';
-import { RequestWithUserPayload } from '../auth/jwt.strategy';
-import { RolesEnum } from '../app/app.roles';
-import { User } from '../users/entities/user.entity';
+import { RequestWithUserPayload } from '../modules/auth/jwt.strategy';
+import { RolesEnum } from '../modules/app/app.roles';
+import { User } from '../modules/users/entities/user.entity';
 import { serializeUser } from '../utils/user.serializer';
 
 const EXCLUDED_USER_PROP = ['phone', 'isPhoneVerified', 'email', 'lastName'];

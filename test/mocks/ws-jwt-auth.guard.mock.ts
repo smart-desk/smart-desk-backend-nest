@@ -1,7 +1,7 @@
 import { ExecutionContext } from '@nestjs/common';
 import fn = jest.fn;
-import { User } from '../../src/users/entities/user.entity';
-import { RolesEnum } from '../../src/app/app.roles';
+import { User } from '../../src/modules/users/entities/user.entity';
+import { RolesEnum } from '../../src/modules/app/app.roles';
 
 export const WsJwtAuthGuardMock = {
     canActivate: fn().mockImplementation((context: ExecutionContext) => {
