@@ -12,8 +12,6 @@ import { FieldType } from '../dynamic-fields/dynamic-fields.module';
 import { CreateAdvertDto } from './dto/create-advert.dto';
 import { UpdateAdvertDto } from './dto/update-advert.dto';
 import { AdvertStatus } from './models/advert-status.enum';
-import { SortingType } from './models/sorting';
-import { Field } from '../fields/field.entity';
 
 interface FieldDataDtoInstance {
     type: FieldType;
@@ -225,26 +223,25 @@ export class AdvertsService {
         return advert;
     }
 
+    // todo improve
     private async getAdverts(options: GetAdvertsDto, categoryId?: string): Promise<GetAdvertsResponseDto> {
-        options.sorting = { '14b509a4-c9ab-411e-a511-ee342df477cc': SortingType.ASC };
-
         const where = this.getWhereClause(options, categoryId);
+        let orderedIds = [];
 
         if (options.sorting) {
-            const newOrder = await this.getOrderedIds(where, options);
-            console.log(newOrder);
+            orderedIds = await this.getOrderedIds(where, options);
+            where.id = In(orderedIds);
         }
 
-        const [adverts, totalCount] = await this.advertRepository.findAndCount({
-            where,
-            order: {
-                createdAt: 'DESC',
-            },
-            skip: (options.page - 1) * options.limit,
-            take: options.limit,
-        });
+        const [adverts, totalCount] = await this.advertRepository.createQueryBuilder('advert')
+            .where(where)
+            .orderBy('array_position(:ids, advert.id)') // todo default should be createdAt
+            .setParameter('ids', orderedIds)
+            .skip((options.page - 1) * options.limit)
+            .take(options.limit)
+            .getManyAndCount();
 
-        const advertsWithData = await Promise.all<Advert>(adverts.map(advert => this.loadFieldDataForAdvert(advert)));
+        const advertsWithData = await Promise.all(adverts.map(advert => this.loadFieldDataForAdvert(advert)));
         const advertResponse = new GetAdvertsResponseDto();
 
         advertResponse.totalCount = totalCount;
@@ -333,6 +330,7 @@ export class AdvertsService {
         return where;
     }
 
+    // todo this is very bad implementation
     private async getOrderedIds(where: any, options: GetAdvertsDto): Promise<string[]> {
         const adverts = await this.advertRepository.createQueryBuilder('advert').where(where).select('advert.id').getMany();
         const advertIds = adverts.map(advert => advert.id);
@@ -340,7 +338,9 @@ export class AdvertsService {
         const fieldId = Object.keys(options.sorting)[0];
         const field = await this.fieldsService.getById(fieldId);
         const service = this.dynamicFieldsService.getService(field.type);
-
-        return [];
+        if (!service) {
+            return advertIds;
+        }
+        return await service.getSortedAdvertIds(field.id, advertIds, options.sorting[field.id]);
     }
 }
