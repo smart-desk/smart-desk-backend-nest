@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository, Raw } from 'typeorm';
+import { In, Raw, Repository } from 'typeorm';
 import { isUUID } from 'class-validator';
 import { Advert } from './entities/advert.entity';
 import { GetAdvertsDto, GetAdvertsResponseDto } from './dto/get-adverts.dto';
@@ -12,6 +12,8 @@ import { FieldType } from '../dynamic-fields/dynamic-fields.module';
 import { CreateAdvertDto } from './dto/create-advert.dto';
 import { UpdateAdvertDto } from './dto/update-advert.dto';
 import { AdvertStatus } from './models/advert-status.enum';
+import { SortingType } from './models/sorting';
+import { Field } from '../fields/field.entity';
 
 interface FieldDataDtoInstance {
     type: FieldType;
@@ -224,7 +226,14 @@ export class AdvertsService {
     }
 
     private async getAdverts(options: GetAdvertsDto, categoryId?: string): Promise<GetAdvertsResponseDto> {
+        options.sorting = { '14b509a4-c9ab-411e-a511-ee342df477cc': SortingType.ASC };
+
         const where = this.getWhereClause(options, categoryId);
+
+        if (options.sorting) {
+            const newOrder = await this.getOrderedIds(where, options);
+            console.log(newOrder);
+        }
 
         const [adverts, totalCount] = await this.advertRepository.findAndCount({
             where,
@@ -322,5 +331,16 @@ export class AdvertsService {
         }
 
         return where;
+    }
+
+    private async getOrderedIds(where: any, options: GetAdvertsDto): Promise<string[]> {
+        const adverts = await this.advertRepository.createQueryBuilder('advert').where(where).select('advert.id').getMany();
+        const advertIds = adverts.map(advert => advert.id);
+
+        const fieldId = Object.keys(options.sorting)[0];
+        const field = await this.fieldsService.getById(fieldId);
+        const service = this.dynamicFieldsService.getService(field.type);
+
+        return [];
     }
 }
