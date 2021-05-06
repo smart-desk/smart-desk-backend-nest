@@ -2,6 +2,8 @@ import { IsNumber, IsObject, IsOptional, IsPositive, IsString, IsUUID, Max, MaxL
 import { Exclude, Transform } from 'class-transformer';
 import { Advert } from '../entities/advert.entity';
 import { AdvertStatus } from '../models/advert-status.enum';
+import { Sorting } from '../models/sorting';
+import { Filters } from '../models/filters';
 
 export class GetAdvertsDto {
     @IsOptional()
@@ -24,7 +26,7 @@ export class GetAdvertsDto {
 
     @IsObject()
     @IsOptional()
-    filters?: object; // todo define class or interface
+    filters?: Filters;
 
     @IsUUID()
     @IsOptional()
@@ -32,6 +34,10 @@ export class GetAdvertsDto {
 
     @Exclude()
     status: AdvertStatus = AdvertStatus.ACTIVE;
+
+    @IsObject()
+    @IsOptional()
+    sorting?: Sorting;
 }
 
 export class GetAdvertsResponseDto {

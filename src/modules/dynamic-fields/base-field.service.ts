@@ -6,6 +6,7 @@ import { DynamicFieldsBaseCreateDto } from './dynamic-fields-base-create.dto';
 import { DynamicFieldsBaseUpdateDto } from './dynamic-fields-base-update.dto';
 import { DynamicFieldsBaseEntity } from './dynamic-fields-base.entity';
 import { getMessageFromValidationErrors } from '../../utils/validation';
+import { SortingType } from '../adverts/models/sorting';
 
 export abstract class BaseFieldService {
     protected constructor(
@@ -55,6 +56,10 @@ export abstract class BaseFieldService {
     async validateParams(dtoObject: Record<any, any>): Promise<ValidationError[]> {
         const dtoClass = plainToClass(this.paramsDtoType, dtoObject);
         return await validate(dtoClass);
+    }
+
+    async getSortedAdvertIds(fieldId: string, advertIds: string[], direction: SortingType): Promise<string[]> {
+        return advertIds;
     }
 
     // todo create some basic implementation

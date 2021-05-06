@@ -163,6 +163,21 @@ describe('Adverts controller', () => {
                 });
         });
 
+        it(`successfully with sorting`, () => {
+            return request(app.getHttpServer())
+                .get(`/adverts?sorting[${uuid()}]=ASC`)
+                .expect(HttpStatus.OK);
+        });
+
+        it(`with error - invalid sorting format`, () => {
+            return request(app.getHttpServer())
+                .get(`/adverts?sorting=1000`)
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('sorting must be an object');
+                });
+        });
+
         it(`successfully with user id`, () => {
             return request(app.getHttpServer()).get(`/adverts?user=${uuid()}`).expect(HttpStatus.OK);
         });
@@ -268,6 +283,21 @@ describe('Adverts controller', () => {
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('filters must be an object');
+                });
+        });
+
+        it(`successfully with sorting`, () => {
+            return request(app.getHttpServer())
+                .get(`/adverts/category/${uuid()}?sorting[${uuid()}]=ASC`)
+                .expect(HttpStatus.OK);
+        });
+
+        it(`with error - invalid sorting format`, () => {
+            return request(app.getHttpServer())
+                .get(`/adverts/category/${uuid()}?sorting=1000`)
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('sorting must be an object');
                 });
         });
 
