@@ -91,10 +91,11 @@ describe('Users controller', () => {
                     expect(res.body.id).toBe(user.id);
                     expect(res.body.status).toBe(user.status);
                     expect(res.body.firstName).toBe(user.firstName);
+                    expect(res.body.isPhoneVerified).toBe(user.isPhoneVerified);
                     expect(res.body.lastName).toBeUndefined();
                     expect(res.body.email).toBeUndefined();
                     expect(res.body.phone).toBeUndefined();
-                    expect(res.body.isPhoneVerified).toBeUndefined();
+
                 });
         });
     });

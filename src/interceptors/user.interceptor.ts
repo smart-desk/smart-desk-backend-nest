@@ -1,13 +1,10 @@
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { omit } from 'lodash';
 import { RequestWithUserPayload } from '../modules/auth/jwt.strategy';
 import { RolesEnum } from '../modules/app/app.roles';
 import { User } from '../modules/users/entities/user.entity';
 import { serializeUser } from '../utils/user.serializer';
-
-const EXCLUDED_USER_PROP = ['phone', 'isPhoneVerified', 'email', 'lastName'];
 
 @Injectable()
 export class UserInterceptor implements NestInterceptor {
