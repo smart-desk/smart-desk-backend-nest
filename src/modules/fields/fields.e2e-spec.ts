@@ -20,6 +20,9 @@ import { roles, RolesEnum } from '../app/app.roles';
 describe('Fields controller', () => {
     let app: INestApplication;
     const field = new Field();
+    field.type = FieldType.INPUT_TEXT;
+    field.id = uuid();
+    field.section_id = uuid();
     const section = new Section();
 
     const fieldsRepositoryMock = createRepositoryMock<Field>([field]);
@@ -136,19 +139,6 @@ describe('Fields controller', () => {
                 .expect(HttpStatus.OK);
         });
 
-        it(`with error - wrong field type`, () => {
-            return request(app.getHttpServer())
-                .put(`/fields/${uuid()}`)
-                .send({
-                    title: 'some title',
-                    params: { label: 'some label' } as InputTextParamsDto,
-                } as FieldUpdateDto)
-                .expect(HttpStatus.BAD_REQUEST)
-                .expect(res => {
-                    expect(res.body.message).toContain('type must be a valid enum value');
-                });
-        });
-
         it(`with error - field not found`, () => {
             fieldsRepositoryMock.findOne.mockReturnValueOnce(undefined);
             return request(app.getHttpServer())
@@ -200,23 +190,27 @@ describe('Fields controller', () => {
 describe('Fields controller with ACL enabled', () => {
     let app: INestApplication;
     const field = new Field();
+    field.type = FieldType.INPUT_TEXT;
+    field.id = uuid();
+    field.section_id = uuid();
+
     const section = new Section();
     const JwtGuard = JwtAuthGuardMock;
 
     beforeAll(async () => {
         let moduleBuilder = Test.createTestingModule({
             imports: [FieldsModule, SectionsModule, AccessControlModule.forRoles(roles)],
-        })
+        });
+
+        const moduleRef = await declareCommonProviders(moduleBuilder)
             .overrideProvider(getRepositoryToken(Field))
             .useValue(createRepositoryMock([field]))
             .overrideProvider(getRepositoryToken(Section))
             .useValue(createRepositoryMock([section]))
             .overrideGuard(JwtAuthGuard)
-            .useValue(JwtGuard);
+            .useValue(JwtGuard)
+            .compile();
 
-        moduleBuilder = declareCommonProviders(moduleBuilder);
-
-        const moduleRef = await moduleBuilder.compile();
         app = await createTestAppForModule(moduleRef);
     });
 
@@ -277,7 +271,6 @@ describe('Fields controller with ACL enabled', () => {
                 .put(`/fields/${uuid()}`)
                 .send({
                     title: 'some title',
-                    type: FieldType.INPUT_TEXT,
                     params: { label: 'some label' } as InputTextParamsDto,
                 } as FieldUpdateDto)
                 .expect(HttpStatus.OK);
@@ -290,7 +283,6 @@ describe('Fields controller with ACL enabled', () => {
                 .put('/fields/12345')
                 .send({
                     title: 'some title',
-                    type: FieldType.INPUT_TEXT,
                     params: { label: 'some label' } as InputTextParamsDto,
                 } as FieldUpdateDto)
                 .expect(HttpStatus.FORBIDDEN);
@@ -301,7 +293,6 @@ describe('Fields controller with ACL enabled', () => {
                 .put('/fields/12345')
                 .send({
                     title: 'some title',
-                    type: FieldType.INPUT_TEXT,
                     params: { label: 'some label' } as InputTextParamsDto,
                 } as FieldUpdateDto)
                 .expect(HttpStatus.FORBIDDEN);
