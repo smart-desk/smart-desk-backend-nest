@@ -1,16 +1,7 @@
-import { IsBoolean, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsOptional, MaxLength } from 'class-validator';
 
 export class InputTextParamsDto {
-    @IsNotEmpty()
-    @MaxLength(255)
-    @IsString()
-    label: string;
-
     @IsOptional()
     @MaxLength(255)
     placeholder?: string;
-
-    @IsOptional()
-    @IsBoolean()
-    required?: boolean;
 }

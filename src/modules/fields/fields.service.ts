@@ -7,6 +7,7 @@ import { SectionsService } from '../sections/sections.service';
 import { ValidationError } from 'class-validator';
 import { getMessageFromValidationErrors } from '../../utils/validation';
 import { DynamicFieldsService } from '../dynamic-fields/dynamic-fields.service';
+import { FieldType } from '../dynamic-fields/dynamic-fields.module';
 
 @Injectable()
 export class FieldsService {
@@ -23,7 +24,7 @@ export class FieldsService {
     async create(fieldDto: FieldCreateDto): Promise<Field> {
         await this.sectionsService.getById(fieldDto.section_id);
 
-        const errors = await this.validateParams(fieldDto);
+        const errors = await this.validateParams(fieldDto, fieldDto.type);
         if (errors.length) {
             throw new BadRequestException(getMessageFromValidationErrors(errors));
         }
@@ -36,7 +37,7 @@ export class FieldsService {
         const field = await this.findOneOrThrowException(id);
         await this.fieldRepository.update(field.id, fieldDto);
 
-        const errors = await this.validateParams(fieldDto);
+        const errors = await this.validateParams(fieldDto, field.type);
         if (errors.length) {
             throw new BadRequestException(getMessageFromValidationErrors(errors));
         }
@@ -58,8 +59,8 @@ export class FieldsService {
         return field;
     }
 
-    private validateParams(field: FieldCreateDto | FieldUpdateDto): Promise<ValidationError[]> {
-        const service = this.dynamicFieldsService.getService(field.type);
+    private validateParams(field: FieldCreateDto | FieldUpdateDto, type: FieldType): Promise<ValidationError[]> {
+        const service = this.dynamicFieldsService.getService(type);
         if (!service) {
             return;
         }
