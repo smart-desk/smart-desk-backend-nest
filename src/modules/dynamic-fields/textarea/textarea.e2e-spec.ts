@@ -278,38 +278,10 @@ describe('Textarea field', () => {
                         title: 'some title',
                         type: FieldType.TEXTAREA,
                         params: {
-                            label: 'some label',
                             placeholder: 'some place',
-                            required: true,
                         } as TextareaParamsDto,
                     } as FieldCreateDto)
                     .expect(HttpStatus.CREATED);
-            });
-
-            it(`with errors - no label provided, required must be boolean`, () => {
-                JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
-                    const req = context.switchToHttp().getRequest();
-                    req.user = { id: '007', email: 'test@email.com', roles: [RolesEnum.USER, RolesEnum.ADMIN] };
-                    return true;
-                });
-
-                return request(app.getHttpServer())
-                    .post('/fields')
-                    .send({
-                        section_id: uuid(),
-                        title: 'some title',
-                        type: FieldType.TEXTAREA,
-                        params: {
-                            label: '',
-                            placeholder: 'some place',
-                            required: 'string' as any,
-                        } as TextareaParamsDto,
-                    } as FieldCreateDto)
-                    .expect(HttpStatus.BAD_REQUEST)
-                    .expect(res => {
-                        expect(res.body.message).toContain('label should not be empty');
-                        expect(res.body.message).toContain('required must be a boolean value');
-                    });
             });
         });
 
@@ -333,37 +305,10 @@ describe('Textarea field', () => {
                         title: 'some title',
                         type: FieldType.TEXTAREA,
                         params: {
-                            label: 'some label',
                             placeholder: 'some place',
-                            required: true,
                         } as TextareaParamsDto,
                     } as FieldUpdateDto)
                     .expect(HttpStatus.OK);
-            });
-
-            it(`with errors - no label provided, required must be boolean`, () => {
-                JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
-                    const req = context.switchToHttp().getRequest();
-                    req.user = { id: '007', email: 'test@email.com', roles: [RolesEnum.USER, RolesEnum.ADMIN] };
-                    return true;
-                });
-
-                return request(app.getHttpServer())
-                    .put(`/fields/${uuid()}`)
-                    .send({
-                        title: 'some title',
-                        type: FieldType.TEXTAREA,
-                        params: {
-                            label: '',
-                            placeholder: 'some place',
-                            required: 'string' as any,
-                        } as TextareaParamsDto,
-                    } as FieldUpdateDto)
-                    .expect(HttpStatus.BAD_REQUEST)
-                    .expect(res => {
-                        expect(res.body.message).toContain('label should not be empty');
-                        expect(res.body.message).toContain('required must be a boolean value');
-                    });
             });
         });
     });
