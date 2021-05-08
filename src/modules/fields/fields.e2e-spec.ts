@@ -53,6 +53,7 @@ describe('Fields controller', () => {
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
                     order: 1,
+                    required: true,
                     params: { label: 'some label' } as InputTextParamsDto,
                 } as FieldCreateDto)
                 .expect(HttpStatus.CREATED);
@@ -112,11 +113,13 @@ describe('Fields controller', () => {
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
                     order: 'test' as any,
+                    required: 'test' as any,
                     params: { label: 'some label' } as InputTextParamsDto,
                 } as FieldCreateDto)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('order must be an integer number');
+                    expect(res.body.message).toContain('required must be a boolean value');
                 });
         });
     });
@@ -127,7 +130,7 @@ describe('Fields controller', () => {
                 .put(`/fields/${uuid()}`)
                 .send({
                     title: 'some title',
-                    type: FieldType.INPUT_TEXT,
+                    required: false,
                     params: { label: 'some label' } as InputTextParamsDto,
                 } as FieldUpdateDto)
                 .expect(HttpStatus.OK);
@@ -138,7 +141,6 @@ describe('Fields controller', () => {
                 .put(`/fields/${uuid()}`)
                 .send({
                     title: 'some title',
-                    type: 'wrong type' as FieldType,
                     params: { label: 'some label' } as InputTextParamsDto,
                 } as FieldUpdateDto)
                 .expect(HttpStatus.BAD_REQUEST)
@@ -153,12 +155,27 @@ describe('Fields controller', () => {
                 .put(`/fields/${uuid()}`)
                 .send({
                     title: 'some title',
-                    type: FieldType.INPUT_TEXT,
                     params: { label: 'some label' } as InputTextParamsDto,
                 } as FieldUpdateDto)
                 .expect(HttpStatus.NOT_FOUND)
                 .expect(res => {
                     expect(res.body.message).toContain('Field not found');
+                });
+        });
+
+        it(`with error - order is not valid`, () => {
+            return request(app.getHttpServer())
+                .put(`/fields/${uuid()}`)
+                .send({
+                    title: 'some title',
+                    order: 'test' as any,
+                    required: 'test' as any,
+                    params: { label: 'some label' } as InputTextParamsDto,
+                } as FieldUpdateDto)
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('order must be an integer number');
+                    expect(res.body.message).toContain('required must be a boolean value');
                 });
         });
     });

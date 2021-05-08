@@ -25,6 +25,9 @@ export class Field {
     @Column('int')
     order: number;
 
+    @Column('boolean')
+    required: boolean;
+
     data: unknown;
 
     @ManyToOne(() => Section, (section: Section) => section.fields)
