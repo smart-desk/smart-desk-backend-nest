@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { FieldType } from '../dynamic-fields/dynamic-fields.module';
+import { Model } from '../models/model.entity';
 
 @Entity('fields')
 export class Field {
@@ -29,6 +30,10 @@ export class Field {
 
     @Column('boolean')
     required: boolean;
+
+    @ManyToOne(() => Model, (model: Model) => model.fields)
+    @JoinColumn({ name: 'model_id' })
+    model: Model;
 
     data: unknown;
 }
