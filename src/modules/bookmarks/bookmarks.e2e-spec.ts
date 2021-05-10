@@ -12,7 +12,6 @@ import { Field } from '../fields/field.entity';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { Bookmark } from './entities/bookmark.entity';
 import { Advert } from '../adverts/entities/advert.entity';
-import { Section, SectionType } from '../sections/section.entity';
 import { FieldType } from '../dynamic-fields/dynamic-fields.module';
 import { AdvertsModule } from '../adverts/adverts.module';
 import { Connection } from 'typeorm';
@@ -26,20 +25,12 @@ describe('Bookmarks controller', () => {
     const fieldEntity = new Field();
     fieldEntity.type = FieldType.INPUT_TEXT;
     fieldEntity.id = uuid();
-    fieldEntity.section_id = uuid();
     fieldEntity.title = 'test';
     fieldEntity.params = { label: 'Test', placeholder: 'test', required: true };
-
-    const sectionEntity = new Section();
-    sectionEntity.id = uuid();
-    sectionEntity.model_id = uuid();
-    sectionEntity.type = SectionType.PARAMS;
-    sectionEntity.fields = [fieldEntity];
 
     const advertEntity = new Advert();
     advertEntity.id = '1234';
     advertEntity.model_id = '12323';
-    advertEntity.sections = [sectionEntity, sectionEntity];
     advertEntity.userId = '123';
 
     const bookmark = new Bookmark();
@@ -47,7 +38,6 @@ describe('Bookmarks controller', () => {
     bookmark.advert = advertEntity;
 
     const advertRepositoryMock = createRepositoryMock<Advert>([advertEntity]);
-    const sectionRepositoryMock = createRepositoryMock<Section>([sectionEntity]);
     const fieldRepositoryMock = createRepositoryMock<Field>([fieldEntity]);
     const bookmarkRepositoryMock = createRepositoryMock<Bookmark>([bookmark]);
     const connectionMock = {
@@ -64,8 +54,6 @@ describe('Bookmarks controller', () => {
         const moduleRef = await declareCommonProviders(moduleBuilder)
             .overrideProvider(getRepositoryToken(Advert))
             .useValue(advertRepositoryMock)
-            .overrideProvider(getRepositoryToken(Section))
-            .useValue(sectionRepositoryMock)
             .overrideProvider(getRepositoryToken(Field))
             .useValue(fieldRepositoryMock)
             .overrideProvider(getRepositoryToken(Bookmark))

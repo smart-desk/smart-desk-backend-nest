@@ -11,8 +11,8 @@ export class FieldCreateDto {
     type: FieldType;
 
     @IsNotEmpty()
-    @IsUUID()
-    section_id: string;
+    // @IsEnum(SectionType) // todo
+    section: string;
 
     @IsOptional()
     @IsInt()

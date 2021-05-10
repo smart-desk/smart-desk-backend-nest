@@ -1,5 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Section } from '../sections/section.entity';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { FieldType } from '../dynamic-fields/dynamic-fields.module';
 
 @Entity('fields')
@@ -13,8 +12,8 @@ export class Field {
     @Column('varchar', { length: 255 })
     type: FieldType;
 
-    @Column('uuid')
-    section_id: string;
+    @Column('varchar', { length: 100 })
+    section: string;
 
     @Column('json')
     params: unknown;
@@ -29,8 +28,4 @@ export class Field {
     required: boolean;
 
     data: unknown;
-
-    @ManyToOne(() => Section, (section: Section) => section.fields)
-    @JoinColumn({ name: 'section_id' })
-    section: Section;
 }

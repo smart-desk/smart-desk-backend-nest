@@ -7,7 +7,6 @@ import { AccessControlModule, ACGuard } from 'nest-access-control';
 import { Model } from './model.entity';
 import { createRepositoryMock, createTestAppForModule } from '../../../test/test.utils';
 import { ModelsModule } from './models.module';
-import { Section } from '../sections/section.entity';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { JwtAuthGuardMock } from '../../../test/mocks/jwt-auth.guard.mock';
 import { AcGuardMock } from '../../../test/mocks/ac.guard.mock';
@@ -16,10 +15,8 @@ import { roles, RolesEnum } from '../app/app.roles';
 describe('Models controller', () => {
     let app: INestApplication;
     const modelEntity = new Model();
-    const sectionEntity = new Section();
 
     const modelRepositoryMock = createRepositoryMock<Model>([modelEntity]);
-    const sectionRepository = createRepositoryMock<Section>([sectionEntity]);
 
     beforeAll(async () => {
         const moduleRef = await Test.createTestingModule({
@@ -27,8 +24,6 @@ describe('Models controller', () => {
         })
             .overrideProvider(getRepositoryToken(Model))
             .useValue(modelRepositoryMock)
-            .overrideProvider(getRepositoryToken(Section))
-            .useValue(sectionRepository)
             .overrideGuard(JwtAuthGuard)
             .useValue(JwtAuthGuardMock)
             .overrideGuard(ACGuard)
@@ -109,7 +104,6 @@ describe('Models controller', () => {
 describe('Models controller with ACL enabled', () => {
     let app: INestApplication;
     const modelEntity = new Model();
-    const sectionEntity = new Section();
     const JwtGuard = JwtAuthGuardMock;
 
     beforeAll(async () => {
@@ -118,8 +112,6 @@ describe('Models controller with ACL enabled', () => {
         })
             .overrideProvider(getRepositoryToken(Model))
             .useValue(createRepositoryMock([modelEntity]))
-            .overrideProvider(getRepositoryToken(Section))
-            .useValue(createRepositoryMock([sectionEntity]))
             .overrideGuard(JwtAuthGuard)
             .useValue(JwtGuard)
             .compile();

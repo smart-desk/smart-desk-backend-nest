@@ -4,7 +4,6 @@ import { Raw, Repository } from 'typeorm';
 import { isUUID } from 'class-validator';
 import { Advert } from './entities/advert.entity';
 import { GetAdvertsDto, GetAdvertsResponseDto } from './dto/get-adverts.dto';
-import { SectionsService } from '../sections/sections.service';
 import { FieldsService } from '../fields/fields.service';
 import { getMessageFromValidationErrors } from '../../utils/validation';
 import { DynamicFieldsService } from '../dynamic-fields/dynamic-fields.service';
@@ -23,7 +22,6 @@ interface FieldDataDtoInstance {
 export class AdvertsService {
     constructor(
         @InjectRepository(Advert) private advertRepository: Repository<Advert>,
-        private sectionsService: SectionsService,
         private fieldsService: FieldsService,
         private dynamicFieldsService: DynamicFieldsService
     ) {}
@@ -187,6 +185,7 @@ export class AdvertsService {
 
     async loadFieldDataForAdvert(advert: Advert): Promise<Advert> {
         advert.sections = await this.sectionsService.getByModelId(advert.model_id);
+        // todo create model_id for fields
 
         // todo sequential loading is not effective, replace with parallel
         for (const section of advert.sections) {

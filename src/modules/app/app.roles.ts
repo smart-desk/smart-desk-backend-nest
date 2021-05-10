@@ -9,7 +9,6 @@ export enum RolesEnum {
 export enum ResourceEnum {
     ADVERT = 'advert',
     MODEL = 'model',
-    SECTION = 'section',
     FIELD = 'field',
     CATEGORY = 'category',
     USER = 'user',
@@ -37,7 +36,6 @@ roles
     .create([
         ResourceEnum.ADVERT,
         ResourceEnum.MODEL,
-        ResourceEnum.SECTION,
         ResourceEnum.FIELD,
         ResourceEnum.CATEGORY,
         ResourceEnum.USER,
@@ -49,7 +47,6 @@ roles
     .read([
         ResourceEnum.ADVERT,
         ResourceEnum.MODEL,
-        ResourceEnum.SECTION,
         ResourceEnum.FIELD,
         ResourceEnum.CATEGORY,
         ResourceEnum.USER,
@@ -61,7 +58,6 @@ roles
     .update([
         ResourceEnum.ADVERT,
         ResourceEnum.MODEL,
-        ResourceEnum.SECTION,
         ResourceEnum.FIELD,
         ResourceEnum.CATEGORY,
         ResourceEnum.USER,
@@ -73,7 +69,6 @@ roles
     .delete([
         ResourceEnum.ADVERT,
         ResourceEnum.MODEL,
-        ResourceEnum.SECTION,
         ResourceEnum.FIELD,
         ResourceEnum.CATEGORY,
         ResourceEnum.USER,

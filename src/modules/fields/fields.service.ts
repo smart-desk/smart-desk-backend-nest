@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository } from 'typeorm';
 import { Field } from './field.entity';
 import { FieldCreateDto, FieldUpdateDto } from './dto/field.dto';
-import { SectionsService } from '../sections/sections.service';
 import { ValidationError } from 'class-validator';
 import { getMessageFromValidationErrors } from '../../utils/validation';
 import { DynamicFieldsService } from '../dynamic-fields/dynamic-fields.service';
@@ -13,7 +12,6 @@ import { FieldType } from '../dynamic-fields/dynamic-fields.module';
 export class FieldsService {
     constructor(
         @InjectRepository(Field) private fieldRepository: Repository<Field>,
-        private sectionsService: SectionsService,
         private dynamicFieldsService: DynamicFieldsService
     ) {}
 

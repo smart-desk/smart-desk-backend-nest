@@ -12,7 +12,6 @@ import { ChatModule } from './chat.module';
 import { Advert } from '../adverts/entities/advert.entity';
 import { Field } from '../fields/field.entity';
 import { Chat } from './enitities/chat.entity';
-import { Section } from '../sections/section.entity';
 import { ChatMessage } from './enitities/chat-message.entity';
 import * as io from 'socket.io-client';
 import { ChatEvent } from './chat.gateway';
@@ -29,12 +28,7 @@ describe('Chat gateway', () => {
 
     const advert = new Advert();
     advert.id = uuid();
-    advert.sections = [];
     advert.userId = user.id;
-
-    const section = new Section();
-    section.id = uuid();
-    section.fields = [];
 
     const field = new Field();
     field.id = uuid();
@@ -66,8 +60,6 @@ describe('Chat gateway', () => {
             .useValue(chatMessageRepositoryMock)
             .overrideProvider(getRepositoryToken(Advert))
             .useValue(advertServiceRepositoryMock)
-            .overrideProvider(getRepositoryToken(Section))
-            .useValue(createRepositoryMock([section]))
             .overrideProvider(getRepositoryToken(Field))
             .useValue(createRepositoryMock([field]))
             .overrideProvider(getRepositoryToken(User))
