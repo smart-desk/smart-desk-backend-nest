@@ -22,14 +22,7 @@ export class ModelsService {
 
     async create(modelDto: ModelCreateDto): Promise<Model> {
         const model = this.modelRepository.create(modelDto);
-        const resultModel = await this.modelRepository.save(model);
-
-        const sectionTypesArray = Object.values(SectionType); // todo
-        for (const type of sectionTypesArray) {
-            await this.sectionsService.create({ type, model_id: resultModel.id });
-        }
-
-        return resultModel;
+        return this.modelRepository.save(model);
     }
 
     async update(id: string, modelDto: ModelUpdateDto): Promise<Model> {

@@ -79,8 +79,15 @@ export class AdvertsService {
             });
         }
 
-        const status = AdvertStatus.PENDING;
-        const advert = this.advertRepository.create({ ...advertDto, userId, status });
+        const a = new Advert();
+        a.status = AdvertStatus.PENDING
+        a.category_id = advertDto.category_id;
+        a.model_id = advertDto.model_id;
+        a.title = advertDto.title;
+        a.preferContact = advertDto.preferContact;
+        a.userId = userId;
+
+        const advert = this.advertRepository.create(a);
         const advertResult = await this.advertRepository.save(advert);
 
         for (const fieldData of validDtos) {
@@ -184,25 +191,22 @@ export class AdvertsService {
     }
 
     async loadFieldDataForAdvert(advert: Advert): Promise<Advert> {
-        advert.sections = await this.sectionsService.getByModelId(advert.model_id);
-        // todo create model_id for fields
+        advert.fields = await this.fieldsService.getByModelId(advert.model_id);
 
         // todo sequential loading is not effective, replace with parallel
-        for (const section of advert.sections) {
-            for (const field of section.fields) {
-                const service = this.dynamicFieldsService.getService(field.type);
-                if (!service) {
-                    continue;
-                }
-                const repository = service.getRepository();
-                if (repository) {
-                    field.data = await repository.findOne({
-                        where: {
-                            field_id: field.id,
-                            advert_id: advert.id,
-                        },
-                    });
-                }
+        for (const field of advert.fields) {
+            const service = this.dynamicFieldsService.getService(field.type);
+            if (!service) {
+                continue;
+            }
+            const repository = service.getRepository();
+            if (repository) {
+                field.data = await repository.findOne({
+                    where: {
+                        field_id: field.id,
+                        advert_id: advert.id,
+                    },
+                });
             }
         }
 

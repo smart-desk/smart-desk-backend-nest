@@ -7,20 +7,26 @@ import { ValidationError } from 'class-validator';
 import { getMessageFromValidationErrors } from '../../utils/validation';
 import { DynamicFieldsService } from '../dynamic-fields/dynamic-fields.service';
 import { FieldType } from '../dynamic-fields/dynamic-fields.module';
+import { ModelsService } from '../models/models.service';
 
 @Injectable()
 export class FieldsService {
     constructor(
         @InjectRepository(Field) private fieldRepository: Repository<Field>,
-        private dynamicFieldsService: DynamicFieldsService
+        private dynamicFieldsService: DynamicFieldsService,
+        private modelService: ModelsService
     ) {}
 
     async getById(id: string): Promise<Field> {
         return await this.findOneOrThrowException(id);
     }
 
+    async getByModelId(modelId: string): Promise<Field[]> {
+        return this.fieldRepository.find({ modelId });
+    }
+
     async create(fieldDto: FieldCreateDto): Promise<Field> {
-        await this.sectionsService.getById(fieldDto.section_id);
+        await this.modelService.getById(fieldDto.modelId);
 
         const errors = await this.validateParams(fieldDto, fieldDto.type);
         if (errors.length) {

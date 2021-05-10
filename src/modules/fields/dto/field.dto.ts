@@ -7,6 +7,10 @@ export class FieldCreateDto {
     title?: string;
 
     @IsNotEmpty()
+    @IsUUID()
+    modelId: string;
+
+    @IsNotEmpty()
     @IsEnum(FieldType)
     type: FieldType;
 

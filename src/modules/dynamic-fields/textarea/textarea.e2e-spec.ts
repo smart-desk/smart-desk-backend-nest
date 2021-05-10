@@ -263,7 +263,6 @@ describe('Textarea field', () => {
                 return request(app.getHttpServer())
                     .post('/fields')
                     .send({
-                        section_id: uuid(),
                         title: 'some title',
                         type: FieldType.TEXTAREA,
                         params: {

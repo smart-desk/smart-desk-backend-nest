@@ -6,6 +6,9 @@ export class Field {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
+    @Column('uuid', { name: 'model_id' })
+    modelId: string;
+
     @Column('varchar', { length: 255 })
     title: string;
 
