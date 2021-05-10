@@ -10,7 +10,6 @@ import { LocationEntity } from '../src/modules/dynamic-fields/location/location.
 import { PriceEntity } from '../src/modules/dynamic-fields/price/price.entity';
 import { CheckboxEntity } from '../src/modules/dynamic-fields/checkbox/checkbox.entity';
 import { Advert } from '../src/modules/adverts/entities/advert.entity';
-import { Section } from '../src/modules/sections/section.entity';
 import { Field } from '../src/modules/fields/field.entity';
 import { User } from '../src/modules/users/entities/user.entity';
 import { DatepickerEntity } from '../src/modules/dynamic-fields/datepicker/datepicker.entity';
@@ -65,8 +64,6 @@ export function declareCommonProviders(moduleRef: TestingModuleBuilder): Testing
         .overrideProvider(getRepositoryToken(User))
         .useValue(createRepositoryMock())
         .overrideProvider(getRepositoryToken(Advert))
-        .useValue(createRepositoryMock())
-        .overrideProvider(getRepositoryToken(Section))
         .useValue(createRepositoryMock())
         .overrideProvider(getRepositoryToken(Field))
         .useValue(createRepositoryMock())
