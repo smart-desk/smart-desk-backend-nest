@@ -10,10 +10,10 @@ import { LocationEntity } from '../src/modules/dynamic-fields/location/location.
 import { PriceEntity } from '../src/modules/dynamic-fields/price/price.entity';
 import { CheckboxEntity } from '../src/modules/dynamic-fields/checkbox/checkbox.entity';
 import { Advert } from '../src/modules/adverts/entities/advert.entity';
+import { Model } from '../src/modules/models/model.entity';
 import { Field } from '../src/modules/fields/field.entity';
 import { User } from '../src/modules/users/entities/user.entity';
 import { DatepickerEntity } from '../src/modules/dynamic-fields/datepicker/datepicker.entity';
-import { Model } from '../dist/modules/models/model.entity';
 
 export async function createTestAppForModule(moduleRef: TestingModule) {
     const app = moduleRef.createNestApplication();
