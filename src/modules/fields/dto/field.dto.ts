@@ -1,18 +1,29 @@
 import { IsBoolean, IsEnum, IsInt, IsNotEmpty, IsOptional, IsUUID, MaxLength } from 'class-validator';
 import { FieldType } from '../../dynamic-fields/dynamic-fields.module';
 
+export enum SectionType {
+    PARAMS = 'params',
+    CONTACTS = 'contacts',
+    LOCATION = 'location',
+    PRICE = 'price',
+}
+
 export class FieldCreateDto {
     @IsOptional()
     @MaxLength(255)
     title?: string;
 
     @IsNotEmpty()
+    @IsUUID()
+    modelId: string;
+
+    @IsNotEmpty()
     @IsEnum(FieldType)
     type: FieldType;
 
     @IsNotEmpty()
-    @IsUUID()
-    section_id: string;
+    @IsEnum(SectionType)
+    section: string;
 
     @IsOptional()
     @IsInt()

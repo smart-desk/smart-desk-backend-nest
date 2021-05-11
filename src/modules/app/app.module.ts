@@ -8,7 +8,6 @@ import { AuthModule } from '../auth/auth.module';
 import { CategoriesModule } from '../categories/categories.module';
 import { FieldsModule } from '../fields/fields.module';
 import { ModelsModule } from '../models/models.module';
-import { SectionsModule } from '../sections/sections.module';
 import { UsersModule } from '../users/users.module';
 import { DynamicFieldsModule } from '../dynamic-fields/dynamic-fields.module';
 import { DataPipe } from '../../utils/data.pipe';
@@ -23,7 +22,6 @@ const app = [
     UsersModule,
     CategoriesModule,
     ModelsModule,
-    SectionsModule,
     FieldsModule,
     AdvertsModule,
     DynamicFieldsModule,

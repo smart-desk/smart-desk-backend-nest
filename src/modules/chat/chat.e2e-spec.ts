@@ -12,13 +12,13 @@ import { ChatModule } from './chat.module';
 import { Advert } from '../adverts/entities/advert.entity';
 import { Field } from '../fields/field.entity';
 import { Chat } from './enitities/chat.entity';
-import { Section } from '../sections/section.entity';
 import { ChatMessage } from './enitities/chat-message.entity';
 import * as io from 'socket.io-client';
 import { ChatEvent } from './chat.gateway';
 import { WsJwtAuthGuard } from '../../guards/ws-jwt-auth.guard';
 import { WsJwtAuthGuardMock } from '../../../test/mocks/ws-jwt-auth.guard.mock';
 import { PreferContact } from '../adverts/models/prefer-contact.enum';
+import { FieldType } from '../dynamic-fields/dynamic-fields.module';
 
 describe('Chat gateway', () => {
     let app: INestApplication;
@@ -27,17 +27,14 @@ describe('Chat gateway', () => {
     const user = new User();
     user.id = uuid();
 
-    const advert = new Advert();
-    advert.id = uuid();
-    advert.sections = [];
-    advert.userId = user.id;
-
-    const section = new Section();
-    section.id = uuid();
-    section.fields = [];
-
     const field = new Field();
     field.id = uuid();
+    field.type = FieldType.INPUT_TEXT;
+
+    const advert = new Advert();
+    advert.id = uuid();
+    advert.userId = user.id;
+    advert.fields = [field];
 
     const chat = new Chat();
     chat.id = uuid();
@@ -66,8 +63,6 @@ describe('Chat gateway', () => {
             .useValue(chatMessageRepositoryMock)
             .overrideProvider(getRepositoryToken(Advert))
             .useValue(advertServiceRepositoryMock)
-            .overrideProvider(getRepositoryToken(Section))
-            .useValue(createRepositoryMock([section]))
             .overrideProvider(getRepositoryToken(Field))
             .useValue(createRepositoryMock([field]))
             .overrideProvider(getRepositoryToken(User))

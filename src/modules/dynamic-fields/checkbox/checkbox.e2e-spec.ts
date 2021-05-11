@@ -9,7 +9,6 @@ import { createRepositoryMock, createTestAppForModule, declareCommonProviders } 
 import { Advert } from '../../adverts/entities/advert.entity';
 import { AdvertsModule } from '../../adverts/adverts.module';
 import { Field } from '../../fields/field.entity';
-import { Section, SectionType } from '../../sections/section.entity';
 import { CreateAdvertDto } from '../../adverts/dto/create-advert.dto';
 import { FieldType } from '../dynamic-fields.module';
 import { JwtAuthGuard } from '../../../guards/jwt-auth.guard';
@@ -18,7 +17,7 @@ import { roles, RolesEnum } from '../../app/app.roles';
 import { UsersModule } from '../../users/users.module';
 import { User } from '../../users/entities/user.entity';
 import { UpdateAdvertDto } from '../../adverts/dto/update-advert.dto';
-import { FieldCreateDto, FieldUpdateDto } from '../../fields/dto/field.dto';
+import { FieldCreateDto, FieldUpdateDto, SectionType } from '../../fields/dto/field.dto';
 import { CreateCheckboxDto } from './dto/create-checkbox.dto';
 import { UpdateCheckboxDto } from './dto/update-checkbox.dto';
 import { CheckboxParamsDto } from './dto/checkbox-params.dto';
@@ -29,23 +28,14 @@ describe('Checkbox field', () => {
     const fieldEntity = new Field();
     fieldEntity.type = FieldType.CHECKBOX;
     fieldEntity.id = uuid();
-    fieldEntity.section_id = uuid();
     fieldEntity.title = 'test';
     fieldEntity.params = {};
 
-    const sectionEntity = new Section();
-    sectionEntity.id = uuid();
-    sectionEntity.model_id = uuid();
-    sectionEntity.type = SectionType.PARAMS;
-    sectionEntity.fields = [fieldEntity];
-
     const advertEntity = new Advert();
     advertEntity.id = '1234';
-    advertEntity.sections = [sectionEntity, sectionEntity];
     advertEntity.userId = '123';
 
     const advertRepositoryMock = createRepositoryMock<Advert>([advertEntity]);
-    const sectionRepositoryMock = createRepositoryMock<Section>([sectionEntity]);
     const fieldRepositoryMock = createRepositoryMock<Field>([fieldEntity]);
     const connectionMock = {
         manager: createRepositoryMock(),
@@ -61,8 +51,6 @@ describe('Checkbox field', () => {
         const moduleRef = await declareCommonProviders(moduleBuilder)
             .overrideProvider(getRepositoryToken(Advert))
             .useValue(advertRepositoryMock)
-            .overrideProvider(getRepositoryToken(Section))
-            .useValue(sectionRepositoryMock)
             .overrideProvider(getRepositoryToken(Field))
             .useValue(fieldRepositoryMock)
             .overrideProvider(getRepositoryToken(User))
@@ -212,7 +200,8 @@ describe('Checkbox field', () => {
                 return request(app.getHttpServer())
                     .post('/fields')
                     .send({
-                        section_id: uuid(),
+                        modelId: uuid(),
+                        section: SectionType.PARAMS,
                         title: 'some title',
                         type: FieldType.CHECKBOX,
                         params: {
@@ -237,7 +226,8 @@ describe('Checkbox field', () => {
                 return request(app.getHttpServer())
                     .post('/fields')
                     .send({
-                        section_id: uuid(),
+                        modelId: uuid(),
+                        section: SectionType.PARAMS,
                         title: 'some title',
                         type: FieldType.CHECKBOX,
                         params: {
@@ -295,7 +285,6 @@ describe('Checkbox field', () => {
                 return request(app.getHttpServer())
                     .put(`/fields/${uuid()}`)
                     .send({
-                        section_id: uuid(),
                         title: 'some title',
                         type: FieldType.CHECKBOX,
                         params: {

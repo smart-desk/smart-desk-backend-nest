@@ -9,7 +9,6 @@ import { createRepositoryMock, createTestAppForModule, declareCommonProviders } 
 import { Advert } from './entities/advert.entity';
 import { AdvertsModule } from './adverts.module';
 import { Field } from '../fields/field.entity';
-import { Section, SectionType } from '../sections/section.entity';
 import { CreateAdvertDto } from './dto/create-advert.dto';
 import { UpdateAdvertDto } from './dto/update-advert.dto';
 import { FieldType } from '../dynamic-fields/dynamic-fields.module';
@@ -30,23 +29,14 @@ describe('Adverts controller', () => {
     const fieldEntity = new Field();
     fieldEntity.type = FieldType.INPUT_TEXT;
     fieldEntity.id = uuid();
-    fieldEntity.section_id = uuid();
     fieldEntity.title = 'test';
     fieldEntity.params = { label: 'Test', placeholder: 'test', required: true };
 
-    const sectionEntity = new Section();
-    sectionEntity.id = uuid();
-    sectionEntity.model_id = uuid();
-    sectionEntity.type = SectionType.PARAMS;
-    sectionEntity.fields = [fieldEntity];
-
     const advertEntity = new Advert();
     advertEntity.id = '1234';
-    advertEntity.sections = [sectionEntity, sectionEntity];
     advertEntity.userId = '123';
 
     const advertRepositoryMock = createRepositoryMock<Advert>([advertEntity]);
-    const sectionRepositoryMock = createRepositoryMock<Section>([sectionEntity]);
     const fieldRepositoryMock = createRepositoryMock<Field>([fieldEntity]);
     const connectionMock = {
         manager: createRepositoryMock(),
@@ -60,8 +50,6 @@ describe('Adverts controller', () => {
         const moduleRef = await declareCommonProviders(moduleBuilder)
             .overrideProvider(getRepositoryToken(Advert))
             .useValue(advertRepositoryMock)
-            .overrideProvider(getRepositoryToken(Section))
-            .useValue(sectionRepositoryMock)
             .overrideProvider(getRepositoryToken(Field))
             .useValue(fieldRepositoryMock)
             .overrideProvider(Connection)
@@ -513,23 +501,14 @@ describe('Adverts controller with ACL enabled', () => {
     const fieldEntity = new Field();
     fieldEntity.type = FieldType.INPUT_TEXT;
     fieldEntity.id = uuid();
-    fieldEntity.section_id = uuid();
     fieldEntity.title = 'test';
     fieldEntity.params = { label: 'Test', placeholder: 'test', required: true };
 
-    const sectionEntity = new Section();
-    sectionEntity.id = uuid();
-    sectionEntity.model_id = uuid();
-    sectionEntity.type = SectionType.PARAMS;
-    sectionEntity.fields = [fieldEntity];
-
     const advertEntity = new Advert();
     advertEntity.id = '1234';
-    advertEntity.sections = [sectionEntity, sectionEntity];
     advertEntity.userId = '123';
 
     const advertRepositoryMock = createRepositoryMock<Advert>([advertEntity]);
-    const sectionRepositoryMock = createRepositoryMock<Section>([sectionEntity]);
     const fieldRepositoryMock = createRepositoryMock<Field>([fieldEntity]);
     const connectionMock = {
         manager: createRepositoryMock(),
@@ -545,8 +524,6 @@ describe('Adverts controller with ACL enabled', () => {
         const moduleRef = await declareCommonProviders(moduleBuilder)
             .overrideProvider(getRepositoryToken(Advert))
             .useValue(advertRepositoryMock)
-            .overrideProvider(getRepositoryToken(Section))
-            .useValue(sectionRepositoryMock)
             .overrideProvider(getRepositoryToken(Field))
             .useValue(fieldRepositoryMock)
             .overrideProvider(getRepositoryToken(User))

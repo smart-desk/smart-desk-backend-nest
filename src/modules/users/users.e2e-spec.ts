@@ -30,7 +30,6 @@ describe('Users controller', () => {
 
     const advertEntity = new Advert();
     advertEntity.id = uuid();
-    advertEntity.sections = [];
 
     const advertRepositoryMock = createRepositoryMock<Advert>([advertEntity]);
     const userRepositoryMock = createRepositoryMock<User>([user]);

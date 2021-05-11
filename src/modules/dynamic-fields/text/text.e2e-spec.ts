@@ -9,14 +9,13 @@ import { createRepositoryMock, createTestAppForModule, declareCommonProviders } 
 import { Advert } from '../../adverts/entities/advert.entity';
 import { AdvertsModule } from '../../adverts/adverts.module';
 import { Field } from '../../fields/field.entity';
-import { Section, SectionType } from '../../sections/section.entity';
 import { FieldType } from '../dynamic-fields.module';
 import { JwtAuthGuard } from '../../../guards/jwt-auth.guard';
 import { JwtAuthGuardMock } from '../../../../test/mocks/jwt-auth.guard.mock';
 import { roles, RolesEnum } from '../../app/app.roles';
 import { UsersModule } from '../../users/users.module';
 import { User } from '../../users/entities/user.entity';
-import { FieldCreateDto, FieldUpdateDto } from '../../fields/dto/field.dto';
+import { FieldCreateDto, FieldUpdateDto, SectionType } from '../../fields/dto/field.dto';
 import { TextParamsDto } from './dto/text-params.dto';
 
 describe('Text field', () => {
@@ -25,23 +24,14 @@ describe('Text field', () => {
     const fieldEntity = new Field();
     fieldEntity.type = FieldType.TEXT;
     fieldEntity.id = uuid();
-    fieldEntity.section_id = uuid();
     fieldEntity.title = 'test';
     fieldEntity.params = {};
 
-    const sectionEntity = new Section();
-    sectionEntity.id = uuid();
-    sectionEntity.model_id = uuid();
-    sectionEntity.type = SectionType.PARAMS;
-    sectionEntity.fields = [fieldEntity];
-
     const advertEntity = new Advert();
     advertEntity.id = '1234';
-    advertEntity.sections = [sectionEntity, sectionEntity];
     advertEntity.userId = '123';
 
     const advertRepositoryMock = createRepositoryMock<Advert>([advertEntity]);
-    const sectionRepositoryMock = createRepositoryMock<Section>([sectionEntity]);
     const fieldRepositoryMock = createRepositoryMock<Field>([fieldEntity]);
     const connectionMock = {
         manager: createRepositoryMock(),
@@ -57,8 +47,6 @@ describe('Text field', () => {
         const moduleRef = await declareCommonProviders(moduleBuilder)
             .overrideProvider(getRepositoryToken(Advert))
             .useValue(advertRepositoryMock)
-            .overrideProvider(getRepositoryToken(Section))
-            .useValue(sectionRepositoryMock)
             .overrideProvider(getRepositoryToken(Field))
             .useValue(fieldRepositoryMock)
             .overrideProvider(getRepositoryToken(User))
@@ -84,7 +72,8 @@ describe('Text field', () => {
                 return request(app.getHttpServer())
                     .post('/fields')
                     .send({
-                        section_id: uuid(),
+                        modelId: uuid(),
+                        section: SectionType.PARAMS,
                         title: 'some title',
                         type: FieldType.TEXT,
                         params: { value: 'some string' } as TextParamsDto,
@@ -102,7 +91,8 @@ describe('Text field', () => {
                 return request(app.getHttpServer())
                     .post('/fields')
                     .send({
-                        section_id: uuid(),
+                        modelId: uuid(),
+                        section: SectionType.PARAMS,
                         title: 'some title',
                         type: FieldType.TEXT,
                         params: { value: '' } as TextParamsDto,

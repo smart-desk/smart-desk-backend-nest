@@ -9,7 +9,6 @@ import { createRepositoryMock, createTestAppForModule, declareCommonProviders } 
 import { Advert } from '../../adverts/entities/advert.entity';
 import { AdvertsModule } from '../../adverts/adverts.module';
 import { Field } from '../../fields/field.entity';
-import { Section, SectionType } from '../../sections/section.entity';
 import { CreateAdvertDto } from '../../adverts/dto/create-advert.dto';
 import { FieldType } from '../dynamic-fields.module';
 import { JwtAuthGuard } from '../../../guards/jwt-auth.guard';
@@ -18,7 +17,7 @@ import { roles, RolesEnum } from '../../app/app.roles';
 import { UsersModule } from '../../users/users.module';
 import { User } from '../../users/entities/user.entity';
 import { UpdateAdvertDto } from '../../adverts/dto/update-advert.dto';
-import { FieldCreateDto, FieldUpdateDto } from '../../fields/dto/field.dto';
+import { FieldCreateDto, FieldUpdateDto, SectionType } from '../../fields/dto/field.dto';
 import { CreateInputTextDto } from './dto/create-input-text.dto';
 import { UpdateInputTextDto } from './dto/update-input-text.dto';
 import { InputTextParamsDto } from './dto/input-text-params.dto';
@@ -29,23 +28,14 @@ describe('Input text field', () => {
     const fieldEntity = new Field();
     fieldEntity.type = FieldType.INPUT_TEXT;
     fieldEntity.id = uuid();
-    fieldEntity.section_id = uuid();
     fieldEntity.title = 'test';
     fieldEntity.params = {};
 
-    const sectionEntity = new Section();
-    sectionEntity.id = uuid();
-    sectionEntity.model_id = uuid();
-    sectionEntity.type = SectionType.PARAMS;
-    sectionEntity.fields = [fieldEntity];
-
     const advertEntity = new Advert();
     advertEntity.id = '1234';
-    advertEntity.sections = [sectionEntity, sectionEntity];
     advertEntity.userId = '123';
 
     const advertRepositoryMock = createRepositoryMock<Advert>([advertEntity]);
-    const sectionRepositoryMock = createRepositoryMock<Section>([sectionEntity]);
     const fieldRepositoryMock = createRepositoryMock<Field>([fieldEntity]);
     const connectionMock = {
         manager: createRepositoryMock(),
@@ -61,8 +51,6 @@ describe('Input text field', () => {
         const moduleRef = await declareCommonProviders(moduleBuilder)
             .overrideProvider(getRepositoryToken(Advert))
             .useValue(advertRepositoryMock)
-            .overrideProvider(getRepositoryToken(Section))
-            .useValue(sectionRepositoryMock)
             .overrideProvider(getRepositoryToken(Field))
             .useValue(fieldRepositoryMock)
             .overrideProvider(getRepositoryToken(User))
@@ -272,7 +260,8 @@ describe('Input text field', () => {
                 return request(app.getHttpServer())
                     .post('/fields')
                     .send({
-                        section_id: uuid(),
+                        modelId: uuid(),
+                        section: SectionType.PARAMS,
                         title: 'some title',
                         type: FieldType.INPUT_TEXT,
                         params: {

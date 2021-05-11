@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { Section } from '../../sections/section.entity';
 import { PreferContact } from '../models/prefer-contact.enum';
+import { Field } from '../../fields/field.entity';
 
 @Entity('adverts')
 export class Advert {
@@ -34,5 +34,5 @@ export class Advert {
     @UpdateDateColumn({ name: 'updated_at', type: 'timestamp with time zone' })
     updatedAt: Date;
 
-    sections: Section[];
+    fields: Field[];
 }

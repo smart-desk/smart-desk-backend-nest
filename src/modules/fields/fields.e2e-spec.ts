@@ -7,9 +7,7 @@ import { AccessControlModule, ACGuard } from 'nest-access-control';
 import { createRepositoryMock, createTestAppForModule, declareCommonProviders } from '../../../test/test.utils';
 import { FieldsModule } from './fields.module';
 import { Field } from './field.entity';
-import { FieldCreateDto, FieldUpdateDto } from './dto/field.dto';
-import { SectionsModule } from '../sections/sections.module';
-import { Section } from '../sections/section.entity';
+import { FieldCreateDto, FieldUpdateDto, SectionType } from './dto/field.dto';
 import { InputTextParamsDto } from '../dynamic-fields/input-text/dto/input-text-params.dto';
 import { FieldType } from '../dynamic-fields/dynamic-fields.module';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
@@ -22,22 +20,17 @@ describe('Fields controller', () => {
     const field = new Field();
     field.type = FieldType.INPUT_TEXT;
     field.id = uuid();
-    field.section_id = uuid();
-    const section = new Section();
 
     const fieldsRepositoryMock = createRepositoryMock<Field>([field]);
-    const sectionRepositoryMock = createRepositoryMock<Section>([section]);
 
     beforeAll(async () => {
         let moduleBuilder = Test.createTestingModule({
-            imports: [FieldsModule, SectionsModule],
+            imports: [FieldsModule],
         });
 
         const moduleRef = await declareCommonProviders(moduleBuilder)
             .overrideProvider(getRepositoryToken(Field))
             .useValue(fieldsRepositoryMock)
-            .overrideProvider(getRepositoryToken(Section))
-            .useValue(sectionRepositoryMock)
             .overrideGuard(JwtAuthGuard)
             .useValue(JwtAuthGuardMock)
             .overrideGuard(ACGuard)
@@ -52,7 +45,8 @@ describe('Fields controller', () => {
             return request(app.getHttpServer())
                 .post('/fields')
                 .send({
-                    section_id: uuid(),
+                    modelId: uuid(),
+                    section: SectionType.PARAMS,
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
                     order: 1,
@@ -66,7 +60,6 @@ describe('Fields controller', () => {
             return request(app.getHttpServer())
                 .post('/fields')
                 .send({
-                    section_id: uuid(),
                     title: 'some title',
                     type: 'wrong type' as FieldType,
                     params: { label: 'some label' } as InputTextParamsDto,
@@ -77,42 +70,10 @@ describe('Fields controller', () => {
                 });
         });
 
-        it(`with error - not correct section_id`, () => {
-            return request(app.getHttpServer())
-                .post('/fields')
-                .send({
-                    section_id: 'not id',
-                    title: 'some title',
-                    type: FieldType.INPUT_TEXT,
-                    params: { label: 'some label' } as InputTextParamsDto,
-                } as FieldCreateDto)
-                .expect(HttpStatus.BAD_REQUEST)
-                .expect(res => {
-                    expect(res.body.message).toContain('section_id must be an UUID');
-                });
-        });
-
-        it(`with error - section_id not found`, () => {
-            sectionRepositoryMock.findOne.mockReturnValueOnce(undefined);
-            return request(app.getHttpServer())
-                .post('/fields')
-                .send({
-                    section_id: uuid(),
-                    title: 'some title',
-                    type: FieldType.INPUT_TEXT,
-                    params: { label: 'some label' } as InputTextParamsDto,
-                } as FieldCreateDto)
-                .expect(HttpStatus.NOT_FOUND)
-                .expect(res => {
-                    expect(res.body.message).toContain('Section not found');
-                });
-        });
-
         it(`with error - order is not valid`, () => {
             return request(app.getHttpServer())
                 .post('/fields')
                 .send({
-                    section_id: uuid(),
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
                     order: 'test' as any,
@@ -122,7 +83,11 @@ describe('Fields controller', () => {
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('order must be an integer number');
-                    expect(res.body.message).toContain('required must be a boolean value');
+                    expect(res.body.message).toContain('order must be an integer number');
+                    expect(res.body.message).toContain('modelId must be an UUID');
+                    expect(res.body.message).toContain('modelId should not be empty');
+                    expect(res.body.message).toContain('section must be a valid enum value');
+                    expect(res.body.message).toContain('section should not be empty');
                 });
         });
     });
@@ -192,21 +157,17 @@ describe('Fields controller with ACL enabled', () => {
     const field = new Field();
     field.type = FieldType.INPUT_TEXT;
     field.id = uuid();
-    field.section_id = uuid();
 
-    const section = new Section();
     const JwtGuard = JwtAuthGuardMock;
 
     beforeAll(async () => {
         let moduleBuilder = Test.createTestingModule({
-            imports: [FieldsModule, SectionsModule, AccessControlModule.forRoles(roles)],
+            imports: [FieldsModule, AccessControlModule.forRoles(roles)],
         });
 
         const moduleRef = await declareCommonProviders(moduleBuilder)
             .overrideProvider(getRepositoryToken(Field))
             .useValue(createRepositoryMock([field]))
-            .overrideProvider(getRepositoryToken(Section))
-            .useValue(createRepositoryMock([section]))
             .overrideGuard(JwtAuthGuard)
             .useValue(JwtGuard)
             .compile();
@@ -225,7 +186,8 @@ describe('Fields controller with ACL enabled', () => {
             return request(app.getHttpServer())
                 .post('/fields')
                 .send({
-                    section_id: uuid(),
+                    modelId: uuid(),
+                    section: SectionType.PARAMS,
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
                     params: { label: 'some label' } as InputTextParamsDto,
@@ -238,7 +200,6 @@ describe('Fields controller with ACL enabled', () => {
             return request(app.getHttpServer())
                 .post('/fields')
                 .send({
-                    section_id: uuid(),
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
                     params: { label: 'some label' } as InputTextParamsDto,
@@ -250,7 +211,6 @@ describe('Fields controller with ACL enabled', () => {
             return request(app.getHttpServer())
                 .post('/fields')
                 .send({
-                    section_id: uuid(),
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
                     params: { label: 'some label' } as InputTextParamsDto,
