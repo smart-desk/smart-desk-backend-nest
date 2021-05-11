@@ -17,11 +17,10 @@ import { roles, RolesEnum } from '../../app/app.roles';
 import { UsersModule } from '../../users/users.module';
 import { User } from '../../users/entities/user.entity';
 import { UpdateAdvertDto } from '../../adverts/dto/update-advert.dto';
-import { FieldCreateDto, FieldUpdateDto } from '../../fields/dto/field.dto';
+import { FieldCreateDto, FieldUpdateDto, SectionType } from '../../fields/dto/field.dto';
 import { CreateDatepickerDto } from './dto/create-datepicker.dto';
 import { UpdateDatepickerDto } from './dto/update-datepicker.dto';
 import { DatepickerParamsDto } from './dto/datepicker-params.dto';
-import { IsBoolean, IsDate, IsNotEmpty, IsOptional } from 'class-validator';
 
 describe('Datepicker field', () => {
     let app: INestApplication;
@@ -150,6 +149,8 @@ describe('Datepicker field', () => {
                 return request(app.getHttpServer())
                     .post('/fields')
                     .send({
+                        modelId: uuid(),
+                        section: SectionType.PARAMS,
                         title: 'some title',
                         type: FieldType.DATEPICKER,
                         params: { range: true } as DatepickerParamsDto,

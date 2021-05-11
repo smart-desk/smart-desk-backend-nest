@@ -15,7 +15,7 @@ import { JwtAuthGuardMock } from '../../../../test/mocks/jwt-auth.guard.mock';
 import { roles, RolesEnum } from '../../app/app.roles';
 import { UsersModule } from '../../users/users.module';
 import { User } from '../../users/entities/user.entity';
-import { FieldCreateDto, FieldUpdateDto } from '../../fields/dto/field.dto';
+import { FieldCreateDto, FieldUpdateDto, SectionType } from '../../fields/dto/field.dto';
 import { TextParamsDto } from './dto/text-params.dto';
 
 describe('Text field', () => {
@@ -72,6 +72,8 @@ describe('Text field', () => {
                 return request(app.getHttpServer())
                     .post('/fields')
                     .send({
+                        modelId: uuid(),
+                        section: SectionType.PARAMS,
                         title: 'some title',
                         type: FieldType.TEXT,
                         params: { value: 'some string' } as TextParamsDto,
@@ -89,6 +91,8 @@ describe('Text field', () => {
                 return request(app.getHttpServer())
                     .post('/fields')
                     .send({
+                        modelId: uuid(),
+                        section: SectionType.PARAMS,
                         title: 'some title',
                         type: FieldType.TEXT,
                         params: { value: '' } as TextParamsDto,

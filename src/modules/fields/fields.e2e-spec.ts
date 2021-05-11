@@ -7,7 +7,7 @@ import { AccessControlModule, ACGuard } from 'nest-access-control';
 import { createRepositoryMock, createTestAppForModule, declareCommonProviders } from '../../../test/test.utils';
 import { FieldsModule } from './fields.module';
 import { Field } from './field.entity';
-import { FieldCreateDto, FieldUpdateDto } from './dto/field.dto';
+import { FieldCreateDto, FieldUpdateDto, SectionType } from './dto/field.dto';
 import { InputTextParamsDto } from '../dynamic-fields/input-text/dto/input-text-params.dto';
 import { FieldType } from '../dynamic-fields/dynamic-fields.module';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
@@ -45,6 +45,8 @@ describe('Fields controller', () => {
             return request(app.getHttpServer())
                 .post('/fields')
                 .send({
+                    modelId: uuid(),
+                    section: SectionType.PARAMS,
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
                     order: 1,
@@ -81,7 +83,11 @@ describe('Fields controller', () => {
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('order must be an integer number');
-                    expect(res.body.message).toContain('required must be a boolean value');
+                    expect(res.body.message).toContain('order must be an integer number');
+                    expect(res.body.message).toContain('modelId must be an UUID');
+                    expect(res.body.message).toContain('modelId should not be empty');
+                    expect(res.body.message).toContain('section must be a valid enum value');
+                    expect(res.body.message).toContain('section should not be empty');
                 });
         });
     });
@@ -180,6 +186,8 @@ describe('Fields controller with ACL enabled', () => {
             return request(app.getHttpServer())
                 .post('/fields')
                 .send({
+                    modelId: uuid(),
+                    section: SectionType.PARAMS,
                     title: 'some title',
                     type: FieldType.INPUT_TEXT,
                     params: { label: 'some label' } as InputTextParamsDto,

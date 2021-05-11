@@ -17,7 +17,7 @@ import { roles, RolesEnum } from '../../app/app.roles';
 import { UsersModule } from '../../users/users.module';
 import { User } from '../../users/entities/user.entity';
 import { UpdateAdvertDto } from '../../adverts/dto/update-advert.dto';
-import { FieldCreateDto, FieldUpdateDto } from '../../fields/dto/field.dto';
+import { FieldCreateDto, FieldUpdateDto, SectionType } from '../../fields/dto/field.dto';
 import { CreatePriceDto } from './dto/create-price.dto';
 import { UpdatePriceDto } from './dto/update-price.dto';
 import { PriceParamsDto } from './dto/price-params.dto';
@@ -239,6 +239,8 @@ describe('Price field', () => {
                 return request(app.getHttpServer())
                     .post('/fields')
                     .send({
+                        modelId: uuid(),
+                        section: SectionType.PRICE,
                         title: 'some title',
                         type: FieldType.PRICE,
                         params: {
@@ -258,6 +260,8 @@ describe('Price field', () => {
                 return request(app.getHttpServer())
                     .post('/fields')
                     .send({
+                        modelId: uuid(),
+                        section: SectionType.PRICE,
                         title: 'some title',
                         type: FieldType.PRICE,
                         params: {

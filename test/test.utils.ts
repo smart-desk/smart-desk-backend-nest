@@ -13,6 +13,7 @@ import { Advert } from '../src/modules/adverts/entities/advert.entity';
 import { Field } from '../src/modules/fields/field.entity';
 import { User } from '../src/modules/users/entities/user.entity';
 import { DatepickerEntity } from '../src/modules/dynamic-fields/datepicker/datepicker.entity';
+import { Model } from '../dist/modules/models/model.entity';
 
 export async function createTestAppForModule(moduleRef: TestingModule) {
     const app = moduleRef.createNestApplication();
@@ -66,6 +67,8 @@ export function declareCommonProviders(moduleRef: TestingModuleBuilder): Testing
         .overrideProvider(getRepositoryToken(Advert))
         .useValue(createRepositoryMock())
         .overrideProvider(getRepositoryToken(Field))
+        .useValue(createRepositoryMock())
+        .overrideProvider(getRepositoryToken(Model))
         .useValue(createRepositoryMock())
         .overrideProvider(getRepositoryToken(InputTextEntity))
         .useValue(createRepositoryMock())

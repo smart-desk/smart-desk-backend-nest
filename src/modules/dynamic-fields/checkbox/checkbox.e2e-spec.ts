@@ -17,7 +17,7 @@ import { roles, RolesEnum } from '../../app/app.roles';
 import { UsersModule } from '../../users/users.module';
 import { User } from '../../users/entities/user.entity';
 import { UpdateAdvertDto } from '../../adverts/dto/update-advert.dto';
-import { FieldCreateDto, FieldUpdateDto } from '../../fields/dto/field.dto';
+import { FieldCreateDto, FieldUpdateDto, SectionType } from '../../fields/dto/field.dto';
 import { CreateCheckboxDto } from './dto/create-checkbox.dto';
 import { UpdateCheckboxDto } from './dto/update-checkbox.dto';
 import { CheckboxParamsDto } from './dto/checkbox-params.dto';
@@ -200,6 +200,8 @@ describe('Checkbox field', () => {
                 return request(app.getHttpServer())
                     .post('/fields')
                     .send({
+                        modelId: uuid(),
+                        section: SectionType.PARAMS,
                         title: 'some title',
                         type: FieldType.CHECKBOX,
                         params: {
@@ -224,6 +226,8 @@ describe('Checkbox field', () => {
                 return request(app.getHttpServer())
                     .post('/fields')
                     .send({
+                        modelId: uuid(),
+                        section: SectionType.PARAMS,
                         title: 'some title',
                         type: FieldType.CHECKBOX,
                         params: {

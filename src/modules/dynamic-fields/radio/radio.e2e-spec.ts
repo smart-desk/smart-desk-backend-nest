@@ -17,7 +17,7 @@ import { roles, RolesEnum } from '../../app/app.roles';
 import { UsersModule } from '../../users/users.module';
 import { User } from '../../users/entities/user.entity';
 import { UpdateAdvertDto } from '../../adverts/dto/update-advert.dto';
-import { FieldCreateDto, FieldUpdateDto } from '../../fields/dto/field.dto';
+import { FieldCreateDto, FieldUpdateDto, SectionType } from '../../fields/dto/field.dto';
 import { CreateRadioDto } from './dto/create-radio.dto';
 import { UpdateRadioDto } from './dto/update-radio.dto';
 import { RadioParamsDto } from './dto/radio-params.dto';
@@ -262,6 +262,8 @@ describe('Radio field', () => {
                 return request(app.getHttpServer())
                     .post('/fields')
                     .send({
+                        modelId: uuid(),
+                        section: SectionType.PARAMS,
                         title: 'some title',
                         type: FieldType.RADIO,
                         params: {
@@ -290,6 +292,8 @@ describe('Radio field', () => {
                 return request(app.getHttpServer())
                     .post('/fields')
                     .send({
+                        modelId: uuid(),
+                        section: SectionType.PARAMS,
                         title: 'some title',
                         type: FieldType.RADIO,
                         params: {

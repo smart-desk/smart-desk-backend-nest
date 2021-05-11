@@ -19,7 +19,7 @@ import { User } from '../../users/entities/user.entity';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateAdvertDto } from '../../adverts/dto/update-advert.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
-import { FieldCreateDto, FieldUpdateDto } from '../../fields/dto/field.dto';
+import { FieldCreateDto, FieldUpdateDto, SectionType } from '../../fields/dto/field.dto';
 import { LocationParamsDto } from './dto/location-params.dto';
 
 describe('Location field', () => {
@@ -166,6 +166,8 @@ describe('Location field', () => {
                 return request(app.getHttpServer())
                     .post('/fields')
                     .send({
+                        modelId: uuid(),
+                        section: SectionType.LOCATION,
                         title: 'some title',
                         type: FieldType.LOCATION,
                         params: {} as LocationParamsDto,

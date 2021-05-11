@@ -17,7 +17,7 @@ import { roles, RolesEnum } from '../../app/app.roles';
 import { UsersModule } from '../../users/users.module';
 import { User } from '../../users/entities/user.entity';
 import { UpdateAdvertDto } from '../../adverts/dto/update-advert.dto';
-import { FieldCreateDto, FieldUpdateDto } from '../../fields/dto/field.dto';
+import { FieldCreateDto, FieldUpdateDto, SectionType } from '../../fields/dto/field.dto';
 import { CreateTextareaDto } from './dto/create-textarea.dto';
 import { UpdateTextareaDto } from './dto/update-textarea.dto';
 import { TextareaParamsDto } from './dto/textarea-params.dto';
@@ -263,6 +263,8 @@ describe('Textarea field', () => {
                 return request(app.getHttpServer())
                     .post('/fields')
                     .send({
+                        modelId: uuid(),
+                        section: SectionType.PARAMS,
                         title: 'some title',
                         type: FieldType.TEXTAREA,
                         params: {
@@ -290,6 +292,8 @@ describe('Textarea field', () => {
                 return request(app.getHttpServer())
                     .put(`/fields/${uuid()}`)
                     .send({
+                        modelId: uuid(),
+                        section: SectionType.PARAMS,
                         title: 'some title',
                         type: FieldType.TEXTAREA,
                         params: {
