@@ -8,4 +8,8 @@ export class DatepickerFilterDto {
     @IsDate()
     @IsOptional()
     to: Date;
+
+    @IsDate()
+    @IsOptional()
+    range: boolean = false;
 }
