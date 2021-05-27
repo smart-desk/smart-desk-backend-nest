@@ -28,6 +28,10 @@ export class UsersService {
         return this.userRepository.createQueryBuilder('user').where('user.email = :email', { email }).getOne();
     }
 
+    async findByVkId(id: string): Promise<User> {
+        return this.userRepository.createQueryBuilder('user').where('user.vk_id = :id', { id }).getOne();
+    }
+
     async updateUserRoles(id: string, roles: RolesEnum[]): Promise<User> {
         const user = await this.findOneOrThrowException(id);
         user.roles = roles;
