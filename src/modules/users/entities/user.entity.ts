@@ -22,11 +22,14 @@ export class User {
     email: string;
 
     @Column('varchar', { length: 255, array: true })
-    roles: string[]; // todo hide for public
+    roles: string[];
 
     @Column('varchar', { length: 255 })
     phone: string;
 
     @Column('boolean', { name: 'is_phone_verified' })
     isPhoneVerified: boolean;
+
+    @Column('varchar', { length: 100, name: 'vk_id' })
+    vkId: string;
 }
