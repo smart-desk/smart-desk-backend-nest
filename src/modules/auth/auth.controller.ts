@@ -1,19 +1,31 @@
-import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, HttpService, Post, Query } from '@nestjs/common';
 import { OAuth2Client } from 'google-auth-library';
 import { VK } from 'vk-io';
 import { JwtService } from '@nestjs/jwt';
-import { UsersService } from '../users/users.service';
+import { UsersUserFull } from 'vk-io/lib/api/schemas/objects';
 import { ApiTags } from '@nestjs/swagger';
+import { AxiosResponse } from 'axios';
+import * as dotenv from 'dotenv';
+import { catchError, take } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { UsersService } from '../users/users.service';
 import { RolesEnum } from '../app/app.roles';
 import { UserStatus } from '../users/user-status.enum';
 import { JWTPayload } from './jwt.strategy';
-import { UsersUserFull } from 'vk-io/lib/api/schemas/objects';
+
+dotenv.config();
+
+interface VkAccessTokenResponse {
+    access_token: string;
+    expires_in: number;
+    user_id: number;
+}
 
 @Controller('auth')
 @ApiTags('Auth')
 export class AuthController {
     private vk: VK;
-    constructor(private userService: UsersService, private jwtService: JwtService) {
+    constructor(private userService: UsersService, private jwtService: JwtService, private httpService: HttpService) {
         this.vk = new VK({
             token: process.env.VK_API_TOKEN,
         });
@@ -51,12 +63,30 @@ export class AuthController {
         };
     }
 
-    @Post('vk/login')
-    async vkLogin(@Body('token') token: string) {
+    @Get('vk/login')
+    async vkLogin(@Query('code') code: string, @Query('host') host: string) {
+        const accessTokenResponse = await this.httpService
+            .get<VkAccessTokenResponse>(
+                `https://oauth.vk.com/access_token?client_id=${process.env.VK_APP_ID}&client_secret=${process.env.VK_APP_SECRET}&code=${code}&redirect_uri=${host}`
+            )
+            .pipe(
+                take(1),
+                catchError(err => {
+                    console.log(err?.data);
+                    return of(null);
+                })
+            )
+            .toPromise<AxiosResponse<VkAccessTokenResponse>>();
+
+        if (!accessTokenResponse) {
+            return new BadRequestException('Invalid VK user');
+        }
+
         let vkUser: UsersUserFull;
         const vkUsers = await this.vk.api.users.get({
             fields: ['photo_200_orig'],
-            access_token: token,
+            user_ids: [accessTokenResponse.data.user_id.toString()],
+            access_token: accessTokenResponse.data.access_token,
         });
 
         if (vkUsers.length) {
