@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { HttpModule, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthController } from './auth.controller';
@@ -10,6 +10,7 @@ dotenv.config();
 
 @Module({
     imports: [
+        HttpModule,
         UsersModule,
         PassportModule,
         JwtModule.register({
