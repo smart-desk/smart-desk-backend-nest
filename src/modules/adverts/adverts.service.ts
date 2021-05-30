@@ -11,8 +11,8 @@ import { FieldType } from '../dynamic-fields/dynamic-fields.module';
 import { CreateAdvertDto } from './dto/create-advert.dto';
 import { UpdateAdvertDto } from './dto/update-advert.dto';
 import { AdvertStatus } from './models/advert-status.enum';
-import { SortingType } from './models/sorting';
 import { MailService } from '../mail/mail.service';
+import { SortingType } from './models/sorting';
 
 interface FieldDataDtoInstance {
     type: FieldType;
@@ -166,8 +166,12 @@ export class AdvertsService {
         advert.status = AdvertStatus.BLOCKED;
         const updatedAdvert = await this.advertRepository.preload({ id, ...advert });
         const resultBlockedAdvert = await this.advertRepository.save(updatedAdvert);
-        // todo get the email of user
-        this.mailService.sendMessage('<email>', advert.title + ' is blocked', 'Please check yout advert');
+        // todo send prepared html templates
+        await this.mailService.sendMessageToUser(
+            advert.userId,
+            `Объявление "${advert.title}" было заблокировано администратором`,
+            `Ваше объявление было заблокировано, пройдите по <a href="${process.env.HOST}/adverts/${advert.id}/edit">ссылке</a> чтобы исправить.<br />Ваша команда Smart Desk`
+        );
         return resultBlockedAdvert;
     }
 
@@ -175,7 +179,14 @@ export class AdvertsService {
         const advert = await this.findOneOrThrowException(id);
         advert.status = AdvertStatus.ACTIVE;
         const updatedAdvert = await this.advertRepository.preload({ id, ...advert });
-        return await this.advertRepository.save(updatedAdvert);
+        const resultPublishedAdvert = await this.advertRepository.save(updatedAdvert);
+        // todo send prepared html templates
+        await this.mailService.sendMessageToUser(
+            advert.userId,
+            `Объявление "${advert.title}" было опубликовано`,
+            `Ваше объявление было опубликовано, пройдите по <a href="${process.env.HOST}/adverts/${advert.id}">ссылке</a> чтобы посмотреть.<br />Ваша команда Smart Desk`
+        );
+        return resultPublishedAdvert;
     }
 
     async complete(id: string): Promise<Advert> {
