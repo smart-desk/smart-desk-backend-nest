@@ -22,6 +22,8 @@ import { UserStatus } from '../users/models/user-status.enum';
 import { BlockedUserGuard } from '../../guards/blocked-user.guard';
 import { BlockedUserGuardMock } from '../../../test/mocks/blocked-user.guard.mock';
 import { PreferContact } from './models/prefer-contact.enum';
+import { MailService } from '../mail/mail.service';
+import { MailServiceMock } from '../../../test/mocks/mail.service.mock';
 
 describe('Adverts controller', () => {
     let app: INestApplication;
@@ -60,6 +62,8 @@ describe('Adverts controller', () => {
             .useValue(AcGuardMock)
             .overrideGuard(BlockedUserGuard)
             .useValue(BlockedUserGuardMock)
+            .overrideProvider(MailService)
+            .useValue(MailServiceMock)
             .compile();
 
         app = await createTestAppForModule(moduleRef);
