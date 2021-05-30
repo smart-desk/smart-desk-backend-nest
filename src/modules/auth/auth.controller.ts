@@ -10,8 +10,9 @@ import { catchError, take } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { UsersService } from '../users/users.service';
 import { RolesEnum } from '../app/app.roles';
-import { UserStatus } from '../users/user-status.enum';
+import { UserStatus } from '../users/models/user-status.enum';
 import { JWTPayload } from './jwt.strategy';
+import { NotificationTypes } from '../users/models/notification-types.enum';
 
 dotenv.config();
 
@@ -54,6 +55,7 @@ export class AuthController {
                 avatar: payload.picture,
                 roles: [RolesEnum.USER],
                 status: UserStatus.ACTIVE,
+                emailNotifications: Object.values(NotificationTypes) as NotificationTypes[],
             });
         }
 
@@ -104,6 +106,7 @@ export class AuthController {
                 roles: [RolesEnum.USER],
                 status: UserStatus.ACTIVE,
                 vkId: vkUser.id.toString(),
+                emailNotifications: Object.values(NotificationTypes) as NotificationTypes[],
             });
         }
 

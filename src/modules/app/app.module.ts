@@ -16,6 +16,7 @@ import { roles } from './app.roles';
 import { BookmarksModule } from '../bookmarks/bookmarks.module';
 import { PhoneModule } from '../phone/phone.module';
 import { ChatModule } from '../chat/chat.module';
+import { MailModule } from '../mail/mail.module';
 
 const app = [
     AuthModule,
@@ -29,6 +30,7 @@ const app = [
     BookmarksModule,
     PhoneModule,
     ChatModule,
+    MailModule,
 ];
 
 @Module({

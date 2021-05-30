@@ -1,5 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { UserStatus } from '../user-status.enum';
+import { UserStatus } from '../models/user-status.enum';
+import { NotificationTypes } from '../models/notification-types.enum';
 
 @Entity('users')
 export class User {
@@ -32,4 +33,7 @@ export class User {
 
     @Column('varchar', { length: 100, name: 'vk_id' })
     vkId: string;
+
+    @Column('varchar', { length: 100, name: 'email_notifications', array: true })
+    emailNotifications: NotificationTypes[];
 }

@@ -17,7 +17,7 @@ import { AdvertsModule } from '../adverts/adverts.module';
 import { Connection } from 'typeorm';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { User } from '../users/entities/user.entity';
-import { UserStatus } from '../users/user-status.enum';
+import { UserStatus } from '../users/models/user-status.enum';
 
 describe('Bookmarks controller', () => {
     let app: INestApplication;

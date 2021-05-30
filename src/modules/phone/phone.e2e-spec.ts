@@ -1,4 +1,4 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
+import { forwardRef, HttpStatus, INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as request from 'supertest';
@@ -25,7 +25,7 @@ describe('Phone controller', () => {
 
     beforeAll(async () => {
         let moduleBuilder = await Test.createTestingModule({
-            imports: [PhoneModule],
+            imports: [forwardRef(() => PhoneModule)],
         });
 
         const moduleRef = await declareCommonProviders(moduleBuilder)

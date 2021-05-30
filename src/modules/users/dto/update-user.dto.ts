@@ -1,6 +1,7 @@
-import { IsOptional, IsPhoneNumber, IsString, IsUrl, MaxLength, MinLength } from 'class-validator';
+import { IsArray, IsEnum, IsOptional, IsPhoneNumber, IsString, IsUrl, MaxLength, MinLength } from 'class-validator';
 import { ApiHideProperty } from '@nestjs/swagger';
 import { IsImageUrl } from '../../../utils/validation';
+import { NotificationTypes } from '../models/notification-types.enum';
 
 export class UpdateUserDto {
     @IsOptional()
@@ -29,4 +30,9 @@ export class UpdateUserDto {
 
     @ApiHideProperty()
     isPhoneVerified: boolean;
+
+    @IsOptional()
+    @IsArray()
+    @IsEnum(NotificationTypes, { each: true })
+    emailNotifications?: NotificationTypes[];
 }
