@@ -13,7 +13,7 @@ import { JwtAuthGuardMock } from '../../../test/mocks/jwt-auth.guard.mock';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateUserRolesDto } from './dto/update-user-roles.dto';
 import { BlockUserDto } from './dto/block-user.dto';
-import { UserStatus } from './user-status.enum';
+import { UserStatus } from './models/user-status.enum';
 import { Advert } from '../adverts/entities/advert.entity';
 import { PreferContact } from '../adverts/models/prefer-contact.enum';
 
@@ -94,7 +94,6 @@ describe('Users controller', () => {
                     expect(res.body.lastName).toBeUndefined();
                     expect(res.body.email).toBeUndefined();
                     expect(res.body.phone).toBeUndefined();
-
                 });
         });
     });

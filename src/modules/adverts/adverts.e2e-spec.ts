@@ -18,7 +18,7 @@ import { AcGuardMock } from '../../../test/mocks/ac.guard.mock';
 import { roles } from '../app/app.roles';
 import { UsersModule } from '../users/users.module';
 import { User } from '../users/entities/user.entity';
-import { UserStatus } from '../users/user-status.enum';
+import { UserStatus } from '../users/models/user-status.enum';
 import { BlockedUserGuard } from '../../guards/blocked-user.guard';
 import { BlockedUserGuardMock } from '../../../test/mocks/blocked-user.guard.mock';
 import { PreferContact } from './models/prefer-contact.enum';
@@ -152,9 +152,7 @@ describe('Adverts controller', () => {
         });
 
         it(`successfully with sorting`, () => {
-            return request(app.getHttpServer())
-                .get(`/adverts?sorting[${uuid()}]=ASC`)
-                .expect(HttpStatus.OK);
+            return request(app.getHttpServer()).get(`/adverts?sorting[${uuid()}]=ASC`).expect(HttpStatus.OK);
         });
 
         it(`with error - invalid sorting format`, () => {
@@ -275,9 +273,7 @@ describe('Adverts controller', () => {
         });
 
         it(`successfully with sorting`, () => {
-            return request(app.getHttpServer())
-                .get(`/adverts/category/${uuid()}?sorting[${uuid()}]=ASC`)
-                .expect(HttpStatus.OK);
+            return request(app.getHttpServer()).get(`/adverts/category/${uuid()}?sorting[${uuid()}]=ASC`).expect(HttpStatus.OK);
         });
 
         it(`with error - invalid sorting format`, () => {

@@ -5,7 +5,7 @@ import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RolesEnum } from '../app/app.roles';
-import { UserStatus } from './user-status.enum';
+import { UserStatus } from './models/user-status.enum';
 
 @Injectable()
 export class UsersService {
