@@ -12,6 +12,7 @@ import { CreateAdvertDto } from './dto/create-advert.dto';
 import { UpdateAdvertDto } from './dto/update-advert.dto';
 import { AdvertStatus } from './models/advert-status.enum';
 import { SortingType } from './models/sorting';
+import { MailService } from '../mail/mail.service';
 
 interface FieldDataDtoInstance {
     type: FieldType;
@@ -23,7 +24,8 @@ export class AdvertsService {
     constructor(
         @InjectRepository(Advert) private advertRepository: Repository<Advert>,
         private fieldsService: FieldsService,
-        private dynamicFieldsService: DynamicFieldsService
+        private dynamicFieldsService: DynamicFieldsService,
+        private mailService: MailService
     ) {}
 
     async getAll(options: GetAdvertsDto): Promise<GetAdvertsResponseDto> {
@@ -80,7 +82,7 @@ export class AdvertsService {
         }
 
         const a = new Advert();
-        a.status = AdvertStatus.PENDING
+        a.status = AdvertStatus.PENDING;
         a.category_id = advertDto.category_id;
         a.model_id = advertDto.model_id;
         a.title = advertDto.title;
@@ -163,7 +165,10 @@ export class AdvertsService {
         const advert = await this.findOneOrThrowException(id);
         advert.status = AdvertStatus.BLOCKED;
         const updatedAdvert = await this.advertRepository.preload({ id, ...advert });
-        return await this.advertRepository.save(updatedAdvert);
+        const resultBlockedAdvert = await this.advertRepository.save(updatedAdvert);
+        // todo get the email of user
+        this.mailService.sendMessage('<email>', advert.title + ' is blocked', 'Please check yout advert');
+        return resultBlockedAdvert;
     }
 
     async publish(id: string): Promise<Advert> {
