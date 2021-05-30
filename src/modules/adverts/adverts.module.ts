@@ -9,7 +9,13 @@ import { UsersModule } from '../users/users.module';
 import { MailModule } from '../mail/mail.module';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Advert]), FieldsModule, DynamicFieldsModule, forwardRef(() => UsersModule), MailModule],
+    imports: [
+        TypeOrmModule.forFeature([Advert]),
+        FieldsModule,
+        DynamicFieldsModule,
+        forwardRef(() => UsersModule),
+        forwardRef(() => MailModule),
+    ],
     providers: [AdvertsService],
     controllers: [AdvertsController],
     exports: [AdvertsService],

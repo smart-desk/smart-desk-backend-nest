@@ -16,6 +16,7 @@ import { BlockUserDto } from './dto/block-user.dto';
 import { UserStatus } from './models/user-status.enum';
 import { Advert } from '../adverts/entities/advert.entity';
 import { PreferContact } from '../adverts/models/prefer-contact.enum';
+import { NotificationTypes } from './models/notification-types.enum';
 
 describe('Users controller', () => {
     let app: INestApplication;
@@ -107,6 +108,7 @@ describe('Users controller', () => {
                     lastName: 'New last name',
                     avatar: 'http://test.com/image.png',
                     phone: '+4915141111111',
+                    emailNotifications: [NotificationTypes.ADVERT_BLOCKED],
                 } as UpdateUserDto)
                 .expect(HttpStatus.OK);
         });
@@ -133,6 +135,7 @@ describe('Users controller', () => {
                     lastName: '',
                     avatar: '',
                     phone: '',
+                    emailNotifications: [''] as any,
                 } as UpdateUserDto)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
@@ -141,6 +144,7 @@ describe('Users controller', () => {
                     expect(res.body.message).toContain('value must be url to image');
                     expect(res.body.message).toContain('avatar must be an URL address');
                     expect(res.body.message).toContain('phone must be a valid phone number');
+                    expect(res.body.message).toContain('each value in emailNotifications must be a valid enum value');
                 });
         });
 
