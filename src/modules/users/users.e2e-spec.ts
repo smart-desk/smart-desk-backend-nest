@@ -95,6 +95,7 @@ describe('Users controller', () => {
                     expect(res.body.lastName).toBeUndefined();
                     expect(res.body.email).toBeUndefined();
                     expect(res.body.phone).toBeUndefined();
+                    expect(res.body.emailNotifications).toBeUndefined();
                 });
         });
     });

@@ -62,8 +62,6 @@ describe('Adverts controller', () => {
             .useValue(AcGuardMock)
             .overrideGuard(BlockedUserGuard)
             .useValue(BlockedUserGuardMock)
-            .overrideProvider(MailService)
-            .useValue(MailServiceMock)
             .compile();
 
         app = await createTestAppForModule(moduleRef);
