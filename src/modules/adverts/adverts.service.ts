@@ -13,6 +13,7 @@ import { UpdateAdvertDto } from './dto/update-advert.dto';
 import { AdvertStatus } from './models/advert-status.enum';
 import { MailService } from '../mail/mail.service';
 import { SortingType } from './models/sorting';
+import { NotificationTypes } from '../users/models/notification-types.enum';
 
 interface FieldDataDtoInstance {
     type: FieldType;
@@ -170,7 +171,8 @@ export class AdvertsService {
         await this.mailService.sendMessageToUser(
             advert.userId,
             `Объявление "${advert.title}" было заблокировано администратором`,
-            `Ваше объявление было заблокировано, пройдите по <a href="${process.env.HOST}/adverts/${advert.id}/edit">ссылке</a> чтобы исправить.<br />Ваша команда Smart Desk`
+            `Ваше объявление было заблокировано, пройдите по <a href="${process.env.HOST}/adverts/${advert.id}/edit">ссылке</a> чтобы исправить.<br />Ваша команда Smart Desk`,
+            NotificationTypes.ADVERT_BLOCKED
         );
         return resultBlockedAdvert;
     }
@@ -184,7 +186,8 @@ export class AdvertsService {
         await this.mailService.sendMessageToUser(
             advert.userId,
             `Объявление "${advert.title}" было опубликовано`,
-            `Ваше объявление было опубликовано, пройдите по <a href="${process.env.HOST}/adverts/${advert.id}">ссылке</a> чтобы посмотреть.<br />Ваша команда Smart Desk`
+            `Ваше объявление было опубликовано, пройдите по <a href="${process.env.HOST}/adverts/${advert.id}">ссылке</a> чтобы посмотреть.<br />Ваша команда Smart Desk`,
+            NotificationTypes.ADVERT_PUBLISHED
         );
         return resultPublishedAdvert;
     }
