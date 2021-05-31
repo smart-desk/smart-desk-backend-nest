@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -6,10 +6,16 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RolesEnum } from '../app/app.roles';
 import { UserStatus } from './models/user-status.enum';
+import { NotificationTypes } from './models/notification-types.enum';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class UsersService {
-    constructor(@InjectRepository(User) private userRepository: Repository<User>) {}
+    constructor(
+        @InjectRepository(User) private userRepository: Repository<User>,
+        @Inject(forwardRef(() => MailService))
+        private mailService: MailService
+    ) {}
 
     async createUser(user: CreateUserDto): Promise<User> {
         const userEntity = this.userRepository.create(user);
@@ -67,7 +73,24 @@ export class UsersService {
         }
 
         const updatedUser = await this.userRepository.preload({ id, ...user });
-        return await this.userRepository.save(updatedUser);
+        const resultUpdatedUser = await this.userRepository.save(updatedUser);
+
+        if (resultUpdatedUser.status === UserStatus.BLOCKED) {
+            await this.mailService.sendMessageToUser(
+                user.id,
+                'Вы были заблокированы на сайте Smart Desk',
+                'Вы были заблокированы на сайте Smart Desk',
+                NotificationTypes.USER_BLOCKED
+            );
+        } else if (resultUpdatedUser.status === UserStatus.ACTIVE) {
+            await this.mailService.sendMessageToUser(
+                user.id,
+                'Вы были разблокированы на сайте Smart Desk',
+                'Вы были разблокированы на сайте Smart Desk',
+                NotificationTypes.USER_UNBLOCKED
+            );
+        }
+        return resultUpdatedUser;
     }
 
     async findOneOrThrowException(id: string): Promise<User> {

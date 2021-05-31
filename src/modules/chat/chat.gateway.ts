@@ -9,6 +9,8 @@ import { GetChatsDto } from './dto/get-chats.dto';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { AdvertsService } from '../adverts/adverts.service';
 import { PreferContact } from '../adverts/models/prefer-contact.enum';
+import { MailService } from '../mail/mail.service';
+import { NotificationTypes } from '../users/models/notification-types.enum';
 
 const options = {
     path: '/socket',
@@ -43,7 +45,7 @@ export enum ChatEvent {
 export class ChatGateway {
     @WebSocketServer() server: Server;
 
-    constructor(private chatService: ChatService, private advertsService: AdvertsService) {}
+    constructor(private chatService: ChatService, private advertsService: AdvertsService, private mailService: MailService) {}
 
     @SubscribeMessage(ChatEvent.INIT_CHATS)
     async initChats(@ConnectedSocket() client: Socket, @MessageBody() data: ChatBaseEventDto): Promise<void> {
@@ -107,6 +109,14 @@ export class ChatGateway {
         data.userId = data.user.id;
         const chatMessage = await this.chatService.createMessage(data);
         client.to(data.chatId).emit(ChatEvent.NEW_MESSAGE, chatMessage);
+        const partnerId = await this.getChatPartner(data.chatId, data.userId);
+        // todo указать сообщение, дать ссылку и тд
+        await this.mailService.sendMessageToUser(
+            partnerId,
+            'Новое сообщение',
+            'Вам прислали новое сообщение на сайте Smart Desk',
+            NotificationTypes.CHAT_MESSAGE
+        );
     }
 
     @SubscribeMessage(ChatEvent.GET_MESSAGES)
@@ -132,5 +142,14 @@ export class ChatGateway {
     private async isUserInChat(userId: string, chatId: string): Promise<boolean> {
         const chat = await this.chatService.getChat(chatId);
         return userId === chat.user1 || userId === chat.user2;
+    }
+
+    private async getChatPartner(chatId: string, userId: string): Promise<string> {
+        const chat = await this.chatService.getChat(chatId);
+        if (chat.user1 === userId) {
+            return chat.user2;
+        } else if (chat.user2 === userId) {
+            return chat.user1;
+        }
     }
 }
