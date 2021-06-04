@@ -23,6 +23,7 @@ export class ModelsController {
         return this.modelsService.getById(id);
     }
 
+    // todo only admin!!!
     @Post()
     @UseGuards(JwtAuthGuard, ACGuard)
     @UseRoles({

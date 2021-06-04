@@ -17,6 +17,9 @@ import { BookmarksModule } from '../bookmarks/bookmarks.module';
 import { PhoneModule } from '../phone/phone.module';
 import { ChatModule } from '../chat/chat.module';
 import { MailModule } from '../mail/mail.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { AppConfig } from './enitities/app-config.entity';
 
 const app = [
     AuthModule,
@@ -34,14 +37,21 @@ const app = [
 ];
 
 @Module({
-    imports: [AccessControlModule.forRoles(roles), TypeOrmModule.forRoot(), ConfigModule.forRoot(), ...app],
-    controllers: [],
+    imports: [
+        AccessControlModule.forRoles(roles),
+        TypeOrmModule.forRoot(),
+        ConfigModule.forRoot(),
+        TypeOrmModule.forFeature([AppConfig]),
+        ...app,
+    ],
+    controllers: [AppController],
     providers: [
         {
             provide: APP_PIPE,
             useClass: DataPipe,
         },
+        AppService,
     ],
-    exports: [],
+    exports: [AppService],
 })
 export class AppModule {}
