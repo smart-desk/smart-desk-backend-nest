@@ -1,4 +1,4 @@
-import { Body, Controller, ForbiddenException, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, Get, HttpCode, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { ACGuard, UseRoles } from 'nest-access-control';
@@ -24,6 +24,7 @@ export class AdController {
         resource: ResourceEnum.AD_CONFIG,
         action: 'update',
     })
+    @HttpCode(HttpStatus.OK)
     updateAdConfig(@Body() body: AdConfigDto, @Req() req: RequestWithUserPayload): Promise<AdConfig> {
         if (!this.isAdmin(req.user)) throw new ForbiddenException();
         return this.appService.updateAdConfig(body);
