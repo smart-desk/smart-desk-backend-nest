@@ -8,6 +8,9 @@ import { AdConfigDto } from './dto/ad-config.dto';
 import { AdConfig } from './enitities/ad-config.entity';
 import { User } from '../users/entities/user.entity';
 import { RequestWithUserPayload } from '../auth/jwt.strategy';
+import { BlockedUserGuard } from '../../guards/blocked-user.guard';
+import { AdCampaign } from './enitities/ad-campaign.entity';
+import { AdCampaignDto } from './dto/ad-campaign.dto';
 
 @Controller('ad')
 @ApiTags('Ad')
@@ -29,6 +32,17 @@ export class AdController {
     @Get('config')
     getAdConfig(): Promise<AdConfig> {
         return this.appService.getAdConfig();
+    }
+
+    @Post('campaign')
+    @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
+    @ApiBearerAuth('access-token')
+    @UseRoles({
+        resource: ResourceEnum.AD_CAMPAIGN,
+        action: 'create',
+    })
+    createCampaign(@Body() body: AdCampaignDto): Promise<AdCampaign> {
+        return this.appService.createCampaign(body);
     }
 
     private isAdmin(user: User): boolean {

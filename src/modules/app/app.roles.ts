@@ -17,6 +17,7 @@ export enum ResourceEnum {
     ADDRESS = 'address',
     CHAT = 'chat',
     AD_CONFIG = 'ad_config',
+    AD_CAMPAIGN = 'ad_campaign',
 }
 
 export const roles = new RolesBuilder();
@@ -28,10 +29,17 @@ roles
     // User
     .grant(RolesEnum.USER)
     .extend(RolesEnum.VIEWER)
-    .read([ResourceEnum.BOOKMARK, ResourceEnum.ADDRESS, ResourceEnum.CHAT])
-    .create([ResourceEnum.ADVERT, ResourceEnum.FILE, ResourceEnum.BOOKMARK, ResourceEnum.ADDRESS, ResourceEnum.CHAT])
-    .update([ResourceEnum.ADVERT, ResourceEnum.USER, ResourceEnum.BOOKMARK, ResourceEnum.ADDRESS])
-    .delete([ResourceEnum.ADVERT, ResourceEnum.BOOKMARK, ResourceEnum.ADDRESS])
+    .read([ResourceEnum.BOOKMARK, ResourceEnum.ADDRESS, ResourceEnum.CHAT, ResourceEnum.AD_CAMPAIGN])
+    .create([
+        ResourceEnum.ADVERT,
+        ResourceEnum.FILE,
+        ResourceEnum.BOOKMARK,
+        ResourceEnum.ADDRESS,
+        ResourceEnum.CHAT,
+        ResourceEnum.AD_CAMPAIGN,
+    ])
+    .update([ResourceEnum.ADVERT, ResourceEnum.USER, ResourceEnum.BOOKMARK, ResourceEnum.ADDRESS, ResourceEnum.AD_CAMPAIGN])
+    .delete([ResourceEnum.ADVERT, ResourceEnum.BOOKMARK, ResourceEnum.ADDRESS, ResourceEnum.AD_CAMPAIGN])
     // Admin
     .grant(RolesEnum.ADMIN)
     .create([
@@ -45,6 +53,7 @@ roles
         ResourceEnum.ADDRESS,
         ResourceEnum.CHAT,
         ResourceEnum.AD_CONFIG,
+        ResourceEnum.AD_CAMPAIGN,
     ])
     .read([
         ResourceEnum.ADVERT,
@@ -57,6 +66,7 @@ roles
         ResourceEnum.ADDRESS,
         ResourceEnum.CHAT,
         ResourceEnum.AD_CONFIG,
+        ResourceEnum.AD_CAMPAIGN,
     ])
     .update([
         ResourceEnum.ADVERT,
@@ -69,6 +79,7 @@ roles
         ResourceEnum.ADDRESS,
         ResourceEnum.CHAT,
         ResourceEnum.AD_CONFIG,
+        ResourceEnum.AD_CAMPAIGN,
     ])
     .delete([
         ResourceEnum.ADVERT,
@@ -81,4 +92,5 @@ roles
         ResourceEnum.ADDRESS,
         ResourceEnum.CHAT,
         ResourceEnum.AD_CONFIG,
+        ResourceEnum.AD_CAMPAIGN,
     ]);
