@@ -4,7 +4,7 @@ export class AppConfig1622844844329 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(
             new Table({
-                name: 'app_config',
+                name: 'ad_config',
                 columns: [
                     {
                         name: 'id',
@@ -15,7 +15,13 @@ export class AppConfig1622844844329 implements MigrationInterface {
                         default: `uuid_generate_v4()`,
                     },
                     {
-                        name: 'ad_hourly_rate',
+                        name: 'main_hourly_rate',
+                        type: 'numeric',
+                        precision: 13,
+                        scale: 2,
+                    },
+                    {
+                        name: 'sidebar_hourly_rate',
                         type: 'numeric',
                         precision: 13,
                         scale: 2,
@@ -26,6 +32,6 @@ export class AppConfig1622844844329 implements MigrationInterface {
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.dropTable('app_config');
+        await queryRunner.dropTable('ad_config');
     }
 }

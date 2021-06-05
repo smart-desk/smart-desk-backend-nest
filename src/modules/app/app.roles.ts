@@ -16,7 +16,7 @@ export enum ResourceEnum {
     BOOKMARK = 'bookmark',
     ADDRESS = 'address',
     CHAT = 'chat',
-    APP_CONFIG = 'app_config',
+    AD_CONFIG = 'ad_config',
 }
 
 export const roles = new RolesBuilder();
@@ -24,7 +24,7 @@ export const roles = new RolesBuilder();
 roles
     // Viewer
     .grant(RolesEnum.VIEWER)
-    .read([ResourceEnum.ADVERT, ResourceEnum.CATEGORY, ResourceEnum.USER, ResourceEnum.APP_CONFIG])
+    .read([ResourceEnum.ADVERT, ResourceEnum.CATEGORY, ResourceEnum.USER, ResourceEnum.AD_CONFIG])
     // User
     .grant(RolesEnum.USER)
     .extend(RolesEnum.VIEWER)
@@ -44,7 +44,7 @@ roles
         ResourceEnum.BOOKMARK,
         ResourceEnum.ADDRESS,
         ResourceEnum.CHAT,
-        ResourceEnum.APP_CONFIG,
+        ResourceEnum.AD_CONFIG,
     ])
     .read([
         ResourceEnum.ADVERT,
@@ -56,7 +56,7 @@ roles
         ResourceEnum.BOOKMARK,
         ResourceEnum.ADDRESS,
         ResourceEnum.CHAT,
-        ResourceEnum.APP_CONFIG,
+        ResourceEnum.AD_CONFIG,
     ])
     .update([
         ResourceEnum.ADVERT,
@@ -68,7 +68,7 @@ roles
         ResourceEnum.BOOKMARK,
         ResourceEnum.ADDRESS,
         ResourceEnum.CHAT,
-        ResourceEnum.APP_CONFIG,
+        ResourceEnum.AD_CONFIG,
     ])
     .delete([
         ResourceEnum.ADVERT,
@@ -80,5 +80,5 @@ roles
         ResourceEnum.BOOKMARK,
         ResourceEnum.ADDRESS,
         ResourceEnum.CHAT,
-        ResourceEnum.APP_CONFIG,
+        ResourceEnum.AD_CONFIG,
     ]);
