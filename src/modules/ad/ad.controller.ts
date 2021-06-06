@@ -27,8 +27,8 @@ import { BlockedUserGuard } from '../../guards/blocked-user.guard';
 import { AdCampaign, AdCampaignType } from './enitities/ad-campaign.entity';
 import { AdCampaignDto } from './dto/ad-campaign.dto';
 import { RejectCampaignDto } from './dto/reject-campaign.dto';
+import { GetAdCampaignsDto } from './dto/get-ad-campaigns.dto';
 
-// todo all campaigns and pending campaigns for admins
 @Controller('ad')
 @ApiTags('Ad')
 export class AdController {
@@ -50,6 +50,18 @@ export class AdController {
     @Get('config')
     getAdConfig(): Promise<AdConfig> {
         return this.adService.getAdConfig();
+    }
+
+    @Get('campaigns')
+    @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
+    @ApiBearerAuth('access-token')
+    @UseRoles({
+        resource: ResourceEnum.AD_CAMPAIGN,
+        action: 'read',
+    })
+    async getCampaigns(@Req() req: RequestWithUserPayload, @Query() options?: GetAdCampaignsDto): Promise<AdCampaign[]> {
+        if (!this.isAdmin(req.user)) throw new ForbiddenException();
+        return this.adService.getCampaigns(options);
     }
 
     @Post('campaigns')

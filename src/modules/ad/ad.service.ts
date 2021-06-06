@@ -3,9 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AdConfig } from './enitities/ad-config.entity';
 import { AdConfigDto } from './dto/ad-config.dto';
-import { AdCampaign, AdCampaignState, AdCampaignType } from './enitities/ad-campaign.entity';
+import { AdCampaign, AdCampaignStatus, AdCampaignType } from './enitities/ad-campaign.entity';
 import { AdCampaignDto } from './dto/ad-campaign.dto';
 import * as dayjs from 'dayjs';
+import { GetAdCampaignsDto } from './dto/get-ad-campaigns.dto';
 
 @Injectable()
 export class AdService {
@@ -29,15 +30,29 @@ export class AdService {
         return await this.adConfigRepository.findOne();
     }
 
+    async getCampaigns(options: GetAdCampaignsDto): Promise<AdCampaign[]> {
+        const builder = this.adCampaignRepository.createQueryBuilder();
+        const where = {} as any;
+
+        if (options?.type) {
+            where['type'] = options.type;
+        }
+        if (options?.status) {
+            where['status'] = options.status;
+        }
+
+        return builder.where(where).getMany();
+    }
+
     async createCampaign(campaign: AdCampaignDto, userId: string): Promise<AdCampaign> {
-        const campaignEntity = this.adCampaignRepository.create({ ...campaign, status: AdCampaignState.PENDING, userId });
+        const campaignEntity = this.adCampaignRepository.create({ ...campaign, status: AdCampaignStatus.PENDING, userId });
         return await this.adCampaignRepository.save(campaignEntity);
     }
 
     async getCampaignsSchedule(type: AdCampaignType): Promise<Partial<AdCampaign[]>> {
         return await this.adCampaignRepository
             .createQueryBuilder('campaign')
-            .where({ status: AdCampaignState.APPROVED, type }) // todo change on PAID!!!
+            .where({ status: AdCampaignStatus.APPROVED, type }) // todo change on PAID!!!
             .andWhere('campaign.endDate >= :today', { today: dayjs().toISOString() })
             .select(['campaign.startDate', 'campaign.endDate'])
             .getMany();
@@ -45,14 +60,14 @@ export class AdService {
 
     async approveCampaign(id: string): Promise<AdCampaign> {
         const campaign = await this.findOneCampaignOrThrowException(id);
-        campaign.status = AdCampaignState.APPROVED;
+        campaign.status = AdCampaignStatus.APPROVED;
         campaign.reason = null;
         return this.adCampaignRepository.save(campaign);
     }
 
     async rejectCampaign(id: string, reason: string): Promise<AdCampaign> {
         const campaign = await this.findOneCampaignOrThrowException(id);
-        campaign.status = AdCampaignState.REJECTED;
+        campaign.status = AdCampaignStatus.REJECTED;
         campaign.reason = reason;
         return this.adCampaignRepository.save(campaign);
     }

@@ -11,7 +11,7 @@ import { AdModule } from './ad.module';
 import { AdConfigDto } from './dto/ad-config.dto';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { AdConfig } from './enitities/ad-config.entity';
-import { AdCampaign, AdCampaignState, AdCampaignType } from './enitities/ad-campaign.entity';
+import { AdCampaign, AdCampaignStatus, AdCampaignType } from './enitities/ad-campaign.entity';
 import * as dayjs from 'dayjs';
 import { User } from '../users/entities/user.entity';
 import { AdCampaignDto } from './dto/ad-campaign.dto';
@@ -30,7 +30,7 @@ describe('Ad controller', () => {
 
     const adCampaign = new AdCampaign();
     adCampaign.id = uuid();
-    adCampaign.status = AdCampaignState.PENDING;
+    adCampaign.status = AdCampaignStatus.PENDING;
     adCampaign.img = 'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png';
     adCampaign.link = 'https://www.google.com/';
     adCampaign.startDate = new Date();
@@ -202,6 +202,48 @@ describe('Ad controller', () => {
 
         it('with error wrong campaign type', () => {
             return request(app.getHttpServer()).get('/ad/campaigns/schedule').expect(HttpStatus.BAD_REQUEST);
+        });
+    });
+
+    describe('get all campaigns', () => {
+        it('successfully', () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = adminUser;
+                return true;
+            });
+
+            return request(app.getHttpServer())
+                .get('/ad/campaigns')
+                .expect(HttpStatus.OK)
+                .expect(res => {
+                    expect(res.body.length).toEqual(1);
+                });
+        });
+
+        it('with error wrong options', () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = adminUser;
+                return true;
+            });
+
+            return request(app.getHttpServer())
+                .get('/ad/campaigns?type=123&status=123')
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('type must be a valid enum value');
+                    expect(res.body.message).toContain('status must be a valid enum value');
+                });
+        });
+
+        it('with error unauthorized', () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+            return request(app.getHttpServer()).get('/ad/campaigns').expect(HttpStatus.FORBIDDEN);
+        });
+
+        it('with error not an admin', () => {
+            return request(app.getHttpServer()).get('/ad/campaigns').expect(HttpStatus.FORBIDDEN);
         });
     });
 

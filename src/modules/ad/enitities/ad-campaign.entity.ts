@@ -5,7 +5,7 @@ export enum AdCampaignType {
     SIDEBAR = 'sidebar',
 }
 
-export enum AdCampaignState {
+export enum AdCampaignStatus {
     PENDING = 'pending',
     APPROVED = 'approved',
     REJECTED = 'rejected',
@@ -37,7 +37,7 @@ export class AdCampaign {
     type: AdCampaignType;
 
     @Column('varchar', { length: 100 })
-    status: AdCampaignState;
+    status: AdCampaignStatus;
 
     @Column('varchar', { length: 1000 })
     reason: string;
