@@ -14,6 +14,7 @@ import { AdConfig } from './enitities/ad-config.entity';
 import { AdCampaign, AdCampaignState, AdCampaignType } from './enitities/ad-campaign.entity';
 import * as dayjs from 'dayjs';
 import { User } from '../users/entities/user.entity';
+import { AdCampaignDto } from './dto/ad-campaign.dto';
 
 // todo add tests for blocked user
 describe('Ad controller', () => {
@@ -136,7 +137,24 @@ describe('Ad controller', () => {
 
     describe('create campaign', () => {
         it('successfully', () => {
-            return request(app.getHttpServer()).post('/ad/campaigns').send(adCampaign).expect(HttpStatus.CREATED);
+            return request(app.getHttpServer())
+                .post('/ad/campaigns')
+                .send({
+                    ...adCampaign,
+                    startDate: dayjs(adCampaign.endDate).add(1, 'days').toDate(),
+                    endDate: dayjs(adCampaign.endDate).add(2, 'days').toDate(),
+                } as AdCampaignDto)
+                .expect(HttpStatus.CREATED);
+        });
+
+        it('with error ', () => {
+            return request(app.getHttpServer())
+                .post('/ad/campaigns')
+                .send(adCampaign)
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('Dates overlap with another campaign');
+                });
         });
 
         it('with error wrong values', () => {
@@ -170,7 +188,7 @@ describe('Ad controller', () => {
     describe("get campaign's schedule", () => {
         it('successfully', () => {
             return request(app.getHttpServer())
-                .get('/ad/campaigns/schedule')
+                .get('/ad/campaigns/schedule?type=main')
                 .expect(HttpStatus.OK)
                 .expect(res => {
                     expect(res.body.length).toEqual(1);
@@ -179,7 +197,11 @@ describe('Ad controller', () => {
 
         it('with error unauthorized', () => {
             JwtGuard.canActivate.mockReturnValueOnce(false);
-            return request(app.getHttpServer()).get('/ad/campaigns/schedule').expect(HttpStatus.FORBIDDEN);
+            return request(app.getHttpServer()).get('/ad/campaigns/schedule?type=main').expect(HttpStatus.FORBIDDEN);
+        });
+
+        it('with error wrong campaign type', () => {
+            return request(app.getHttpServer()).get('/ad/campaigns/schedule').expect(HttpStatus.BAD_REQUEST);
         });
     });
 

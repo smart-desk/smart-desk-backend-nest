@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AdConfig } from './enitities/ad-config.entity';
 import { AdConfigDto } from './dto/ad-config.dto';
-import { AdCampaign, AdCampaignState } from './enitities/ad-campaign.entity';
+import { AdCampaign, AdCampaignState, AdCampaignType } from './enitities/ad-campaign.entity';
 import { AdCampaignDto } from './dto/ad-campaign.dto';
 import * as dayjs from 'dayjs';
 
@@ -34,10 +34,10 @@ export class AdService {
         return await this.adCampaignRepository.save(campaignEntity);
     }
 
-    async getCampaignsSchedule(): Promise<Partial<AdCampaign[]>> {
+    async getCampaignsSchedule(type: AdCampaignType): Promise<Partial<AdCampaign[]>> {
         return await this.adCampaignRepository
             .createQueryBuilder('campaign')
-            .where({ status: AdCampaignState.APPROVED }) // todo change on PAID!!!
+            .where({ status: AdCampaignState.APPROVED, type }) // todo change on PAID!!!
             .andWhere('campaign.endDate >= :today', { today: dayjs().toISOString() })
             .select(['campaign.startDate', 'campaign.endDate'])
             .getMany();

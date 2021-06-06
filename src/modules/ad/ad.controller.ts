@@ -10,6 +10,7 @@ import {
     ParseUUIDPipe,
     Patch,
     Post,
+    Query,
     Req,
     UseGuards,
 } from '@nestjs/common';
@@ -23,10 +24,11 @@ import { AdConfig } from './enitities/ad-config.entity';
 import { User } from '../users/entities/user.entity';
 import { RequestWithUserPayload } from '../auth/jwt.strategy';
 import { BlockedUserGuard } from '../../guards/blocked-user.guard';
-import { AdCampaign } from './enitities/ad-campaign.entity';
+import { AdCampaign, AdCampaignType } from './enitities/ad-campaign.entity';
 import { AdCampaignDto } from './dto/ad-campaign.dto';
 import { RejectCampaignDto } from './dto/reject-campaign.dto';
 
+// todo all campaigns and pending campaigns for admins
 @Controller('ad')
 @ApiTags('Ad')
 export class AdController {
@@ -70,8 +72,9 @@ export class AdController {
         resource: ResourceEnum.AD_CAMPAIGN,
         action: 'read',
     })
-    getCampaignsSchedule(): Promise<Partial<AdCampaign[]>> {
-        return this.adService.getCampaignsSchedule();
+    getCampaignsSchedule(@Query('type') type: AdCampaignType): Promise<Partial<AdCampaign[]>> {
+        if (!type) throw new BadRequestException('Invalid campaign type');
+        return this.adService.getCampaignsSchedule(type);
     }
 
     @Patch('campaigns/:id/approve')
@@ -106,9 +109,17 @@ export class AdController {
         return user.roles && user.roles.some(role => role === RolesEnum.ADMIN);
     }
 
-    private async checkAdCampaignParams(body: AdCampaignDto): Promise<string | undefined> {
-        if (body.startDate >= body.endDate) {
+    private async checkAdCampaignParams(campaignParams: AdCampaignDto): Promise<string | undefined> {
+        if (campaignParams.startDate > campaignParams.endDate) {
             return 'Start date must be earlier than End date';
+        }
+
+        const takenAdRanges = await this.adService.getCampaignsSchedule(campaignParams.type);
+        const overlapping = takenAdRanges.some(
+            takenAdRange => !(campaignParams.startDate > takenAdRange.endDate || campaignParams.endDate < takenAdRange.startDate)
+        );
+        if (overlapping) {
+            return 'Dates overlap with another campaign';
         }
     }
 }
