@@ -48,6 +48,12 @@ export class AdController {
     }
 
     @Get('config')
+    @UseGuards(JwtAuthGuard, ACGuard)
+    @ApiBearerAuth('access-token')
+    @UseRoles({
+        resource: ResourceEnum.AD_CONFIG,
+        action: 'read',
+    })
     getAdConfig(): Promise<AdConfig> {
         return this.adService.getAdConfig();
     }

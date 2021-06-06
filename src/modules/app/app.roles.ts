@@ -25,11 +25,11 @@ export const roles = new RolesBuilder();
 roles
     // Viewer
     .grant(RolesEnum.VIEWER)
-    .read([ResourceEnum.ADVERT, ResourceEnum.CATEGORY, ResourceEnum.USER, ResourceEnum.AD_CONFIG])
+    .read([ResourceEnum.ADVERT, ResourceEnum.CATEGORY, ResourceEnum.USER])
     // User
     .grant(RolesEnum.USER)
     .extend(RolesEnum.VIEWER)
-    .read([ResourceEnum.BOOKMARK, ResourceEnum.ADDRESS, ResourceEnum.CHAT, ResourceEnum.AD_CAMPAIGN])
+    .read([ResourceEnum.BOOKMARK, ResourceEnum.ADDRESS, ResourceEnum.CHAT, ResourceEnum.AD_CAMPAIGN, ResourceEnum.AD_CONFIG])
     .create([
         ResourceEnum.ADVERT,
         ResourceEnum.FILE,
