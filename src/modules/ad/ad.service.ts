@@ -5,6 +5,7 @@ import { AdConfig } from './enitities/ad-config.entity';
 import { AdConfigDto } from './dto/ad-config.dto';
 import { AdCampaign, AdCampaignState } from './enitities/ad-campaign.entity';
 import { AdCampaignDto } from './dto/ad-campaign.dto';
+import * as dayjs from 'dayjs';
 
 @Injectable()
 export class AdService {
@@ -28,8 +29,17 @@ export class AdService {
         return await this.adConfigRepository.findOne();
     }
 
-    async createCampaign(campaign: AdCampaignDto): Promise<AdCampaign> {
-        const campaignEntity = this.adCampaignRepository.create({ ...campaign, status: AdCampaignState.PENDING });
+    async createCampaign(campaign: AdCampaignDto, userId: string): Promise<AdCampaign> {
+        const campaignEntity = this.adCampaignRepository.create({ ...campaign, status: AdCampaignState.PENDING, userId });
         return await this.adCampaignRepository.save(campaignEntity);
+    }
+
+    async getCampaignsSchedule(): Promise<Partial<AdCampaign[]>> {
+        return await this.adCampaignRepository
+            .createQueryBuilder('campaign')
+            .where({ status: AdCampaignState.PAID })
+            .andWhere('d.endDate >= :today', { today: dayjs().toISOString() })
+            .select(['campaign.startDate', 'campaign.endDate', 'campaign.startTime', 'campaign.endTime'])
+            .getMany();
     }
 }

@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, Table } from 'typeorm';
+import { MigrationInterface, QueryRunner, Table, TableForeignKey } from 'typeorm';
 
 export class AdCampaigns1622927251266 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
@@ -56,7 +56,20 @@ export class AdCampaigns1622927251266 implements MigrationInterface {
                         length: '1000',
                         isNullable: true,
                     },
+                    {
+                        name: 'user_id',
+                        type: 'uuid',
+                    },
                 ],
+            })
+        );
+
+        await queryRunner.createForeignKey(
+            'ad_campaigns',
+            new TableForeignKey({
+                columnNames: ['user_id'],
+                referencedColumnNames: ['id'],
+                referencedTableName: 'users',
             })
         );
     }

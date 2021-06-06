@@ -10,12 +10,16 @@ export enum AdCampaignState {
     APPROVED = 'approved',
     REJECTED = 'rejected',
     COMPLETED = 'completed',
+    PAID = 'paid',
 }
 
 @Entity('ad_campaigns')
 export class AdCampaign {
     @PrimaryGeneratedColumn('uuid')
     id: string;
+
+    @Column('uuid', { name: 'user_id' })
+    userId: string;
 
     @Column('time with time zone', { name: 'start_date' })
     startDate: Date;
@@ -39,7 +43,7 @@ export class AdCampaign {
     type: AdCampaignType;
 
     @Column('varchar', { length: 100 })
-    status: AdCampaignState = AdCampaignState.PENDING;
+    status: AdCampaignState;
 
     @Column('varchar', { length: 1000 })
     reason: string;

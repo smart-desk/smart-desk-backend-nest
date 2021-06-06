@@ -12,7 +12,9 @@ import { AdConfigDto } from './dto/ad-config.dto';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { AdConfig } from './enitities/ad-config.entity';
 import { AdCampaign, AdCampaignState, AdCampaignType } from './enitities/ad-campaign.entity';
+import * as dayjs from 'dayjs';
 
+// todo add tests for blocked user
 describe('Ad controller', () => {
     let app: INestApplication;
     const adConfig = new AdConfig();
@@ -26,7 +28,7 @@ describe('Ad controller', () => {
     adCampaign.img = 'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png';
     adCampaign.link = 'https://www.google.com/';
     adCampaign.startDate = new Date();
-    adCampaign.endDate = new Date();
+    adCampaign.endDate = dayjs().add(1, 'day').toDate();
     adCampaign.startTime = new Date();
     adCampaign.endTime = new Date();
     adCampaign.reason = 'test';
@@ -131,12 +133,12 @@ describe('Ad controller', () => {
 
     describe('create campaign', () => {
         it('successfully', () => {
-            return request(app.getHttpServer()).post('/ad/campaign').send(adCampaign).expect(HttpStatus.CREATED);
+            return request(app.getHttpServer()).post('/ad/campaigns').send(adCampaign).expect(HttpStatus.CREATED);
         });
 
         it('with error wrong values', () => {
             return request(app.getHttpServer())
-                .post('/ad/campaign')
+                .post('/ad/campaigns')
                 .send({})
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
@@ -160,7 +162,23 @@ describe('Ad controller', () => {
 
         it('with error unauthorized', () => {
             JwtGuard.canActivate.mockReturnValueOnce(false);
-            return request(app.getHttpServer()).post('/ad/campaign').send({}).expect(HttpStatus.FORBIDDEN);
+            return request(app.getHttpServer()).post('/ad/campaigns').send({}).expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
+    describe("get campaign's schedule", () => {
+        it('successfully', () => {
+            return request(app.getHttpServer())
+                .get('/ad/campaigns/schedule')
+                .expect(HttpStatus.OK)
+                .expect(res => {
+                    expect(res.body.length).toEqual(1);
+                });
+        });
+
+        it('with error unauthorized', () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+            return request(app.getHttpServer()).get('/ad/campaigns/schedule').expect(HttpStatus.FORBIDDEN);
         });
     });
 });
