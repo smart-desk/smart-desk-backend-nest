@@ -13,6 +13,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { AdConfig } from './enitities/ad-config.entity';
 import { AdCampaign, AdCampaignState, AdCampaignType } from './enitities/ad-campaign.entity';
 import * as dayjs from 'dayjs';
+import { User } from '../users/entities/user.entity';
 
 // todo add tests for blocked user
 describe('Ad controller', () => {
@@ -21,6 +22,10 @@ describe('Ad controller', () => {
     adConfig.id = uuid();
     adConfig.mainHourlyRate = 10;
     adConfig.sidebarHourlyRate = 5;
+
+    const adminUser = new User();
+    adminUser.id = uuid();
+    adminUser.roles = [RolesEnum.USER, RolesEnum.ADMIN];
 
     const adCampaign = new AdCampaign();
     adCampaign.id = uuid();
@@ -57,7 +62,7 @@ describe('Ad controller', () => {
         it('successfully', () => {
             JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
                 const req = context.switchToHttp().getRequest();
-                req.user = { id: '007', email: 'test@email.com', roles: [RolesEnum.USER, RolesEnum.ADMIN] };
+                req.user = adminUser;
                 return true;
             });
 
@@ -100,7 +105,7 @@ describe('Ad controller', () => {
         it('with error wrong values', () => {
             JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
                 const req = context.switchToHttp().getRequest();
-                req.user = { id: '007', email: 'test@email.com', roles: [RolesEnum.USER, RolesEnum.ADMIN] };
+                req.user = adminUser;
                 return true;
             });
 
@@ -179,6 +184,63 @@ describe('Ad controller', () => {
         it('with error unauthorized', () => {
             JwtGuard.canActivate.mockReturnValueOnce(false);
             return request(app.getHttpServer()).get('/ad/campaigns/schedule').expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
+    describe('approve campaign', () => {
+        it('successfully', () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = adminUser;
+                return true;
+            });
+            return request(app.getHttpServer()).patch(`/ad/campaigns/${uuid()}/approve`).expect(HttpStatus.OK);
+        });
+
+        it('with error unauthorized', () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+            return request(app.getHttpServer()).patch(`/ad/campaigns/${uuid()}/approve`).expect(HttpStatus.FORBIDDEN);
+        });
+
+        it('with error not an admin', () => {
+            return request(app.getHttpServer()).patch(`/ad/campaigns/${uuid()}/approve`).expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
+    describe('reject campaign', () => {
+        it('successfully', () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = adminUser;
+                return true;
+            });
+            return request(app.getHttpServer()).patch(`/ad/campaigns/${uuid()}/reject`).send({ reason: 'Test' }).expect(HttpStatus.OK);
+        });
+
+        it('with error reason', () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = adminUser;
+                return true;
+            });
+            return request(app.getHttpServer())
+                .patch(`/ad/campaigns/${uuid()}/reject`)
+                .send({ reason: null })
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('reason must be shorter than or equal to 1000 characters');
+                    expect(res.body.message).toContain('reason must be a string');
+                    expect(res.body.message).toContain('reason should not be empty');
+                });
+        });
+
+        it('with error unauthorized', () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+            return request(app.getHttpServer()).patch(`/ad/campaigns/${uuid()}/reject`).expect(HttpStatus.FORBIDDEN);
+        });
+
+        it('with error not an admin', () => {
+            return request(app.getHttpServer()).patch(`/ad/campaigns/${uuid()}/reject`).expect(HttpStatus.FORBIDDEN);
         });
     });
 });

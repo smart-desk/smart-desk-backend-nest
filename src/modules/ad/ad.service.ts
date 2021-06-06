@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AdConfig } from './enitities/ad-config.entity';
@@ -41,5 +41,27 @@ export class AdService {
             .andWhere('d.endDate >= :today', { today: dayjs().toISOString() })
             .select(['campaign.startDate', 'campaign.endDate', 'campaign.startTime', 'campaign.endTime'])
             .getMany();
+    }
+
+    async approveCampaign(id: string): Promise<AdCampaign> {
+        const campaign = await this.findOneCampaignOrThrowException(id);
+        campaign.status = AdCampaignState.APPROVED;
+        campaign.reason = null;
+        return this.adCampaignRepository.save(campaign);
+    }
+
+    async rejectCampaign(id: string, reason: string): Promise<AdCampaign> {
+        const campaign = await this.findOneCampaignOrThrowException(id);
+        campaign.status = AdCampaignState.REJECTED;
+        campaign.reason = reason;
+        return this.adCampaignRepository.save(campaign);
+    }
+
+    private async findOneCampaignOrThrowException(id: string): Promise<AdCampaign> {
+        const campaign = await this.adCampaignRepository.findOne({ id });
+        if (!campaign) {
+            throw new NotFoundException(`Campaign ${id} not found`);
+        }
+        return campaign;
     }
 }

@@ -1,4 +1,18 @@
-import { BadRequestException, Body, Controller, ForbiddenException, Get, HttpCode, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
+import {
+    BadRequestException,
+    Body,
+    Controller,
+    ForbiddenException,
+    Get,
+    HttpCode,
+    HttpStatus,
+    Param,
+    ParseUUIDPipe,
+    Patch,
+    Post,
+    Req,
+    UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { ACGuard, UseRoles } from 'nest-access-control';
@@ -11,6 +25,7 @@ import { RequestWithUserPayload } from '../auth/jwt.strategy';
 import { BlockedUserGuard } from '../../guards/blocked-user.guard';
 import { AdCampaign } from './enitities/ad-campaign.entity';
 import { AdCampaignDto } from './dto/ad-campaign.dto';
+import { RejectCampaignDto } from './dto/reject-campaign.dto';
 
 @Controller('ad')
 @ApiTags('Ad')
@@ -58,6 +73,34 @@ export class AdController {
     })
     getCampaignsSchedule(): Promise<Partial<AdCampaign[]>> {
         return this.adService.getCampaignsSchedule();
+    }
+
+    @Patch('campaigns/:id/approve')
+    @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
+    @ApiBearerAuth('access-token')
+    @UseRoles({
+        resource: ResourceEnum.AD_CAMPAIGN,
+        action: 'update',
+    })
+    approveCampaign(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<AdCampaign> {
+        if (!this.isAdmin(req.user)) throw new ForbiddenException();
+        return this.adService.approveCampaign(id);
+    }
+
+    @Patch('campaigns/:id/reject')
+    @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
+    @ApiBearerAuth('access-token')
+    @UseRoles({
+        resource: ResourceEnum.AD_CAMPAIGN,
+        action: 'update',
+    })
+    rejectCampaign(
+        @Param('id', ParseUUIDPipe) id: string,
+        @Body() body: RejectCampaignDto,
+        @Req() req: RequestWithUserPayload
+    ): Promise<AdCampaign> {
+        if (!this.isAdmin(req.user)) throw new ForbiddenException();
+        return this.adService.rejectCampaign(id, body.reason);
     }
 
     private isAdmin(user: User): boolean {
