@@ -1,5 +1,5 @@
 import { AdCampaignStatus, AdCampaignType } from '../enitities/ad-campaign.entity';
-import { IsEnum, IsOptional } from 'class-validator';
+import { IsEnum, IsOptional, IsUUID } from 'class-validator';
 
 export class GetAdCampaignsDto {
     @IsOptional()
@@ -9,4 +9,8 @@ export class GetAdCampaignsDto {
     @IsOptional()
     @IsEnum(AdCampaignStatus)
     status?: AdCampaignStatus;
+
+    @IsUUID()
+    @IsOptional()
+    user?: string;
 }

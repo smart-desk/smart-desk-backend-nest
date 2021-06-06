@@ -40,6 +40,9 @@ export class AdService {
         if (options?.status) {
             where['status'] = options.status;
         }
+        if (options?.user) {
+            where['userId'] = options.user;
+        }
 
         return builder.where(where).getMany();
     }

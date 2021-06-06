@@ -220,12 +220,6 @@ describe('Ad controller', () => {
 
     describe('get all campaigns', () => {
         it('successfully', () => {
-            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
-                const req = context.switchToHttp().getRequest();
-                req.user = adminUser;
-                return true;
-            });
-
             return request(app.getHttpServer())
                 .get('/ad/campaigns')
                 .expect(HttpStatus.OK)
@@ -235,27 +229,18 @@ describe('Ad controller', () => {
         });
 
         it('with error wrong options', () => {
-            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
-                const req = context.switchToHttp().getRequest();
-                req.user = adminUser;
-                return true;
-            });
-
             return request(app.getHttpServer())
-                .get('/ad/campaigns?type=123&status=123')
+                .get('/ad/campaigns?type=123&status=123&user=123')
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('type must be a valid enum value');
                     expect(res.body.message).toContain('status must be a valid enum value');
+                    expect(res.body.message).toContain('user must be an UUID');
                 });
         });
 
         it('with error unauthorized', () => {
             JwtGuard.canActivate.mockReturnValueOnce(false);
-            return request(app.getHttpServer()).get('/ad/campaigns').expect(HttpStatus.FORBIDDEN);
-        });
-
-        it('with error not an admin', () => {
             return request(app.getHttpServer()).get('/ad/campaigns').expect(HttpStatus.FORBIDDEN);
         });
     });

@@ -59,8 +59,10 @@ export class AdController {
         resource: ResourceEnum.AD_CAMPAIGN,
         action: 'read',
     })
-    async getCampaigns(@Req() req: RequestWithUserPayload, @Query() options?: GetAdCampaignsDto): Promise<AdCampaign[]> {
-        if (!this.isAdmin(req.user)) throw new ForbiddenException();
+    async getCampaigns(@Req() req: RequestWithUserPayload, @Query() options: GetAdCampaignsDto): Promise<AdCampaign[]> {
+        if (!this.isAdmin(req.user)) {
+            options.user = req.user.id;
+        }
         return this.adService.getCampaigns(options);
     }
 
