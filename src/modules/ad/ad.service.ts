@@ -58,6 +58,16 @@ export class AdService {
             .getMany();
     }
 
+    // todo probably add timezone
+    async getCurrentCampaign(type: AdCampaignType): Promise<Partial<AdCampaign>> {
+        return await this.adCampaignRepository
+            .createQueryBuilder('campaign')
+            .where({ status: AdCampaignStatus.APPROVED, type }) // todo change on PAID!!!
+            .andWhere(':today BETWEEN campaign.startDate and campaign.endDate', { today: dayjs().toISOString() })
+            .select(['campaign.link', 'campaign.img', 'campaign.type'])
+            .getOne();
+    }
+
     async approveCampaign(id: string): Promise<AdCampaign> {
         const campaign = await this.findOneCampaignOrThrowException(id);
         campaign.status = AdCampaignStatus.APPROVED;

@@ -46,6 +46,7 @@ export function createRepositoryMock<T>(values?: T[]) {
             take: jest.fn().mockReturnThis(),
             getManyAndCount: fn().mockReturnValue([resultValues, resultValues.length]),
             getMany: fn().mockReturnValue(resultValues),
+            getOne: fn().mockReturnValue(resultValues[0]),
             getCount: fn().mockReturnValue(resultValues.length),
             execute: fn(),
         }),

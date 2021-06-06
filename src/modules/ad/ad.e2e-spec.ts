@@ -205,6 +205,19 @@ describe('Ad controller', () => {
         });
     });
 
+    describe('get current campaign', () => {
+        it('successfully', () => {
+            return request(app.getHttpServer())
+                .get('/ad/campaigns/current?type=main')
+                .expect(HttpStatus.OK)
+                .expect(res => {
+                    expect(res.body.link).toBeDefined();
+                    expect(res.body.img).toBeDefined();
+                    expect(res.body.type).toBeDefined();
+                });
+        });
+    });
+
     describe('get all campaigns', () => {
         it('successfully', () => {
             JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {

@@ -117,6 +117,12 @@ export class AdController {
         return this.adService.rejectCampaign(id, body.reason);
     }
 
+    @Get('campaigns/current')
+    getCurrentCampaign(@Query('type') type: AdCampaignType): Promise<Partial<AdCampaign>> {
+        if (!type) throw new BadRequestException('Invalid campaign type');
+        return this.adService.getCurrentCampaign(type);
+    }
+
     private isAdmin(user: User): boolean {
         return user.roles && user.roles.some(role => role === RolesEnum.ADMIN);
     }
