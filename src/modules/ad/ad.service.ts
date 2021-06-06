@@ -37,9 +37,9 @@ export class AdService {
     async getCampaignsSchedule(): Promise<Partial<AdCampaign[]>> {
         return await this.adCampaignRepository
             .createQueryBuilder('campaign')
-            .where({ status: AdCampaignState.PAID })
-            .andWhere('d.endDate >= :today', { today: dayjs().toISOString() })
-            .select(['campaign.startDate', 'campaign.endDate', 'campaign.startTime', 'campaign.endTime'])
+            .where({ status: AdCampaignState.APPROVED }) // todo change on PAID!!!
+            .andWhere('campaign.endDate >= :today', { today: dayjs().toISOString() })
+            .select(['campaign.startDate', 'campaign.endDate'])
             .getMany();
     }
 

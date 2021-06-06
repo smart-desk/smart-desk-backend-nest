@@ -34,8 +34,6 @@ describe('Ad controller', () => {
     adCampaign.link = 'https://www.google.com/';
     adCampaign.startDate = new Date();
     adCampaign.endDate = dayjs().add(1, 'day').toDate();
-    adCampaign.startTime = new Date();
-    adCampaign.endTime = new Date();
     adCampaign.reason = 'test';
     adCampaign.type = AdCampaignType.MAIN;
 
@@ -149,8 +147,6 @@ describe('Ad controller', () => {
                 .expect(res => {
                     expect(res.body.message).toContain('startDate should not be empty');
                     expect(res.body.message).toContain('endDate should not be empty');
-                    expect(res.body.message).toContain('startTime should not be empty');
-                    expect(res.body.message).toContain('endTime should not be empty');
                     expect(res.body.message).toContain('value must be url to image');
                     expect(res.body.message).toContain('img must be an URL address');
                     expect(res.body.message).toContain('img must be shorter than or equal to 1000 characters');
@@ -240,7 +236,10 @@ describe('Ad controller', () => {
         });
 
         it('with error not an admin', () => {
-            return request(app.getHttpServer()).patch(`/ad/campaigns/${uuid()}/reject`).expect(HttpStatus.FORBIDDEN);
+            return request(app.getHttpServer())
+                .patch(`/ad/campaigns/${uuid()}/reject`)
+                .send({ reason: 'test' })
+                .expect(HttpStatus.FORBIDDEN);
         });
     });
 });

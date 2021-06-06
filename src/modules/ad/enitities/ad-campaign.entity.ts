@@ -27,12 +27,6 @@ export class AdCampaign {
     @Column('time with time zone', { name: 'end_date' })
     endDate: Date;
 
-    @Column('time with time zone', { name: 'start_time' })
-    startTime: Date;
-
-    @Column('time with time zone', { name: 'end_time' })
-    endTime: Date;
-
     @Column('varchar', { length: 1000 })
     img: string;
 

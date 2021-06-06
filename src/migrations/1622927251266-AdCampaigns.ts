@@ -23,14 +23,6 @@ export class AdCampaigns1622927251266 implements MigrationInterface {
                         type: 'timestamp with time zone',
                     },
                     {
-                        name: 'start_time',
-                        type: 'timestamp with time zone',
-                    },
-                    {
-                        name: 'end_time',
-                        type: 'timestamp with time zone',
-                    },
-                    {
                         name: 'img',
                         type: 'varchar',
                         length: '1000',

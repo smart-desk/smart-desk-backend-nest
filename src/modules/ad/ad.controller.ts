@@ -57,10 +57,9 @@ export class AdController {
         resource: ResourceEnum.AD_CAMPAIGN,
         action: 'create',
     })
-    createCampaign(@Body() body: AdCampaignDto, @Req() req: RequestWithUserPayload): Promise<AdCampaign> {
-        if (body.startDate >= body.endDate) {
-            throw new BadRequestException('Start date must be earlier than End date');
-        }
+    async createCampaign(@Body() body: AdCampaignDto, @Req() req: RequestWithUserPayload): Promise<AdCampaign> {
+        const errorMessage = await this.checkAdCampaignParams(body);
+        if (errorMessage) throw new BadRequestException(errorMessage);
         return this.adService.createCampaign(body, req.user.id);
     }
 
@@ -105,5 +104,11 @@ export class AdController {
 
     private isAdmin(user: User): boolean {
         return user.roles && user.roles.some(role => role === RolesEnum.ADMIN);
+    }
+
+    private async checkAdCampaignParams(body: AdCampaignDto): Promise<string | undefined> {
+        if (body.startDate >= body.endDate) {
+            return 'Start date must be earlier than End date';
+        }
     }
 }

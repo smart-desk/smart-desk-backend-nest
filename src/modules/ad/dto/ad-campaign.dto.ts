@@ -13,14 +13,6 @@ export class AdCampaignDto {
     endDate: Date;
 
     @IsNotEmpty()
-    @Type(() => Date)
-    startTime: Date;
-
-    @IsNotEmpty()
-    @Type(() => Date)
-    endTime: Date;
-
-    @IsNotEmpty()
     @IsString()
     @MaxLength(1000)
     @IsUrl()
