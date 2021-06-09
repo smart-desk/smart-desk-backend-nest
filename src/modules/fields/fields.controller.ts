@@ -7,6 +7,7 @@ import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { ACGuard, UseRoles } from 'nest-access-control';
 import { ResourceEnum } from '../app/app.roles';
 
+// todo only admin!!!
 @Controller('fields')
 @ApiTags('Fields')
 export class FieldsController {
