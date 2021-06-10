@@ -28,11 +28,23 @@ import { AdCampaign, AdCampaignType } from './enitities/ad-campaign.entity';
 import { AdCampaignDto } from './dto/ad-campaign.dto';
 import { RejectCampaignDto } from './dto/reject-campaign.dto';
 import { GetAdCampaignsDto } from './dto/get-ad-campaigns.dto';
+import Stripe from 'stripe';
+import * as dotenv from 'dotenv';
+import * as dayjs from 'dayjs';
+
+dotenv.config();
+
+const DATE_FORMAT = 'MMMM D, YYYY';
 
 @Controller('ad')
 @ApiTags('Ad')
 export class AdController {
-    constructor(private adService: AdService) {}
+    private stripe: Stripe;
+
+    constructor(private adService: AdService) {
+        // todo update to live key
+        this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2020-08-27' });
+    }
 
     @Post('config')
     @UseGuards(JwtAuthGuard, ACGuard)
@@ -129,6 +141,59 @@ export class AdController {
     getCurrentCampaign(@Query('type') type: AdCampaignType): Promise<Partial<AdCampaign>> {
         if (!type) throw new BadRequestException('Invalid campaign type');
         return this.adService.getCurrentCampaign(type);
+    }
+
+    @Post('campaigns/:id/pay')
+    @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
+    @ApiBearerAuth('access-token')
+    @UseRoles({
+        resource: ResourceEnum.AD_CAMPAIGN,
+        action: 'update',
+    })
+    async payCampaign(@Param('id', ParseUUIDPipe) id: string): Promise<{ id: string }> {
+        const campaign = await this.adService.findOneCampaignOrThrowException(id);
+        const startDate = dayjs(campaign.startDate);
+        const endDate = dayjs(campaign.endDate);
+        const hours = endDate.diff(startDate, 'hours');
+
+        const adConfig = await this.adService.getAdConfig();
+        if (!adConfig) {
+            throw new BadRequestException('Hourly rate is not set');
+        }
+        let rate: number;
+        if (campaign.type === AdCampaignType.MAIN) {
+            rate = Number.parseFloat(adConfig.mainHourlyRate.toString());
+        } else if (campaign.type === AdCampaignType.SIDEBAR) {
+            rate = Number.parseFloat(adConfig.sidebarHourlyRate.toString());
+        } else {
+            throw new BadRequestException('Invalid campaign type');
+        }
+
+        const amount = hours * rate * 100;
+
+        const session = await this.stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [
+                {
+                    price_data: {
+                        currency: 'rub', // todo site currency
+                        product_data: {
+                            name: `Рекламная кампания c ${startDate.format(DATE_FORMAT)} по ${endDate.format(DATE_FORMAT)}`,
+                            metadata: {
+                                campaign: campaign.id,
+                            },
+                        },
+                        unit_amount: amount,
+                    },
+                    quantity: 1,
+                },
+            ],
+            mode: 'payment',
+            success_url: `${process.env.HOST}/my-ad-campaigns.html`, // todo + id of campaign
+            cancel_url: `${process.env.HOST}/my-ad-campaigns.html`, // todo + id of campaign
+        });
+
+        return { id: session.id };
     }
 
     private isAdmin(user: User): boolean {

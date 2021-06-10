@@ -85,7 +85,7 @@ export class AdService {
         return this.adCampaignRepository.save(campaign);
     }
 
-    private async findOneCampaignOrThrowException(id: string): Promise<AdCampaign> {
+    async findOneCampaignOrThrowException(id: string): Promise<AdCampaign> {
         const campaign = await this.adCampaignRepository.findOne({ id });
         if (!campaign) {
             throw new NotFoundException(`Campaign ${id} not found`);
