@@ -174,15 +174,17 @@ export class AdController {
         // todo move to service
         const session = await this.stripe.checkout.sessions.create({
             payment_method_types: ['card'],
+            payment_intent_data: {
+                metadata: {
+                    campaign: campaign.id,
+                },
+            },
             line_items: [
                 {
                     price_data: {
                         currency: 'rub', // todo site currency
                         product_data: {
                             name: `Рекламная кампания c ${startDate.format(DATE_FORMAT)} по ${endDate.format(DATE_FORMAT)}`,
-                            metadata: {
-                                campaign: campaign.id,
-                            },
                         },
                         unit_amount: amount,
                     },
