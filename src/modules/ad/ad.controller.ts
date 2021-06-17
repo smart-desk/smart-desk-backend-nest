@@ -171,6 +171,7 @@ export class AdController {
 
         const amount = hours * rate * 100;
 
+        // todo move to service
         const session = await this.stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: [
@@ -189,8 +190,8 @@ export class AdController {
                 },
             ],
             mode: 'payment',
-            success_url: `${process.env.HOST}/my-ad-campaigns.html`, // todo + id of campaign
-            cancel_url: `${process.env.HOST}/my-ad-campaigns.html`, // todo + id of campaign
+            success_url: `${process.env.HOST}/profile/my-ad-campaigns`, // todo + id of campaign
+            cancel_url: `${process.env.HOST}/profile/my-ad-campaigns`, // todo + id of campaign
         });
 
         return { id: session.id };
