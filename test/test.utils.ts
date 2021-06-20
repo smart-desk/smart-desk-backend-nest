@@ -16,6 +16,8 @@ import { User } from '../src/modules/users/entities/user.entity';
 import { DatepickerEntity } from '../src/modules/dynamic-fields/datepicker/datepicker.entity';
 import { MailService } from '../src/modules/mail/mail.service';
 import { MailServiceMock } from './mocks/mail.service.mock';
+import { StripeService } from '../dist/modules/stripe/stripe.service';
+import { StripeServiceMock } from './mocks/stripe.service.mock';
 
 export async function createTestAppForModule(moduleRef: TestingModule) {
     const app = moduleRef.createNestApplication();
@@ -90,5 +92,7 @@ export function declareCommonProviders(moduleRef: TestingModuleBuilder): Testing
         .overrideProvider(getRepositoryToken(DatepickerEntity))
         .useValue(createRepositoryMock())
         .overrideProvider(MailService)
-        .useValue(MailServiceMock);
+        .useValue(MailServiceMock)
+        .overrideProvider(StripeService)
+        .useValue(StripeServiceMock);
 }

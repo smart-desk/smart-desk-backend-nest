@@ -145,6 +145,7 @@ export class AdController {
         resource: ResourceEnum.AD_CAMPAIGN,
         action: 'update',
     })
+    @HttpCode(HttpStatus.OK)
     async payCampaign(@Param('id', ParseUUIDPipe) id: string): Promise<{ id: string }> {
         const campaign = await this.adService.findOneCampaignOrThrowException(id);
         const amount = await this.adService.countCampaignCost(campaign.id);
