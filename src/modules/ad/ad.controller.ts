@@ -28,9 +28,9 @@ import { AdCampaign, AdCampaignType } from './enitities/ad-campaign.entity';
 import { AdCampaignDto } from './dto/ad-campaign.dto';
 import { RejectCampaignDto } from './dto/reject-campaign.dto';
 import { GetAdCampaignsDto } from './dto/get-ad-campaigns.dto';
-import Stripe from 'stripe';
 import * as dotenv from 'dotenv';
 import * as dayjs from 'dayjs';
+import { StripeService } from '../stripe/stripe.service';
 
 dotenv.config();
 
@@ -39,12 +39,7 @@ const DATE_FORMAT = 'MMMM D, YYYY';
 @Controller('ad')
 @ApiTags('Ad')
 export class AdController {
-    private stripe: Stripe;
-
-    constructor(private adService: AdService) {
-        // todo update to live key
-        this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2020-08-27' });
-    }
+    constructor(private adService: AdService, private stripeService: StripeService) {}
 
     @Post('config')
     @UseGuards(JwtAuthGuard, ACGuard)
@@ -152,27 +147,11 @@ export class AdController {
     })
     async payCampaign(@Param('id', ParseUUIDPipe) id: string): Promise<{ id: string }> {
         const campaign = await this.adService.findOneCampaignOrThrowException(id);
+        const amount = await this.adService.countCampaignCost(campaign.id);
         const startDate = dayjs(campaign.startDate);
         const endDate = dayjs(campaign.endDate);
-        const hours = endDate.diff(startDate, 'hours');
 
-        const adConfig = await this.adService.getAdConfig();
-        if (!adConfig) {
-            throw new BadRequestException('Hourly rate is not set');
-        }
-        let rate: number;
-        if (campaign.type === AdCampaignType.MAIN) {
-            rate = Number.parseFloat(adConfig.mainHourlyRate.toString());
-        } else if (campaign.type === AdCampaignType.SIDEBAR) {
-            rate = Number.parseFloat(adConfig.sidebarHourlyRate.toString());
-        } else {
-            throw new BadRequestException('Invalid campaign type');
-        }
-
-        const amount = hours * rate * 100;
-
-        // todo move to service
-        const session = await this.stripe.checkout.sessions.create({
+        return await this.stripeService.createPaymentSession({
             payment_method_types: ['card'],
             payment_intent_data: {
                 metadata: {
@@ -192,11 +171,9 @@ export class AdController {
                 },
             ],
             mode: 'payment',
-            success_url: `${process.env.HOST}/profile/my-ad-campaigns`, // todo + id of campaign
-            cancel_url: `${process.env.HOST}/profile/my-ad-campaigns`, // todo + id of campaign
+            success_url: `${process.env.HOST}/profile/my-ad-campaigns/${campaign.id}`,
+            cancel_url: `${process.env.HOST}/profile/my-ad-campaigns/${campaign.id}`,
         });
-
-        return { id: session.id };
     }
 
     private isAdmin(user: User): boolean {

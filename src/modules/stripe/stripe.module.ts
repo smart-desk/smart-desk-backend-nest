@@ -1,9 +1,12 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { StripeController } from './stripe.controller';
 import { AdModule } from '../ad/ad.module';
+import { StripeService } from './stripe.service';
 
 @Module({
-    imports: [AdModule],
+    imports: [forwardRef(() => AdModule)],
     controllers: [StripeController],
+    providers: [StripeService],
+    exports: [StripeService],
 })
 export class StripeModule {}

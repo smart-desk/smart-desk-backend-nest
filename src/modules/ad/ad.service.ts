@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AdConfig } from './enitities/ad-config.entity';
@@ -97,5 +97,26 @@ export class AdService {
             throw new NotFoundException(`Campaign ${id} not found`);
         }
         return campaign;
+    }
+
+    async countCampaignCost(id: string): Promise<number> {
+        const campaign = await this.findOneCampaignOrThrowException(id);
+        const startDate = dayjs(campaign.startDate);
+        const endDate = dayjs(campaign.endDate);
+        const hours = endDate.diff(startDate, 'hours');
+
+        const adConfig = await this.getAdConfig();
+        if (!adConfig) {
+            throw new BadRequestException('Hourly rate is not set');
+        }
+        let rate: number;
+        if (campaign.type === AdCampaignType.MAIN) {
+            rate = Number.parseFloat(adConfig.mainHourlyRate.toString());
+        } else if (campaign.type === AdCampaignType.SIDEBAR) {
+            rate = Number.parseFloat(adConfig.sidebarHourlyRate.toString());
+        } else {
+            throw new BadRequestException('Invalid campaign type');
+        }
+        return hours * rate * 100;
     }
 }
