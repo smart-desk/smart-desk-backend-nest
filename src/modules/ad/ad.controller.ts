@@ -28,11 +28,18 @@ import { AdCampaign, AdCampaignType } from './enitities/ad-campaign.entity';
 import { AdCampaignDto } from './dto/ad-campaign.dto';
 import { RejectCampaignDto } from './dto/reject-campaign.dto';
 import { GetAdCampaignsDto } from './dto/get-ad-campaigns.dto';
+import * as dotenv from 'dotenv';
+import * as dayjs from 'dayjs';
+import { StripeService } from '../stripe/stripe.service';
+
+dotenv.config();
+
+const DATE_FORMAT = 'MMMM D, YYYY';
 
 @Controller('ad')
 @ApiTags('Ad')
 export class AdController {
-    constructor(private adService: AdService) {}
+    constructor(private adService: AdService, private stripeService: StripeService) {}
 
     @Post('config')
     @UseGuards(JwtAuthGuard, ACGuard)
@@ -129,6 +136,45 @@ export class AdController {
     getCurrentCampaign(@Query('type') type: AdCampaignType): Promise<Partial<AdCampaign>> {
         if (!type) throw new BadRequestException('Invalid campaign type');
         return this.adService.getCurrentCampaign(type);
+    }
+
+    @Post('campaigns/:id/pay')
+    @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
+    @ApiBearerAuth('access-token')
+    @UseRoles({
+        resource: ResourceEnum.AD_CAMPAIGN,
+        action: 'update',
+    })
+    @HttpCode(HttpStatus.OK)
+    async payCampaign(@Param('id', ParseUUIDPipe) id: string): Promise<{ id: string }> {
+        const campaign = await this.adService.findOneCampaignOrThrowException(id);
+        const amount = await this.adService.countCampaignCost(campaign.id);
+        const startDate = dayjs(campaign.startDate);
+        const endDate = dayjs(campaign.endDate);
+
+        return await this.stripeService.createPaymentSession({
+            payment_method_types: ['card'],
+            payment_intent_data: {
+                metadata: {
+                    campaign: campaign.id,
+                },
+            },
+            line_items: [
+                {
+                    price_data: {
+                        currency: 'rub', // todo site currency
+                        product_data: {
+                            name: `Рекламная кампания c ${startDate.format(DATE_FORMAT)} по ${endDate.format(DATE_FORMAT)}`,
+                        },
+                        unit_amount: amount,
+                    },
+                    quantity: 1,
+                },
+            ],
+            mode: 'payment',
+            success_url: `${process.env.HOST}/profile/my-ad-campaigns/${campaign.id}`,
+            cancel_url: `${process.env.HOST}/profile/my-ad-campaigns/${campaign.id}`,
+        });
     }
 
     private isAdmin(user: User): boolean {

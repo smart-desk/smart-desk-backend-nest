@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -18,6 +18,10 @@ import { PhoneModule } from '../phone/phone.module';
 import { ChatModule } from '../chat/chat.module';
 import { MailModule } from '../mail/mail.module';
 import { AdModule } from '../ad/ad.module';
+import { StripeModule } from '../stripe/stripe.module';
+import { RawBodyMiddleware } from '../../middlewares/raw-body.middleware';
+import { StripeController } from '../stripe/stripe.controller';
+import { ParsedBodyMiddleware } from '../../middlewares/parsed-body.middleware';
 
 const app = [
     AuthModule,
@@ -33,6 +37,7 @@ const app = [
     ChatModule,
     MailModule,
     AdModule,
+    StripeModule,
 ];
 
 @Module({
@@ -44,4 +49,8 @@ const app = [
         },
     ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+    configure(consumer: MiddlewareConsumer) {
+        consumer.apply(RawBodyMiddleware).forRoutes(StripeController).apply(ParsedBodyMiddleware).forRoutes('*');
+    }
+}

@@ -265,6 +265,17 @@ describe('Ad controller', () => {
         });
     });
 
+    describe('pay campaign', () => {
+        it('successfully', () => {
+            return request(app.getHttpServer()).post(`/ad/campaigns/${uuid()}/pay`).expect(HttpStatus.OK);
+        });
+
+        it('with error unauthorized', () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+            return request(app.getHttpServer()).post(`/ad/campaigns/${uuid()}/pay`).expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
     describe('reject campaign', () => {
         it('successfully', () => {
             JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {

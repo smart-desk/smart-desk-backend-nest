@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AdConfig } from './enitities/ad-config.entity';
@@ -55,7 +55,7 @@ export class AdService {
     async getCampaignsSchedule(type: AdCampaignType): Promise<Partial<AdCampaign[]>> {
         return await this.adCampaignRepository
             .createQueryBuilder('campaign')
-            .where({ status: AdCampaignStatus.APPROVED, type }) // todo change on PAID!!!
+            .where({ status: AdCampaignStatus.PAID, type })
             .andWhere('campaign.endDate >= :today', { today: dayjs().toISOString() })
             .select(['campaign.startDate', 'campaign.endDate'])
             .getMany();
@@ -65,7 +65,7 @@ export class AdService {
     async getCurrentCampaign(type: AdCampaignType): Promise<Partial<AdCampaign>> {
         return await this.adCampaignRepository
             .createQueryBuilder('campaign')
-            .where({ status: AdCampaignStatus.APPROVED, type }) // todo change on PAID!!!
+            .where({ status: AdCampaignStatus.PAID, type })
             .andWhere(':today BETWEEN campaign.startDate and campaign.endDate', { today: dayjs().toISOString() })
             .select(['campaign.link', 'campaign.img', 'campaign.type'])
             .getOne();
@@ -85,11 +85,38 @@ export class AdService {
         return this.adCampaignRepository.save(campaign);
     }
 
-    private async findOneCampaignOrThrowException(id: string): Promise<AdCampaign> {
+    async payCampaign(id: string): Promise<AdCampaign> {
+        const campaign = await this.findOneCampaignOrThrowException(id);
+        campaign.status = AdCampaignStatus.PAID;
+        return this.adCampaignRepository.save(campaign);
+    }
+
+    async findOneCampaignOrThrowException(id: string): Promise<AdCampaign> {
         const campaign = await this.adCampaignRepository.findOne({ id });
         if (!campaign) {
             throw new NotFoundException(`Campaign ${id} not found`);
         }
         return campaign;
+    }
+
+    async countCampaignCost(id: string): Promise<number> {
+        const campaign = await this.findOneCampaignOrThrowException(id);
+        const startDate = dayjs(campaign.startDate);
+        const endDate = dayjs(campaign.endDate);
+        const hours = endDate.diff(startDate, 'hours');
+
+        const adConfig = await this.getAdConfig();
+        if (!adConfig) {
+            throw new BadRequestException('Hourly rate is not set');
+        }
+        let rate: number;
+        if (campaign.type === AdCampaignType.MAIN) {
+            rate = Number.parseFloat(adConfig.mainHourlyRate.toString());
+        } else if (campaign.type === AdCampaignType.SIDEBAR) {
+            rate = Number.parseFloat(adConfig.sidebarHourlyRate.toString());
+        } else {
+            throw new BadRequestException('Invalid campaign type');
+        }
+        return hours * rate * 100;
     }
 }

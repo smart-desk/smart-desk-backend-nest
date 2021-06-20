@@ -53,6 +53,7 @@
         "reflect-metadata": "^0.1.13",
         "rimraf": "^3.0.2",
         "rxjs": "^6.5.4",
+        "stripe": "^8.154.0",
         "swagger-ui-express": "^4.1.4",
         "typeorm": "^0.2.32",
         "uuid": "^8.3.1",
