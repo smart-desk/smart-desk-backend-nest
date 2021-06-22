@@ -1,4 +1,4 @@
-export enum AdvertStatus {
+export enum ProductStatus {
     ACTIVE = 'active',
     PENDING = 'pending',
     BLOCKED = 'blocked',

@@ -9,7 +9,7 @@ export class CreateChatDto extends Userable {
 
     @IsUUID()
     @IsNotEmpty()
-    advertId: string;
+    productId: string;
 
     @Exclude()
     user1: string;

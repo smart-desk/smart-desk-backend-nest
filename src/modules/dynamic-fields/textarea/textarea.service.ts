@@ -13,7 +13,7 @@ export class TextareaService extends BaseFieldService {
         super(repository, TextareaEntity, CreateTextareaDto, UpdateTextareaDto, TextareaParamsDto);
     }
 
-    async getAdvertIdsByFilter(fieldId: string, params: any): Promise<string[]> {
+    async getProductIdsByFilter(fieldId: string, params: any): Promise<string[]> {
         return null;
     }
 }

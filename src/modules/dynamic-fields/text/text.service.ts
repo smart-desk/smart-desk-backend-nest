@@ -33,7 +33,7 @@ export class TextService extends BaseFieldService {
         return;
     }
 
-    async getAdvertIdsByFilter(fieldId: string, params: any): Promise<string[]> {
+    async getProductIdsByFilter(fieldId: string, params: any): Promise<string[]> {
         return null;
     }
 }

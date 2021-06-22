@@ -2,7 +2,7 @@ import { IsArray, IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength } 
 import { DynamicFieldsBaseCreateDto } from '../../dynamic-fields/dynamic-fields-base-create.dto';
 import { PreferContact } from '../models/prefer-contact.enum';
 
-export class CreateAdvertDto {
+export class CreateProductDto {
     @IsUUID()
     @IsNotEmpty()
     category_id: string;

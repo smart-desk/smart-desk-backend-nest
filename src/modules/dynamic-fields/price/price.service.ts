@@ -7,7 +7,7 @@ import { CreatePriceDto } from './dto/create-price.dto';
 import { UpdatePriceDto } from './dto/update-price.dto';
 import { PriceParamsDto } from './dto/price-params.dto';
 import { PriceFilterDto } from './dto/price-filter.dto';
-import { SortingType } from '../../adverts/models/sorting';
+import { SortingType } from '../../products/models/sorting';
 
 @Injectable()
 export class PriceService extends BaseFieldService {
@@ -15,7 +15,7 @@ export class PriceService extends BaseFieldService {
         super(repository, PriceEntity, CreatePriceDto, UpdatePriceDto, PriceParamsDto);
     }
 
-    async getAdvertIdsByFilter(fieldId: string, params: PriceFilterDto): Promise<string[]> {
+    async getProductIdsByFilter(fieldId: string, params: PriceFilterDto): Promise<string[]> {
         const result = await this.repository
             .createQueryBuilder()
             .where({
@@ -24,20 +24,20 @@ export class PriceService extends BaseFieldService {
             })
             .getMany();
 
-        return result.map(r => r.advert_id);
+        return result.map(r => r.productId);
     }
 
-    async getSortedAdvertIds(fieldId: string, advertIds: string[], direction: SortingType): Promise<string[]> {
+    async getSortedProductIds(fieldId: string, productIds: string[], direction: SortingType): Promise<string[]> {
         const result = await this.repository
             .createQueryBuilder('price')
             .where({
-                advert_id: In(advertIds),
-                field_id: fieldId
+                product_id: In(productIds),
+                field_id: fieldId,
             })
             .orderBy({ value: direction })
-            .select('price.advert_id')
+            .select('price.product_id')
             .getMany();
 
-        return result.map(r => r.advert_id);
+        return result.map(r => r.productId);
     }
 }

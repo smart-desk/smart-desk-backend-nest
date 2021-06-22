@@ -6,11 +6,11 @@ import { v4 as uuid } from 'uuid';
 import { Connection } from 'typeorm';
 import { AccessControlModule, ACGuard } from 'nest-access-control';
 import { createRepositoryMock, createTestAppForModule, declareCommonProviders } from '../../../test/test.utils';
-import { Advert } from './entities/advert.entity';
-import { AdvertsModule } from './adverts.module';
+import { Product } from './entities/product.entity';
+import { ProductsModule } from './products.module';
 import { Field } from '../fields/field.entity';
-import { CreateAdvertDto } from './dto/create-advert.dto';
-import { UpdateAdvertDto } from './dto/update-advert.dto';
+import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
 import { FieldType } from '../dynamic-fields/dynamic-fields.module';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { JwtAuthGuardMock } from '../../../test/mocks/jwt-auth.guard.mock';
@@ -22,10 +22,8 @@ import { UserStatus } from '../users/models/user-status.enum';
 import { BlockedUserGuard } from '../../guards/blocked-user.guard';
 import { BlockedUserGuardMock } from '../../../test/mocks/blocked-user.guard.mock';
 import { PreferContact } from './models/prefer-contact.enum';
-import { MailService } from '../mail/mail.service';
-import { MailServiceMock } from '../../../test/mocks/mail.service.mock';
 
-describe('Adverts controller', () => {
+describe('Products controller', () => {
     let app: INestApplication;
 
     const fieldEntity = new Field();
@@ -34,11 +32,11 @@ describe('Adverts controller', () => {
     fieldEntity.title = 'test';
     fieldEntity.params = { label: 'Test', placeholder: 'test', required: true };
 
-    const advertEntity = new Advert();
-    advertEntity.id = '1234';
-    advertEntity.userId = '123';
+    const productEntity = new Product();
+    productEntity.id = '1234';
+    productEntity.userId = '123';
 
-    const advertRepositoryMock = createRepositoryMock<Advert>([advertEntity]);
+    const productRepositoryMock = createRepositoryMock<Product>([productEntity]);
     const fieldRepositoryMock = createRepositoryMock<Field>([fieldEntity]);
     const connectionMock = {
         manager: createRepositoryMock(),
@@ -46,12 +44,12 @@ describe('Adverts controller', () => {
 
     beforeAll(async () => {
         let moduleBuilder = await Test.createTestingModule({
-            imports: [AdvertsModule, TypeOrmModule.forRoot()],
+            imports: [ProductsModule, TypeOrmModule.forRoot()],
         });
 
         const moduleRef = await declareCommonProviders(moduleBuilder)
-            .overrideProvider(getRepositoryToken(Advert))
-            .useValue(advertRepositoryMock)
+            .overrideProvider(getRepositoryToken(Product))
+            .useValue(productRepositoryMock)
             .overrideProvider(getRepositoryToken(Field))
             .useValue(fieldRepositoryMock)
             .overrideProvider(Connection)
@@ -67,13 +65,13 @@ describe('Adverts controller', () => {
         app = await createTestAppForModule(moduleRef);
     });
 
-    describe('get adverts', () => {
+    describe('get products', () => {
         it(`successfully with no params`, () => {
             return request(app.getHttpServer())
-                .get('/adverts')
+                .get('/products')
                 .expect(HttpStatus.OK)
                 .expect(res => {
-                    expect(res.body.adverts).toBeDefined();
+                    expect(res.body.products).toBeDefined();
                     expect(res.body.limit).toEqual(20);
                     expect(res.body.totalCount).toEqual(1);
                     expect(res.body.page).toEqual(1);
@@ -82,7 +80,7 @@ describe('Adverts controller', () => {
 
         it(`successfully with page, limit, search and category`, () => {
             return request(app.getHttpServer())
-                .get('/adverts')
+                .get('/products')
                 .query({
                     page: 2,
                     limit: 2,
@@ -91,7 +89,7 @@ describe('Adverts controller', () => {
                 })
                 .expect(HttpStatus.OK)
                 .expect(res => {
-                    expect(res.body.adverts).toBeDefined();
+                    expect(res.body.products).toBeDefined();
                     expect(res.body.limit).toEqual(2);
                     expect(res.body.totalCount).toEqual(1);
                     expect(res.body.page).toEqual(2);
@@ -100,7 +98,7 @@ describe('Adverts controller', () => {
 
         it(`with error - not valid page`, () => {
             return request(app.getHttpServer())
-                .get('/adverts')
+                .get('/products')
                 .query({ page: 0 })
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
@@ -110,7 +108,7 @@ describe('Adverts controller', () => {
 
         it(`with error - not valid limit, no negative numbers`, () => {
             return request(app.getHttpServer())
-                .get('/adverts')
+                .get('/products')
                 .query({ limit: -1 })
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
@@ -120,7 +118,7 @@ describe('Adverts controller', () => {
 
         it(`with error - not valid limit, no greater than 100`, () => {
             return request(app.getHttpServer())
-                .get('/adverts')
+                .get('/products')
                 .query({ limit: 300 })
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
@@ -130,7 +128,7 @@ describe('Adverts controller', () => {
 
         it(`with error - not valid search`, () => {
             return request(app.getHttpServer())
-                .get('/adverts')
+                .get('/products')
                 .query({ search: Array(300).fill('a').join('') })
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
@@ -140,13 +138,13 @@ describe('Adverts controller', () => {
 
         it(`successfully with filters`, () => {
             return request(app.getHttpServer())
-                .get(`/adverts?filters[${uuid()}][from]=100&filters[${uuid()}][to]=500`)
+                .get(`/products?filters[${uuid()}][from]=100&filters[${uuid()}][to]=500`)
                 .expect(HttpStatus.OK);
         });
 
         it(`with error - invalid filters format`, () => {
             return request(app.getHttpServer())
-                .get(`/adverts?filters=1000`)
+                .get(`/products?filters=1000`)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('filters must be an object');
@@ -154,12 +152,12 @@ describe('Adverts controller', () => {
         });
 
         it(`successfully with sorting`, () => {
-            return request(app.getHttpServer()).get(`/adverts?sorting[${uuid()}]=ASC`).expect(HttpStatus.OK);
+            return request(app.getHttpServer()).get(`/products?sorting[${uuid()}]=ASC`).expect(HttpStatus.OK);
         });
 
         it(`with error - invalid sorting format`, () => {
             return request(app.getHttpServer())
-                .get(`/adverts?sorting=1000`)
+                .get(`/products?sorting=1000`)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('sorting must be an object');
@@ -167,12 +165,12 @@ describe('Adverts controller', () => {
         });
 
         it(`successfully with user id`, () => {
-            return request(app.getHttpServer()).get(`/adverts?user=${uuid()}`).expect(HttpStatus.OK);
+            return request(app.getHttpServer()).get(`/products?user=${uuid()}`).expect(HttpStatus.OK);
         });
 
         it(`with error - user uuid is not valid`, () => {
             return request(app.getHttpServer())
-                .get(`/adverts?user=1000`)
+                .get(`/products?user=1000`)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('user must be an UUID');
@@ -180,13 +178,13 @@ describe('Adverts controller', () => {
         });
     });
 
-    describe('get adverts for category', () => {
+    describe('get products for category', () => {
         it(`successfully with no params`, () => {
             return request(app.getHttpServer())
-                .get(`/adverts/category/${uuid()}`)
+                .get(`/products/category/${uuid()}`)
                 .expect(HttpStatus.OK)
                 .expect(res => {
-                    expect(res.body.adverts).toBeDefined();
+                    expect(res.body.products).toBeDefined();
                     expect(res.body.limit).toEqual(20);
                     expect(res.body.totalCount).toEqual(1);
                     expect(res.body.page).toEqual(1);
@@ -195,7 +193,7 @@ describe('Adverts controller', () => {
 
         it(`successfully with page, limit, search`, () => {
             return request(app.getHttpServer())
-                .get(`/adverts/category/${uuid()}`)
+                .get(`/products/category/${uuid()}`)
                 .query({
                     page: 2,
                     limit: 2,
@@ -203,7 +201,7 @@ describe('Adverts controller', () => {
                 })
                 .expect(HttpStatus.OK)
                 .expect(res => {
-                    expect(res.body.adverts).toBeDefined();
+                    expect(res.body.products).toBeDefined();
                     expect(res.body.limit).toEqual(2);
                     expect(res.body.totalCount).toEqual(1);
                     expect(res.body.page).toEqual(2);
@@ -212,7 +210,7 @@ describe('Adverts controller', () => {
 
         it(`with error - not valid category id`, () => {
             return request(app.getHttpServer())
-                .get(`/adverts/category/13244`)
+                .get(`/products/category/13244`)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('Validation failed (uuid  is expected)');
@@ -221,7 +219,7 @@ describe('Adverts controller', () => {
 
         it(`with error - not valid page`, () => {
             return request(app.getHttpServer())
-                .get(`/adverts/category/${uuid()}`)
+                .get(`/products/category/${uuid()}`)
                 .query({ page: 0 })
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
@@ -231,7 +229,7 @@ describe('Adverts controller', () => {
 
         it(`with error - not valid limit, no negative numbers`, () => {
             return request(app.getHttpServer())
-                .get(`/adverts/category/${uuid()}`)
+                .get(`/products/category/${uuid()}`)
                 .query({ limit: -1 })
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
@@ -241,7 +239,7 @@ describe('Adverts controller', () => {
 
         it(`with error - not valid limit, no greater than 100`, () => {
             return request(app.getHttpServer())
-                .get(`/adverts/category/${uuid()}`)
+                .get(`/products/category/${uuid()}`)
                 .query({ limit: 300 })
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
@@ -251,7 +249,7 @@ describe('Adverts controller', () => {
 
         it(`with error - not valid search`, () => {
             return request(app.getHttpServer())
-                .get(`/adverts/category/${uuid()}`)
+                .get(`/products/category/${uuid()}`)
                 .query({ search: Array(300).fill('a').join('') })
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
@@ -261,13 +259,13 @@ describe('Adverts controller', () => {
 
         it(`successfully with filters`, () => {
             return request(app.getHttpServer())
-                .get(`/adverts/category/${uuid()}?filters[${uuid()}][from]=100&filters[${uuid()}][to]=500`)
+                .get(`/products/category/${uuid()}?filters[${uuid()}][from]=100&filters[${uuid()}][to]=500`)
                 .expect(HttpStatus.OK);
         });
 
         it(`with error - invalid filters format`, () => {
             return request(app.getHttpServer())
-                .get(`/adverts/category/${uuid()}?filters=1000`)
+                .get(`/products/category/${uuid()}?filters=1000`)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('filters must be an object');
@@ -275,12 +273,12 @@ describe('Adverts controller', () => {
         });
 
         it(`successfully with sorting`, () => {
-            return request(app.getHttpServer()).get(`/adverts/category/${uuid()}?sorting[${uuid()}]=ASC`).expect(HttpStatus.OK);
+            return request(app.getHttpServer()).get(`/products/category/${uuid()}?sorting[${uuid()}]=ASC`).expect(HttpStatus.OK);
         });
 
         it(`with error - invalid sorting format`, () => {
             return request(app.getHttpServer())
-                .get(`/adverts/category/${uuid()}?sorting=1000`)
+                .get(`/products/category/${uuid()}?sorting=1000`)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('sorting must be an object');
@@ -288,12 +286,12 @@ describe('Adverts controller', () => {
         });
 
         it(`successfully with user id`, () => {
-            return request(app.getHttpServer()).get(`/adverts/category/${uuid()}?user=${uuid()}`).expect(HttpStatus.OK);
+            return request(app.getHttpServer()).get(`/products/category/${uuid()}?user=${uuid()}`).expect(HttpStatus.OK);
         });
 
         it(`with error - user uuid is not valid`, () => {
             return request(app.getHttpServer())
-                .get(`/adverts/category/${uuid()}?user=1000`)
+                .get(`/products/category/${uuid()}?user=1000`)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('user must be an UUID');
@@ -301,14 +299,14 @@ describe('Adverts controller', () => {
         });
     });
 
-    describe('get advert by id', () => {
+    describe('get product by id', () => {
         it(`successfully`, () => {
-            return request(app.getHttpServer()).get(`/adverts/${uuid()}`).expect(HttpStatus.OK);
+            return request(app.getHttpServer()).get(`/products/${uuid()}`).expect(HttpStatus.OK);
         });
 
         it(`with error - not valid uuid`, () => {
             return request(app.getHttpServer())
-                .get('/adverts/123123')
+                .get('/products/123123')
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('Validation failed (uuid  is expected)');
@@ -316,19 +314,19 @@ describe('Adverts controller', () => {
         });
 
         it(`with error - not found`, () => {
-            advertRepositoryMock.findOne.mockReturnValueOnce(undefined);
-            return request(app.getHttpServer()).get(`/adverts/${uuid()}`).expect(HttpStatus.NOT_FOUND);
+            productRepositoryMock.findOne.mockReturnValueOnce(undefined);
+            return request(app.getHttpServer()).get(`/products/${uuid()}`).expect(HttpStatus.NOT_FOUND);
         });
     });
 
-    describe('get recommended adverts by id', () => {
+    describe('get recommended products by id', () => {
         it(`successfully`, () => {
-            return request(app.getHttpServer()).get(`/adverts/${uuid()}/recommended`).expect(HttpStatus.OK);
+            return request(app.getHttpServer()).get(`/products/${uuid()}/recommended`).expect(HttpStatus.OK);
         });
 
         it(`with error - not valid uuid`, () => {
             return request(app.getHttpServer())
-                .get('/adverts/123123/recommended')
+                .get('/products/123123/recommended')
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('Validation failed (uuid  is expected)');
@@ -336,35 +334,35 @@ describe('Adverts controller', () => {
         });
 
         it(`with error - not found`, () => {
-            advertRepositoryMock.findOne.mockReturnValueOnce(undefined);
-            return request(app.getHttpServer()).get(`/adverts/${uuid()}/recommended`).expect(HttpStatus.NOT_FOUND);
+            productRepositoryMock.findOne.mockReturnValueOnce(undefined);
+            return request(app.getHttpServer()).get(`/products/${uuid()}/recommended`).expect(HttpStatus.NOT_FOUND);
         });
     });
 
-    describe('create advert', () => {
+    describe('create product', () => {
         it(`successfully with empty fields array`, () => {
             return request(app.getHttpServer())
-                .post(`/adverts`)
+                .post(`/products`)
                 .send({
                     model_id: uuid(),
                     category_id: uuid(),
-                    title: 'some advert',
+                    title: 'some product',
                     preferContact: PreferContact.PHONE,
                     fields: [],
-                } as CreateAdvertDto)
+                } as CreateProductDto)
                 .expect(HttpStatus.CREATED);
         });
 
-        it(`with error - not valid advert params`, () => {
+        it(`with error - not valid product params`, () => {
             return request(app.getHttpServer())
-                .post(`/adverts`)
+                .post(`/products`)
                 .send({
                     model_id: '12312',
                     category_id: '123123',
                     title: '',
                     preferContact: 'left' as PreferContact,
                     fields: [],
-                } as CreateAdvertDto)
+                } as CreateProductDto)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('category_id must be an UUID');
@@ -376,12 +374,12 @@ describe('Adverts controller', () => {
 
         it(`with error - not valid fields property`, () => {
             return request(app.getHttpServer())
-                .post(`/adverts`)
+                .post(`/products`)
                 .send({
                     model_id: '12312',
                     category_id: '123123',
                     title: '',
-                } as CreateAdvertDto)
+                } as CreateProductDto)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('fields must be an array');
@@ -391,13 +389,13 @@ describe('Adverts controller', () => {
 
         it(`with error - title cannot be longer than 255 characters`, () => {
             return request(app.getHttpServer())
-                .post(`/adverts`)
+                .post(`/products`)
                 .send({
                     model_id: uuid(),
                     category_id: uuid(),
                     title: Array(300).fill('a').join(''),
                     fields: [],
-                } as CreateAdvertDto)
+                } as CreateProductDto)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('title must be shorter than or equal to 255 characters');
@@ -405,35 +403,35 @@ describe('Adverts controller', () => {
         });
     });
 
-    describe('update advert', () => {
+    describe('update product', () => {
         it(`successfully with empty fields array`, () => {
             return request(app.getHttpServer())
-                .patch(`/adverts/${uuid()}`)
+                .patch(`/products/${uuid()}`)
                 .send({
-                    title: 'some advert',
+                    title: 'some product',
                     fields: [],
-                } as UpdateAdvertDto)
+                } as UpdateProductDto)
                 .expect(HttpStatus.OK);
         });
 
         it(`with error - not found`, () => {
-            advertRepositoryMock.findOne.mockReturnValueOnce(undefined);
+            productRepositoryMock.findOne.mockReturnValueOnce(undefined);
             return request(app.getHttpServer())
-                .patch(`/adverts/${uuid()}`)
+                .patch(`/products/${uuid()}`)
                 .send({
                     title: '123123',
                     fields: [],
-                } as UpdateAdvertDto)
+                } as UpdateProductDto)
                 .expect(HttpStatus.NOT_FOUND);
         });
 
         it(`with error - not valid id`, () => {
             return request(app.getHttpServer())
-                .patch(`/adverts/123`)
+                .patch(`/products/123`)
                 .send({
                     title: '123123',
                     fields: [],
-                } as UpdateAdvertDto)
+                } as UpdateProductDto)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('Validation failed (uuid  is expected)');
@@ -442,10 +440,10 @@ describe('Adverts controller', () => {
 
         it(`with error - not valid fields property`, () => {
             return request(app.getHttpServer())
-                .patch(`/adverts/${uuid()}`)
+                .patch(`/products/${uuid()}`)
                 .send({
                     title: '',
-                } as UpdateAdvertDto)
+                } as UpdateProductDto)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('fields must be an array');
@@ -455,11 +453,11 @@ describe('Adverts controller', () => {
 
         it(`with error - title cannot be longer than 255 characters`, () => {
             return request(app.getHttpServer())
-                .patch(`/adverts/${uuid()}`)
+                .patch(`/products/${uuid()}`)
                 .send({
                     title: Array(300).fill('a').join(''),
                     fields: [],
-                } as UpdateAdvertDto)
+                } as UpdateProductDto)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('title must be shorter than or equal to 255 characters');
@@ -467,14 +465,14 @@ describe('Adverts controller', () => {
         });
     });
 
-    describe('delete advert by id', () => {
+    describe('delete product by id', () => {
         it(`successfully`, () => {
-            return request(app.getHttpServer()).delete(`/adverts/${uuid()}`).expect(HttpStatus.NO_CONTENT);
+            return request(app.getHttpServer()).delete(`/products/${uuid()}`).expect(HttpStatus.NO_CONTENT);
         });
 
         it(`with error - not valid uuid`, () => {
             return request(app.getHttpServer())
-                .delete('/adverts/123123')
+                .delete('/products/123123')
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('Validation failed (uuid  is expected)');
@@ -482,8 +480,8 @@ describe('Adverts controller', () => {
         });
 
         it(`with error - not found`, () => {
-            advertRepositoryMock.findOne.mockReturnValueOnce(undefined);
-            return request(app.getHttpServer()).delete(`/adverts/${uuid()}`).expect(HttpStatus.NOT_FOUND);
+            productRepositoryMock.findOne.mockReturnValueOnce(undefined);
+            return request(app.getHttpServer()).delete(`/products/${uuid()}`).expect(HttpStatus.NOT_FOUND);
         });
     });
 
@@ -493,7 +491,7 @@ describe('Adverts controller', () => {
 });
 
 // todo put it together
-describe('Adverts controller with ACL enabled', () => {
+describe('Products controller with ACL enabled', () => {
     let app: INestApplication;
 
     const fieldEntity = new Field();
@@ -502,11 +500,11 @@ describe('Adverts controller with ACL enabled', () => {
     fieldEntity.title = 'test';
     fieldEntity.params = { label: 'Test', placeholder: 'test', required: true };
 
-    const advertEntity = new Advert();
-    advertEntity.id = '1234';
-    advertEntity.userId = '123';
+    const productEntity = new Product();
+    productEntity.id = '1234';
+    productEntity.userId = '123';
 
-    const advertRepositoryMock = createRepositoryMock<Advert>([advertEntity]);
+    const productRepositoryMock = createRepositoryMock<Product>([productEntity]);
     const fieldRepositoryMock = createRepositoryMock<Field>([fieldEntity]);
     const connectionMock = {
         manager: createRepositoryMock(),
@@ -516,12 +514,12 @@ describe('Adverts controller with ACL enabled', () => {
 
     beforeAll(async () => {
         let moduleBuilder = Test.createTestingModule({
-            imports: [AdvertsModule, TypeOrmModule.forRoot(), AccessControlModule.forRoles(roles), UsersModule],
+            imports: [ProductsModule, TypeOrmModule.forRoot(), AccessControlModule.forRoles(roles), UsersModule],
         });
 
         const moduleRef = await declareCommonProviders(moduleBuilder)
-            .overrideProvider(getRepositoryToken(Advert))
-            .useValue(advertRepositoryMock)
+            .overrideProvider(getRepositoryToken(Product))
+            .useValue(productRepositoryMock)
             .overrideProvider(getRepositoryToken(Field))
             .useValue(fieldRepositoryMock)
             .overrideProvider(getRepositoryToken(User))
@@ -535,25 +533,25 @@ describe('Adverts controller with ACL enabled', () => {
         app = await createTestAppForModule(moduleRef);
     });
 
-    describe('get adverts', () => {
+    describe('get products', () => {
         it(`successfully`, () => {
-            return request(app.getHttpServer()).get('/adverts').expect(HttpStatus.OK);
+            return request(app.getHttpServer()).get('/products').expect(HttpStatus.OK);
         });
     });
 
-    describe('get advert by id', () => {
+    describe('get product by id', () => {
         it(`successfully`, () => {
-            return request(app.getHttpServer()).get(`/adverts/${uuid()}`).expect(HttpStatus.OK);
+            return request(app.getHttpServer()).get(`/products/${uuid()}`).expect(HttpStatus.OK);
         });
     });
 
-    describe('get my adverts', () => {
+    describe('get my products', () => {
         it(`successfully`, () => {
             return request(app.getHttpServer())
-                .get('/adverts/my')
+                .get('/products/my')
                 .expect(HttpStatus.OK)
                 .expect(res => {
-                    expect(res.body.adverts).toBeDefined();
+                    expect(res.body.products).toBeDefined();
                     expect(res.body.limit).toEqual(20);
                     expect(res.body.totalCount).toEqual(1);
                     expect(res.body.page).toEqual(1);
@@ -562,17 +560,17 @@ describe('Adverts controller with ACL enabled', () => {
 
         it(`with error - not authorized`, () => {
             JwtGuard.canActivate.mockReturnValueOnce(false);
-            return request(app.getHttpServer()).get('/adverts/my').expect(HttpStatus.FORBIDDEN);
+            return request(app.getHttpServer()).get('/products/my').expect(HttpStatus.FORBIDDEN);
         });
     });
 
-    describe('get blocked adverts', () => {
+    describe('get blocked products', () => {
         it(`successfully`, () => {
             return request(app.getHttpServer())
-                .get('/adverts/blocked')
+                .get('/products/blocked')
                 .expect(HttpStatus.OK)
                 .expect(res => {
-                    expect(res.body.adverts).toBeDefined();
+                    expect(res.body.products).toBeDefined();
                     expect(res.body.limit).toEqual(20);
                     expect(res.body.totalCount).toEqual(1);
                     expect(res.body.page).toEqual(1);
@@ -581,17 +579,17 @@ describe('Adverts controller with ACL enabled', () => {
 
         it(`with error - not authorized`, () => {
             JwtGuard.canActivate.mockReturnValueOnce(false);
-            return request(app.getHttpServer()).get('/adverts/blocked').expect(HttpStatus.FORBIDDEN);
+            return request(app.getHttpServer()).get('/products/blocked').expect(HttpStatus.FORBIDDEN);
         });
     });
 
-    describe('get pending adverts', () => {
+    describe('get pending products', () => {
         it(`successfully`, () => {
             return request(app.getHttpServer())
-                .get('/adverts/pending')
+                .get('/products/pending')
                 .expect(HttpStatus.OK)
                 .expect(res => {
-                    expect(res.body.adverts).toBeDefined();
+                    expect(res.body.products).toBeDefined();
                     expect(res.body.limit).toEqual(20);
                     expect(res.body.totalCount).toEqual(1);
                     expect(res.body.page).toEqual(1);
@@ -600,17 +598,17 @@ describe('Adverts controller with ACL enabled', () => {
 
         it(`with error - not authorized`, () => {
             JwtGuard.canActivate.mockReturnValueOnce(false);
-            return request(app.getHttpServer()).get('/adverts/pending').expect(HttpStatus.FORBIDDEN);
+            return request(app.getHttpServer()).get('/products/pending').expect(HttpStatus.FORBIDDEN);
         });
     });
 
-    describe('get completed adverts', () => {
+    describe('get completed products', () => {
         it(`successfully`, () => {
             return request(app.getHttpServer())
-                .get('/adverts/completed')
+                .get('/products/completed')
                 .expect(HttpStatus.OK)
                 .expect(res => {
-                    expect(res.body.adverts).toBeDefined();
+                    expect(res.body.products).toBeDefined();
                     expect(res.body.limit).toEqual(20);
                     expect(res.body.totalCount).toEqual(1);
                     expect(res.body.page).toEqual(1);
@@ -619,40 +617,40 @@ describe('Adverts controller with ACL enabled', () => {
 
         it(`with error - not authorized`, () => {
             JwtGuard.canActivate.mockReturnValueOnce(false);
-            return request(app.getHttpServer()).get('/adverts/completed').expect(HttpStatus.FORBIDDEN);
+            return request(app.getHttpServer()).get('/products/completed').expect(HttpStatus.FORBIDDEN);
         });
     });
 
-    describe('count advert view', () => {
+    describe('count product view', () => {
         it(`successfully`, () => {
-            return request(app.getHttpServer()).post(`/adverts/${uuid()}/view`).expect(HttpStatus.OK);
+            return request(app.getHttpServer()).post(`/products/${uuid()}/view`).expect(HttpStatus.OK);
         });
     });
 
-    describe('create advert', () => {
+    describe('create product', () => {
         it(`successfully `, () => {
             return request(app.getHttpServer())
-                .post(`/adverts`)
+                .post(`/products`)
                 .send({
                     model_id: uuid(),
                     category_id: uuid(),
-                    title: 'some advert',
+                    title: 'some product',
                     fields: [],
-                } as CreateAdvertDto)
+                } as CreateProductDto)
                 .expect(HttpStatus.CREATED);
         });
 
-        it(`with error - not owner of advert`, () => {
+        it(`with error - not owner of product`, () => {
             JwtGuard.canActivate.mockReturnValueOnce(false);
 
             return request(app.getHttpServer())
-                .post(`/adverts`)
+                .post(`/products`)
                 .send({
                     model_id: '12312',
                     category_id: '123123',
                     title: '',
                     fields: [],
-                } as CreateAdvertDto)
+                } as CreateProductDto)
                 .expect(HttpStatus.FORBIDDEN);
         });
 
@@ -662,29 +660,29 @@ describe('Adverts controller with ACL enabled', () => {
             userRepositoryMock.findOne.mockReturnValueOnce(user);
 
             return request(app.getHttpServer())
-                .post(`/adverts`)
+                .post(`/products`)
                 .send({
                     model_id: '12312',
                     category_id: '123123',
                     title: '',
                     fields: [],
-                } as CreateAdvertDto)
+                } as CreateProductDto)
                 .expect(HttpStatus.FORBIDDEN);
         });
     });
 
-    describe('update advert', () => {
+    describe('update product', () => {
         it(`successfully`, () => {
             return request(app.getHttpServer())
-                .patch(`/adverts/${uuid()}`)
+                .patch(`/products/${uuid()}`)
                 .send({
-                    title: 'some advert',
+                    title: 'some product',
                     fields: [],
-                } as UpdateAdvertDto)
+                } as UpdateProductDto)
                 .expect(HttpStatus.OK);
         });
 
-        it(`with error - not owner of advert`, () => {
+        it(`with error - not owner of product`, () => {
             JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
                 const req = context.switchToHttp().getRequest();
                 req.user = { id: '007', email: 'test@email.com', roles: ['user'] };
@@ -692,11 +690,11 @@ describe('Adverts controller with ACL enabled', () => {
             });
 
             return request(app.getHttpServer())
-                .patch(`/adverts/${uuid()}`)
+                .patch(`/products/${uuid()}`)
                 .send({
                     title: '123123',
                     fields: [],
-                } as UpdateAdvertDto)
+                } as UpdateProductDto)
                 .expect(HttpStatus.FORBIDDEN);
         });
 
@@ -706,11 +704,11 @@ describe('Adverts controller with ACL enabled', () => {
             userRepositoryMock.findOne.mockReturnValueOnce(user);
 
             return request(app.getHttpServer())
-                .patch(`/adverts/${uuid()}`)
+                .patch(`/products/${uuid()}`)
                 .send({
                     title: '123123',
                     fields: [],
-                } as UpdateAdvertDto)
+                } as UpdateProductDto)
                 .expect(HttpStatus.FORBIDDEN);
         });
 
@@ -722,42 +720,42 @@ describe('Adverts controller with ACL enabled', () => {
             });
 
             return request(app.getHttpServer())
-                .patch(`/adverts/${uuid()}`)
+                .patch(`/products/${uuid()}`)
                 .send({
                     title: '123123',
                     fields: [],
-                } as UpdateAdvertDto)
+                } as UpdateProductDto)
                 .expect(HttpStatus.OK);
         });
     });
 
-    describe('block advert', () => {
+    describe('block product', () => {
         it(`successfully`, () => {
             JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
                 const req = context.switchToHttp().getRequest();
                 req.user = { id: '007', email: 'test@email.com', roles: ['user', 'admin'] };
                 return true;
             });
-            return request(app.getHttpServer()).patch(`/adverts/${uuid()}/block`).expect(HttpStatus.OK);
+            return request(app.getHttpServer()).patch(`/products/${uuid()}/block`).expect(HttpStatus.OK);
         });
 
         it(`with error - not authorized`, () => {
             JwtGuard.canActivate.mockReturnValueOnce(false);
-            return request(app.getHttpServer()).patch(`/adverts/${uuid()}/block`).expect(HttpStatus.FORBIDDEN);
+            return request(app.getHttpServer()).patch(`/products/${uuid()}/block`).expect(HttpStatus.FORBIDDEN);
         });
 
         it(`with error - not an admin`, () => {
-            return request(app.getHttpServer()).patch(`/adverts/${uuid()}/block`).expect(HttpStatus.FORBIDDEN);
+            return request(app.getHttpServer()).patch(`/products/${uuid()}/block`).expect(HttpStatus.FORBIDDEN);
         });
 
-        it(`with error - not valid advert id`, () => {
+        it(`with error - not valid product id`, () => {
             JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
                 const req = context.switchToHttp().getRequest();
                 req.user = { id: '007', email: 'test@email.com', roles: ['user', 'admin'] };
                 return true;
             });
             return request(app.getHttpServer())
-                .patch(`/adverts/some/block`)
+                .patch(`/products/some/block`)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('Validation failed (uuid  is expected)');
@@ -765,33 +763,33 @@ describe('Adverts controller with ACL enabled', () => {
         });
     });
 
-    describe('publish advert', () => {
+    describe('publish product', () => {
         it(`successfully`, () => {
             JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
                 const req = context.switchToHttp().getRequest();
                 req.user = { id: '007', email: 'test@email.com', roles: ['user', 'admin'] };
                 return true;
             });
-            return request(app.getHttpServer()).patch(`/adverts/${uuid()}/publish`).expect(HttpStatus.OK);
+            return request(app.getHttpServer()).patch(`/products/${uuid()}/publish`).expect(HttpStatus.OK);
         });
 
         it(`with error - not authorized`, () => {
             JwtGuard.canActivate.mockReturnValueOnce(false);
-            return request(app.getHttpServer()).patch(`/adverts/${uuid()}/publish`).expect(HttpStatus.FORBIDDEN);
+            return request(app.getHttpServer()).patch(`/products/${uuid()}/publish`).expect(HttpStatus.FORBIDDEN);
         });
 
         it(`with error - not an admin`, () => {
-            return request(app.getHttpServer()).patch(`/adverts/${uuid()}/publish`).expect(HttpStatus.FORBIDDEN);
+            return request(app.getHttpServer()).patch(`/products/${uuid()}/publish`).expect(HttpStatus.FORBIDDEN);
         });
 
-        it(`with error - not valid advert id`, () => {
+        it(`with error - not valid product id`, () => {
             JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
                 const req = context.switchToHttp().getRequest();
                 req.user = { id: '007', email: 'test@email.com', roles: ['user', 'admin'] };
                 return true;
             });
             return request(app.getHttpServer())
-                .patch(`/adverts/some/publish`)
+                .patch(`/products/some/publish`)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('Validation failed (uuid  is expected)');
@@ -799,54 +797,54 @@ describe('Adverts controller with ACL enabled', () => {
         });
     });
 
-    describe('complete advert', () => {
+    describe('complete product', () => {
         it(`successfully`, () => {
-            return request(app.getHttpServer()).patch(`/adverts/${uuid()}/complete`).expect(HttpStatus.OK);
+            return request(app.getHttpServer()).patch(`/products/${uuid()}/complete`).expect(HttpStatus.OK);
         });
 
         it(`with error - not authorized`, () => {
             JwtGuard.canActivate.mockReturnValueOnce(false);
-            return request(app.getHttpServer()).patch(`/adverts/${uuid()}/complete`).expect(HttpStatus.FORBIDDEN);
+            return request(app.getHttpServer()).patch(`/products/${uuid()}/complete`).expect(HttpStatus.FORBIDDEN);
         });
 
-        it(`with error - not valid advert id`, () => {
+        it(`with error - not valid product id`, () => {
             JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
                 const req = context.switchToHttp().getRequest();
                 req.user = { id: '007', email: 'test@email.com', roles: ['user', 'admin'] };
                 return true;
             });
             return request(app.getHttpServer())
-                .patch(`/adverts/some/complete`)
+                .patch(`/products/some/complete`)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('Validation failed (uuid  is expected)');
                 });
         });
 
-        it(`with error - not owner of advert`, () => {
+        it(`with error - not owner of product`, () => {
             JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
                 const req = context.switchToHttp().getRequest();
                 req.user = { id: '007', email: 'test@email.com', roles: ['user'] };
                 return true;
             });
 
-            return request(app.getHttpServer()).patch(`/adverts/${uuid()}/complete`).expect(HttpStatus.FORBIDDEN);
+            return request(app.getHttpServer()).patch(`/products/${uuid()}/complete`).expect(HttpStatus.FORBIDDEN);
         });
     });
 
-    describe('delete advert by id', () => {
+    describe('delete product by id', () => {
         it(`successfully`, () => {
-            return request(app.getHttpServer()).delete(`/adverts/${uuid()}`).expect(HttpStatus.NO_CONTENT);
+            return request(app.getHttpServer()).delete(`/products/${uuid()}`).expect(HttpStatus.NO_CONTENT);
         });
 
-        it(`with error - not owner of advert`, () => {
+        it(`with error - not owner of product`, () => {
             JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
                 const req = context.switchToHttp().getRequest();
                 req.user = { id: '007', email: 'test@email.com', roles: ['user'] };
                 return true;
             });
 
-            return request(app.getHttpServer()).delete(`/adverts/${uuid()}`).expect(HttpStatus.FORBIDDEN);
+            return request(app.getHttpServer()).delete(`/products/${uuid()}`).expect(HttpStatus.FORBIDDEN);
         });
 
         it(`successfully with admin permissions`, () => {
@@ -856,7 +854,7 @@ describe('Adverts controller with ACL enabled', () => {
                 return true;
             });
 
-            return request(app.getHttpServer()).delete(`/adverts/${uuid()}`).expect(HttpStatus.NO_CONTENT);
+            return request(app.getHttpServer()).delete(`/products/${uuid()}`).expect(HttpStatus.NO_CONTENT);
         });
     });
 

@@ -7,8 +7,8 @@ import { ChatBaseEventDto } from './dto/chat-base-event.dto';
 import { ChatService } from './chat.service';
 import { GetChatsDto } from './dto/get-chats.dto';
 import { CreateChatDto } from './dto/create-chat.dto';
-import { AdvertsService } from '../adverts/adverts.service';
-import { PreferContact } from '../adverts/models/prefer-contact.enum';
+import { ProductsService } from '../products/products.service';
+import { PreferContact } from '../products/models/prefer-contact.enum';
 import { MailService } from '../mail/mail.service';
 import { NotificationTypes } from '../users/models/notification-types.enum';
 
@@ -45,7 +45,7 @@ export enum ChatEvent {
 export class ChatGateway {
     @WebSocketServer() server: Server;
 
-    constructor(private chatService: ChatService, private advertsService: AdvertsService, private mailService: MailService) {}
+    constructor(private chatService: ChatService, private productsService: ProductsService, private mailService: MailService) {}
 
     @SubscribeMessage(ChatEvent.INIT_CHATS)
     async initChats(@ConnectedSocket() client: Socket, @MessageBody() data: ChatBaseEventDto): Promise<void> {
@@ -57,13 +57,13 @@ export class ChatGateway {
 
     @SubscribeMessage(ChatEvent.CREATE_CHAT)
     async createChat(@ConnectedSocket() client: Socket, @MessageBody() data: CreateChatDto): Promise<void> {
-        const advert = await this.advertsService.getById(data.advertId);
-        if (advert.preferContact === PreferContact.PHONE) {
+        const product = await this.productsService.getById(data.productId);
+        if (product.preferContact === PreferContact.PHONE) {
             throw new WsException('User prefers phone');
         }
 
         data.user1 = data.user.id;
-        data.user2 = advert.userId;
+        data.user2 = product.userId;
 
         if (data.user1 === data.user2) {
             throw new WsException("Chat participants can't be the same user");

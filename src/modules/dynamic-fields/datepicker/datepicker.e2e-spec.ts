@@ -6,17 +6,17 @@ import { v4 as uuid } from 'uuid';
 import { Connection } from 'typeorm';
 import { AccessControlModule } from 'nest-access-control';
 import { createRepositoryMock, createTestAppForModule, declareCommonProviders } from '../../../../test/test.utils';
-import { Advert } from '../../adverts/entities/advert.entity';
-import { AdvertsModule } from '../../adverts/adverts.module';
+import { Product } from '../../products/entities/product.entity';
+import { ProductsModule } from '../../products/products.module';
 import { Field } from '../../fields/field.entity';
-import { CreateAdvertDto } from '../../adverts/dto/create-advert.dto';
+import { CreateProductDto } from '../../products/dto/create-product.dto';
 import { FieldType } from '../dynamic-fields.module';
 import { JwtAuthGuard } from '../../../guards/jwt-auth.guard';
 import { JwtAuthGuardMock } from '../../../../test/mocks/jwt-auth.guard.mock';
 import { roles, RolesEnum } from '../../app/app.roles';
 import { UsersModule } from '../../users/users.module';
 import { User } from '../../users/entities/user.entity';
-import { UpdateAdvertDto } from '../../adverts/dto/update-advert.dto';
+import { UpdateProductDto } from '../../products/dto/update-product.dto';
 import { FieldCreateDto, FieldUpdateDto, SectionType } from '../../fields/dto/field.dto';
 import { CreateDatepickerDto } from './dto/create-datepicker.dto';
 import { UpdateDatepickerDto } from './dto/update-datepicker.dto';
@@ -31,11 +31,11 @@ describe('Datepicker field', () => {
     fieldEntity.title = 'test';
     fieldEntity.params = {};
 
-    const advertEntity = new Advert();
-    advertEntity.id = '1234';
-    advertEntity.userId = '123';
+    const productEntity = new Product();
+    productEntity.id = '1234';
+    productEntity.userId = '123';
 
-    const advertRepositoryMock = createRepositoryMock<Advert>([advertEntity]);
+    const productRepositoryMock = createRepositoryMock<Product>([productEntity]);
     const fieldRepositoryMock = createRepositoryMock<Field>([fieldEntity]);
     const connectionMock = {
         manager: createRepositoryMock(),
@@ -45,11 +45,11 @@ describe('Datepicker field', () => {
 
     beforeAll(async () => {
         let moduleBuilder = Test.createTestingModule({
-            imports: [AdvertsModule, TypeOrmModule.forRoot(), AccessControlModule.forRoles(roles), UsersModule],
+            imports: [ProductsModule, TypeOrmModule.forRoot(), AccessControlModule.forRoles(roles), UsersModule],
         });
         const moduleRef = await declareCommonProviders(moduleBuilder)
-            .overrideProvider(getRepositoryToken(Advert))
-            .useValue(advertRepositoryMock)
+            .overrideProvider(getRepositoryToken(Product))
+            .useValue(productRepositoryMock)
             .overrideProvider(getRepositoryToken(Field))
             .useValue(fieldRepositoryMock)
             .overrideProvider(getRepositoryToken(User))
@@ -63,15 +63,15 @@ describe('Datepicker field', () => {
         app = await createTestAppForModule(moduleRef);
     });
 
-    describe('Adverts controller', () => {
-        describe('create advert', () => {
+    describe('Products controller', () => {
+        describe('create product', () => {
             it(`successfully`, () => {
                 return request(app.getHttpServer())
-                    .post(`/adverts`)
+                    .post(`/products`)
                     .send({
                         model_id: uuid(),
                         category_id: uuid(),
-                        title: 'some advert',
+                        title: 'some product',
                         fields: [
                             {
                                 field_id: uuid(),
@@ -79,19 +79,19 @@ describe('Datepicker field', () => {
                                 date2: new Date(),
                             } as CreateDatepickerDto,
                         ],
-                    } as CreateAdvertDto)
+                    } as CreateProductDto)
                     .expect(HttpStatus.CREATED);
             });
 
             it(`with error - not valid field`, () => {
                 return request(app.getHttpServer())
-                    .post(`/adverts`)
+                    .post(`/products`)
                     .send({
                         model_id: uuid(),
                         category_id: uuid(),
-                        title: 'some advert',
+                        title: 'some product',
                         fields: [{ field_id: uuid() } as any],
-                    } as CreateAdvertDto)
+                    } as CreateProductDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
                         expect(res.body.message).toContain('date1 should not be empty');
@@ -100,12 +100,12 @@ describe('Datepicker field', () => {
             });
         });
 
-        describe('update advert', () => {
+        describe('update product', () => {
             it(`successfully`, () => {
                 return request(app.getHttpServer())
-                    .patch(`/adverts/${uuid()}`)
+                    .patch(`/products/${uuid()}`)
                     .send({
-                        title: 'some advert',
+                        title: 'some product',
                         fields: [
                             {
                                 field_id: uuid(),
@@ -113,21 +113,21 @@ describe('Datepicker field', () => {
                                 date2: new Date(),
                             } as UpdateDatepickerDto,
                         ],
-                    } as UpdateAdvertDto)
+                    } as UpdateProductDto)
                     .expect(HttpStatus.OK);
             });
 
             it(`with error not valid field`, () => {
                 return request(app.getHttpServer())
-                    .patch(`/adverts/${uuid()}`)
+                    .patch(`/products/${uuid()}`)
                     .send({
-                        title: 'some advert',
+                        title: 'some product',
                         fields: [
                             {
                                 field_id: uuid(),
                             } as any,
                         ],
-                    } as CreateAdvertDto)
+                    } as CreateProductDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
                         expect(res.body.message).toContain('date1 should not be empty');

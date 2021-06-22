@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Advert } from '../../adverts/entities/advert.entity';
+import { Product } from '../../products/entities/product.entity';
 import { Exclude } from 'class-transformer';
 
 @Entity('bookmarks')
@@ -12,9 +12,9 @@ export class Bookmark {
 
     @Column('uuid', { name: 'advert_id' })
     @Exclude()
-    advertId: string;
+    productId: string;
 
-    @OneToOne(() => Advert, { eager: true })
+    @OneToOne(() => Product, { eager: true })
     @JoinColumn({ name: 'advert_id' })
-    advert: Advert;
+    product: Product;
 }

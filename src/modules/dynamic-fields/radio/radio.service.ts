@@ -14,7 +14,7 @@ export class RadioService extends BaseFieldService {
         super(repository, RadioEntity, CreateRadioDto, UpdateRadioDto, RadioParamsDto);
     }
 
-    async getAdvertIdsByFilter(fieldId: string, params: RadioFilterDto): Promise<string[]> {
+    async getProductIdsByFilter(fieldId: string, params: RadioFilterDto): Promise<string[]> {
         const result = await this.repository.find({
             where: {
                 field_id: fieldId,
@@ -22,6 +22,6 @@ export class RadioService extends BaseFieldService {
             },
         });
 
-        return result.map(r => r.advert_id);
+        return result.map(r => r.productId);
     }
 }

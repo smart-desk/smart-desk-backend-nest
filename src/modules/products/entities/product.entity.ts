@@ -2,8 +2,9 @@ import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateCol
 import { PreferContact } from '../models/prefer-contact.enum';
 import { Field } from '../../fields/field.entity';
 
+// todo rename after migration
 @Entity('adverts')
-export class Advert {
+export class Product {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 

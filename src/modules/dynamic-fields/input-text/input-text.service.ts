@@ -13,7 +13,7 @@ export class InputTextService extends BaseFieldService {
         super(repository, InputTextEntity, CreateInputTextDto, UpdateInputTextDto, InputTextParamsDto);
     }
 
-    async getAdvertIdsByFilter(fieldId: string, params: any): Promise<string[]> {
+    async getProductIdsByFilter(fieldId: string, params: any): Promise<string[]> {
         return null;
     }
 }
