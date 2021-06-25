@@ -16,85 +16,85 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ACGuard, UseRoles } from 'nest-access-control';
-import { AdvertsService } from './adverts.service';
-import { Advert } from './entities/advert.entity';
+import { ProductsService } from './products.service';
+import { Product } from './entities/product.entity';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { RequestWithUserPayload } from '../auth/jwt.strategy';
 import { ResourceEnum, RolesEnum } from '../app/app.roles';
-import { CreateAdvertDto } from './dto/create-advert.dto';
-import { UpdateAdvertDto } from './dto/update-advert.dto';
-import { GetAdvertsDto, GetAdvertsResponseDto } from './dto/get-adverts.dto';
+import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { GetProductsDto, GetProductsResponseDto } from './dto/get-products.dto';
 import { BlockedUserGuard } from '../../guards/blocked-user.guard';
-import { AdvertStatus } from './models/advert-status.enum';
+import { ProductStatus } from './models/product-status.enum';
 import { User } from '../users/entities/user.entity';
 
-@Controller('adverts')
-@ApiTags('Adverts')
-export class AdvertsController {
-    constructor(private advertsService: AdvertsService) {}
+@Controller('products')
+@ApiTags('Products')
+export class ProductsController {
+    constructor(private productsService: ProductsService) {}
 
     @Get()
     @ApiBearerAuth('access-token')
     @UseGuards(new JwtAuthGuard({ allowNoToken: true }))
-    async getAll(@Req() req: RequestWithUserPayload, @Query() options: GetAdvertsDto): Promise<GetAdvertsResponseDto> {
-        return this.advertsService.getAll(options);
+    async getAll(@Req() req: RequestWithUserPayload, @Query() options: GetProductsDto): Promise<GetProductsResponseDto> {
+        return this.productsService.getAll(options);
     }
 
     @Get('/blocked')
     @ApiBearerAuth('access-token')
     @UseGuards(JwtAuthGuard, ACGuard)
     @UseRoles({
-        resource: ResourceEnum.ADVERT,
+        resource: ResourceEnum.PRODUCT,
         action: 'read',
     })
-    async getBlocked(@Req() req: RequestWithUserPayload, @Query() options: GetAdvertsDto): Promise<GetAdvertsResponseDto> {
+    async getBlocked(@Req() req: RequestWithUserPayload, @Query() options: GetProductsDto): Promise<GetProductsResponseDto> {
         if (!this.isAdmin(req.user)) {
             options.user = req.user.id;
         }
-        options.status = AdvertStatus.BLOCKED;
-        return this.advertsService.getAll(options);
+        options.status = ProductStatus.BLOCKED;
+        return this.productsService.getAll(options);
     }
 
     @Get('/pending')
     @ApiBearerAuth('access-token')
     @UseGuards(JwtAuthGuard, ACGuard)
     @UseRoles({
-        resource: ResourceEnum.ADVERT,
+        resource: ResourceEnum.PRODUCT,
         action: 'read',
     })
-    async getPending(@Req() req: RequestWithUserPayload, @Query() options: GetAdvertsDto): Promise<GetAdvertsResponseDto> {
+    async getPending(@Req() req: RequestWithUserPayload, @Query() options: GetProductsDto): Promise<GetProductsResponseDto> {
         if (!this.isAdmin(req.user)) {
             options.user = req.user.id;
         }
-        options.status = AdvertStatus.PENDING;
-        return this.advertsService.getAll(options);
+        options.status = ProductStatus.PENDING;
+        return this.productsService.getAll(options);
     }
 
     @Get('/completed')
     @ApiBearerAuth('access-token')
     @UseGuards(JwtAuthGuard, ACGuard)
     @UseRoles({
-        resource: ResourceEnum.ADVERT,
+        resource: ResourceEnum.PRODUCT,
         action: 'read',
     })
-    async getCompleted(@Req() req: RequestWithUserPayload, @Query() options: GetAdvertsDto): Promise<GetAdvertsResponseDto> {
+    async getCompleted(@Req() req: RequestWithUserPayload, @Query() options: GetProductsDto): Promise<GetProductsResponseDto> {
         if (!this.isAdmin(req.user)) {
             options.user = req.user.id;
         }
-        options.status = AdvertStatus.COMPLETED;
-        return this.advertsService.getAll(options);
+        options.status = ProductStatus.COMPLETED;
+        return this.productsService.getAll(options);
     }
 
     @Get('/my')
     @UseGuards(JwtAuthGuard, ACGuard)
     @ApiBearerAuth('access-token')
     @UseRoles({
-        resource: ResourceEnum.ADVERT,
+        resource: ResourceEnum.PRODUCT,
         action: 'read',
     })
-    getMy(@Req() req: RequestWithUserPayload, @Query() options: GetAdvertsDto): Promise<GetAdvertsResponseDto> {
+    getMy(@Req() req: RequestWithUserPayload, @Query() options: GetProductsDto): Promise<GetProductsResponseDto> {
         options.user = req.user.id;
-        return this.advertsService.getAll(options);
+        return this.productsService.getAll(options);
     }
 
     @Get('/category/:categoryId')
@@ -103,95 +103,95 @@ export class AdvertsController {
     async getForCategory(
         @Req() req: RequestWithUserPayload,
         @Param('categoryId', ParseUUIDPipe) categoryId: string,
-        @Query() options: GetAdvertsDto
-    ): Promise<GetAdvertsResponseDto> {
-        return this.advertsService.getForCategory(categoryId, options);
+        @Query() options: GetProductsDto
+    ): Promise<GetProductsResponseDto> {
+        return this.productsService.getForCategory(categoryId, options);
     }
 
     @Get(':id')
-    getById(@Param('id', ParseUUIDPipe) id: string): Promise<Advert> {
+    getById(@Param('id', ParseUUIDPipe) id: string): Promise<Product> {
         // todo should not be available for others if it's blocked or pending
-        return this.advertsService.getById(id);
+        return this.productsService.getById(id);
     }
 
     @Get(':id/recommended')
     @ApiBearerAuth('access-token')
     @UseGuards(new JwtAuthGuard({ allowNoToken: true }))
-    async getRecommended(@Req() req: RequestWithUserPayload, @Param('id', ParseUUIDPipe) id: string): Promise<GetAdvertsResponseDto> {
-        return this.advertsService.getRecommendedById(id);
+    async getRecommended(@Req() req: RequestWithUserPayload, @Param('id', ParseUUIDPipe) id: string): Promise<GetProductsResponseDto> {
+        return this.productsService.getRecommendedById(id);
     }
 
     @Post()
     @ApiBearerAuth('access-token')
     @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
     @UseRoles({
-        resource: ResourceEnum.ADVERT,
+        resource: ResourceEnum.PRODUCT,
         action: 'create',
     })
-    createAdvert(@Body() body: CreateAdvertDto, @Req() req: RequestWithUserPayload): Promise<Advert> {
-        return this.advertsService.create(req.user.id, body);
+    createProduct(@Body() body: CreateProductDto, @Req() req: RequestWithUserPayload): Promise<Product> {
+        return this.productsService.create(req.user.id, body);
     }
 
     @Patch(':id')
     @ApiBearerAuth('access-token')
     @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
     @UseRoles({
-        resource: ResourceEnum.ADVERT,
+        resource: ResourceEnum.PRODUCT,
         action: 'update',
     })
-    async updateAdvert(
+    async updateProduct(
         @Param('id', ParseUUIDPipe) id: string,
-        @Body() body: UpdateAdvertDto,
+        @Body() body: UpdateProductDto,
         @Req() req: RequestWithUserPayload
-    ): Promise<Advert> {
+    ): Promise<Product> {
         const isAdminOrOwner = await this.isAdminOrOwner(id, req.user);
         if (!isAdminOrOwner) throw new ForbiddenException();
-        return this.advertsService.update(id, body);
+        return this.productsService.update(id, body);
     }
 
     @Post(':id/view')
     @HttpCode(HttpStatus.OK)
-    async countView(@Param('id', ParseUUIDPipe) id: string): Promise<Advert> {
-        return this.advertsService.countView(id);
+    async countView(@Param('id', ParseUUIDPipe) id: string): Promise<Product> {
+        return this.productsService.countView(id);
     }
 
     @Patch(':id/block')
     @ApiBearerAuth('access-token')
     @UseGuards(JwtAuthGuard, ACGuard)
     @UseRoles({
-        resource: ResourceEnum.ADVERT,
+        resource: ResourceEnum.PRODUCT,
         action: 'update',
     })
-    async blockAdvert(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<Advert> {
+    async blockProduct(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<Product> {
         const isAdmin = await this.isAdmin(req.user);
         if (!isAdmin) throw new ForbiddenException();
-        return this.advertsService.block(id);
+        return this.productsService.block(id);
     }
 
     @Patch(':id/publish')
     @ApiBearerAuth('access-token')
     @UseGuards(JwtAuthGuard, ACGuard)
     @UseRoles({
-        resource: ResourceEnum.ADVERT,
+        resource: ResourceEnum.PRODUCT,
         action: 'update',
     })
-    async publishAdvert(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<Advert> {
+    async publishProduct(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<Product> {
         const isAdmin = await this.isAdmin(req.user);
         if (!isAdmin) throw new ForbiddenException();
-        return this.advertsService.publish(id);
+        return this.productsService.publish(id);
     }
 
     @Patch(':id/complete')
     @ApiBearerAuth('access-token')
     @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
     @UseRoles({
-        resource: ResourceEnum.ADVERT,
+        resource: ResourceEnum.PRODUCT,
         action: 'update',
     })
-    async completeAdvert(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<Advert> {
+    async completeProduct(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<Product> {
         const isAdminOrOwner = await this.isAdminOrOwner(id, req.user);
         if (!isAdminOrOwner) throw new ForbiddenException();
-        return this.advertsService.complete(id);
+        return this.productsService.complete(id);
     }
 
     @Delete(':id')
@@ -199,23 +199,23 @@ export class AdvertsController {
     @HttpCode(HttpStatus.NO_CONTENT)
     @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
     @UseRoles({
-        resource: ResourceEnum.ADVERT,
+        resource: ResourceEnum.PRODUCT,
         action: 'delete',
     })
-    async deleteAdvert(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<Advert> {
+    async deleteProduct(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<Product> {
         const isAdminOrOwner = await this.isAdminOrOwner(id, req.user);
         if (!isAdminOrOwner) throw new ForbiddenException();
-        return await this.advertsService.delete(id);
+        return await this.productsService.delete(id);
     }
 
-    private async isAdminOrOwner(advertId: string, user: User): Promise<boolean> {
-        const isOwner = await this.isOwner(advertId, user);
+    private async isAdminOrOwner(productId: string, user: User): Promise<boolean> {
+        const isOwner = await this.isOwner(productId, user);
         const isAdmin = this.isAdmin(user);
         return isOwner || isAdmin;
     }
 
-    private async isOwner(advertId: string, user: User): Promise<boolean> {
-        const owner = await this.advertsService.getAdvertOwner(advertId);
+    private async isOwner(productId: string, user: User): Promise<boolean> {
+        const owner = await this.productsService.getProductOwner(productId);
         return owner === user.id;
     }
 

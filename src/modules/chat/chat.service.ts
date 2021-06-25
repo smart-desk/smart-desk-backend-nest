@@ -6,7 +6,7 @@ import { ChatMessage, ChatMessageStatus } from './enitities/chat-message.entity'
 import { CreateChatDto } from './dto/create-chat.dto';
 import { CreateChatMessageDto } from './dto/create-chat-message.dto';
 import { UsersService } from '../users/users.service';
-import { AdvertsService } from '../adverts/adverts.service';
+import { ProductsService } from '../products/products.service';
 import { serializeUser } from '../../utils/user.serializer';
 
 @Injectable()
@@ -15,7 +15,7 @@ export class ChatService {
         @InjectRepository(Chat) private chatRepository: Repository<Chat>,
         @InjectRepository(ChatMessage) private chatMessageRepository: Repository<ChatMessage>,
         private userService: UsersService,
-        private advertService: AdvertsService
+        private productsService: ProductsService
     ) {}
 
     async createChat(body: CreateChatDto): Promise<Chat> {
@@ -71,8 +71,8 @@ export class ChatService {
     private async findChatByParams(params: CreateChatDto): Promise<Chat> {
         return await this.chatRepository.findOne({
             where: [
-                { user1: params.user1, user2: params.user2, advertId: params.advertId },
-                { user1: params.user2, user2: params.user1, advertId: params.advertId },
+                { user1: params.user1, user2: params.user2, productId: params.productId },
+                { user1: params.user2, user2: params.user1, productId: params.productId },
             ],
         });
     }
@@ -83,11 +83,11 @@ export class ChatService {
     }
 
     private async addEntitiesToChat(chat: Chat): Promise<Chat> {
-        const advert = await this.advertService.getById(chat.advertId, false);
+        const product = await this.productsService.getById(chat.productId, false);
         const user1 = await this.userService.findOne(chat.user1);
         const user2 = await this.userService.findOne(chat.user2);
 
-        chat.advertData = advert;
+        chat.productData = product;
         chat.user1Data = serializeUser(user1);
         chat.user2Data = serializeUser(user2);
 

@@ -2,8 +2,8 @@ import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateCol
 import { PreferContact } from '../models/prefer-contact.enum';
 import { Field } from '../../fields/field.entity';
 
-@Entity('adverts')
-export class Advert {
+@Entity('products')
+export class Product {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 

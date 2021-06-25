@@ -1,11 +1,11 @@
 import { IsNumber, IsObject, IsOptional, IsPositive, IsString, IsUUID, Max, MaxLength } from 'class-validator';
 import { Exclude, Transform } from 'class-transformer';
-import { Advert } from '../entities/advert.entity';
-import { AdvertStatus } from '../models/advert-status.enum';
+import { Product } from '../entities/product.entity';
+import { ProductStatus } from '../models/product-status.enum';
 import { Sorting } from '../models/sorting';
 import { Filters } from '../models/filters';
 
-export class GetAdvertsDto {
+export class GetProductsDto {
     @IsOptional()
     @IsPositive()
     @IsNumber()
@@ -33,15 +33,15 @@ export class GetAdvertsDto {
     user?: string;
 
     @Exclude()
-    status: AdvertStatus = AdvertStatus.ACTIVE;
+    status: ProductStatus = ProductStatus.ACTIVE;
 
     @IsObject()
     @IsOptional()
     sorting?: Sorting;
 }
 
-export class GetAdvertsResponseDto {
-    adverts: Advert[];
+export class GetProductsResponseDto {
+    products: Product[];
     totalCount: number;
     page: number;
     limit: number;

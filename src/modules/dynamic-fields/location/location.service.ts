@@ -14,15 +14,15 @@ export class LocationService extends BaseFieldService {
         super(repository, LocationEntity, CreateLocationDto, UpdateLocationDto, LocationParamsDto);
     }
 
-    async getAdvertIdsByFilter(fieldId: string, params: LocationFilterDto): Promise<string[]> {
+    async getProductIdsByFilter(fieldId: string, params: LocationFilterDto): Promise<string[]> {
         const result = await this.repository
             .createQueryBuilder()
             .where({
-                field_id: fieldId,
+                fieldId,
             })
             .getMany();
 
-        return result.filter(field => this.withinRadius(field, params)).map(r => r.advert_id);
+        return result.filter(field => this.withinRadius(field, params)).map(r => r.productId);
     }
 
     private withinRadius(field: LocationEntity, params: LocationFilterDto): boolean {

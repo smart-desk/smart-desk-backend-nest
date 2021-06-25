@@ -14,8 +14,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateUserRolesDto } from './dto/update-user-roles.dto';
 import { BlockUserDto } from './dto/block-user.dto';
 import { UserStatus } from './models/user-status.enum';
-import { Advert } from '../adverts/entities/advert.entity';
-import { PreferContact } from '../adverts/models/prefer-contact.enum';
+import { Product } from '../products/entities/product.entity';
+import { PreferContact } from '../products/models/prefer-contact.enum';
 import { NotificationTypes } from './models/notification-types.enum';
 
 describe('Users controller', () => {
@@ -29,10 +29,10 @@ describe('Users controller', () => {
     user.isPhoneVerified = true;
     user.email = 'email@email.com';
 
-    const advertEntity = new Advert();
-    advertEntity.id = uuid();
+    const productEntity = new Product();
+    productEntity.id = uuid();
 
-    const advertRepositoryMock = createRepositoryMock<Advert>([advertEntity]);
+    const productRepositoryMock = createRepositoryMock<Product>([productEntity]);
     const userRepositoryMock = createRepositoryMock<User>([user]);
     const JwtGuard = JwtAuthGuardMock;
 
@@ -44,8 +44,8 @@ describe('Users controller', () => {
         moduleBuilder = declareCommonProviders(moduleBuilder);
 
         moduleBuilder
-            .overrideProvider(getRepositoryToken(Advert))
-            .useValue(advertRepositoryMock)
+            .overrideProvider(getRepositoryToken(Product))
+            .useValue(productRepositoryMock)
             .overrideProvider(getRepositoryToken(User))
             .useValue(userRepositoryMock)
             .overrideGuard(JwtAuthGuard)
@@ -109,7 +109,7 @@ describe('Users controller', () => {
                     lastName: 'New last name',
                     avatar: 'http://test.com/image.png',
                     phone: '+4915141111111',
-                    emailNotifications: [NotificationTypes.ADVERT_BLOCKED],
+                    emailNotifications: [NotificationTypes.PRODUCT_BLOCKED],
                 } as UpdateUserDto)
                 .expect(HttpStatus.OK);
         });
@@ -260,25 +260,25 @@ describe('Users controller', () => {
 
     describe("get user's phone", () => {
         it(`successfully`, () => {
-            return request(app.getHttpServer()).get(`/users/${uuid()}/phone?advert=${uuid()}`).expect(HttpStatus.OK);
+            return request(app.getHttpServer()).get(`/users/${uuid()}/phone?product=${uuid()}`).expect(HttpStatus.OK);
         });
 
-        it(`with error - no advert provided`, () => {
+        it(`with error - no product provided`, () => {
             return request(app.getHttpServer())
                 .get(`/users/${uuid()}/phone`)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
-                    expect(res.body.message).toContain('advert should not be empty');
-                    expect(res.body.message).toContain('advert must be an UUID');
+                    expect(res.body.message).toContain('product should not be empty');
+                    expect(res.body.message).toContain('product must be an UUID');
                 });
         });
 
         it(`with error - user prefers chat`, () => {
-            advertEntity.preferContact = PreferContact.CHAT;
-            advertRepositoryMock.findOne.mockReturnValueOnce(advertEntity);
+            productEntity.preferContact = PreferContact.CHAT;
+            productRepositoryMock.findOne.mockReturnValueOnce(productEntity);
 
             return request(app.getHttpServer())
-                .get(`/users/${uuid()}/phone?advert=${uuid()}`)
+                .get(`/users/${uuid()}/phone?product=${uuid()}`)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('User prefers chat');
@@ -290,7 +290,7 @@ describe('Users controller', () => {
             userRepositoryMock.findOne.mockReturnValueOnce(user);
 
             return request(app.getHttpServer())
-                .get(`/users/${uuid()}/phone?advert=${uuid()}`)
+                .get(`/users/${uuid()}/phone?product=${uuid()}`)
                 .expect(HttpStatus.NOT_FOUND)
                 .expect(res => {
                     expect(res.body.message).toContain('Phone not found');
@@ -303,7 +303,7 @@ describe('Users controller', () => {
             userRepositoryMock.findOne.mockReturnValueOnce(user);
 
             return request(app.getHttpServer())
-                .get(`/users/${uuid()}/phone?advert=${uuid()}`)
+                .get(`/users/${uuid()}/phone?product=${uuid()}`)
                 .expect(HttpStatus.NOT_FOUND)
                 .expect(res => {
                     expect(res.body.message).toContain('Phone not found');
@@ -312,7 +312,7 @@ describe('Users controller', () => {
 
         it(`with error - unauthorized`, () => {
             JwtGuard.canActivate.mockReturnValueOnce(false);
-            return request(app.getHttpServer()).get(`/users/${uuid()}/phone?advert=${uuid()}`).expect(HttpStatus.FORBIDDEN);
+            return request(app.getHttpServer()).get(`/users/${uuid()}/phone?product=${uuid()}`).expect(HttpStatus.FORBIDDEN);
         });
     });
 });

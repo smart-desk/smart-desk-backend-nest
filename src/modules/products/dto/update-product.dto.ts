@@ -2,7 +2,7 @@ import { IsArray, IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'cl
 import { DynamicFieldsBaseUpdateDto } from '../../dynamic-fields/dynamic-fields-base-update.dto';
 import { PreferContact } from '../models/prefer-contact.enum';
 
-export class UpdateAdvertDto {
+export class UpdateProductDto {
     @IsString()
     @MaxLength(255)
     @IsNotEmpty()

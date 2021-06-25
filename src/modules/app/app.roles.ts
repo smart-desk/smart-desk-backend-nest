@@ -7,7 +7,7 @@ export enum RolesEnum {
 }
 
 export enum ResourceEnum {
-    ADVERT = 'advert',
+    PRODUCT = 'product',
     MODEL = 'model',
     FIELD = 'field',
     CATEGORY = 'category',
@@ -25,25 +25,25 @@ export const roles = new RolesBuilder();
 roles
     // Viewer
     .grant(RolesEnum.VIEWER)
-    .read([ResourceEnum.ADVERT, ResourceEnum.CATEGORY, ResourceEnum.USER])
+    .read([ResourceEnum.PRODUCT, ResourceEnum.CATEGORY, ResourceEnum.USER])
     // User
     .grant(RolesEnum.USER)
     .extend(RolesEnum.VIEWER)
     .read([ResourceEnum.BOOKMARK, ResourceEnum.ADDRESS, ResourceEnum.CHAT, ResourceEnum.AD_CAMPAIGN, ResourceEnum.AD_CONFIG])
     .create([
-        ResourceEnum.ADVERT,
+        ResourceEnum.PRODUCT,
         ResourceEnum.FILE,
         ResourceEnum.BOOKMARK,
         ResourceEnum.ADDRESS,
         ResourceEnum.CHAT,
         ResourceEnum.AD_CAMPAIGN,
     ])
-    .update([ResourceEnum.ADVERT, ResourceEnum.USER, ResourceEnum.BOOKMARK, ResourceEnum.ADDRESS, ResourceEnum.AD_CAMPAIGN])
-    .delete([ResourceEnum.ADVERT, ResourceEnum.BOOKMARK, ResourceEnum.ADDRESS, ResourceEnum.AD_CAMPAIGN])
+    .update([ResourceEnum.PRODUCT, ResourceEnum.USER, ResourceEnum.BOOKMARK, ResourceEnum.ADDRESS, ResourceEnum.AD_CAMPAIGN])
+    .delete([ResourceEnum.PRODUCT, ResourceEnum.BOOKMARK, ResourceEnum.ADDRESS, ResourceEnum.AD_CAMPAIGN])
     // Admin
     .grant(RolesEnum.ADMIN)
     .create([
-        ResourceEnum.ADVERT,
+        ResourceEnum.PRODUCT,
         ResourceEnum.MODEL,
         ResourceEnum.FIELD,
         ResourceEnum.CATEGORY,
@@ -56,7 +56,7 @@ roles
         ResourceEnum.AD_CAMPAIGN,
     ])
     .read([
-        ResourceEnum.ADVERT,
+        ResourceEnum.PRODUCT,
         ResourceEnum.MODEL,
         ResourceEnum.FIELD,
         ResourceEnum.CATEGORY,
@@ -69,7 +69,7 @@ roles
         ResourceEnum.AD_CAMPAIGN,
     ])
     .update([
-        ResourceEnum.ADVERT,
+        ResourceEnum.PRODUCT,
         ResourceEnum.MODEL,
         ResourceEnum.FIELD,
         ResourceEnum.CATEGORY,
@@ -82,7 +82,7 @@ roles
         ResourceEnum.AD_CAMPAIGN,
     ])
     .delete([
-        ResourceEnum.ADVERT,
+        ResourceEnum.PRODUCT,
         ResourceEnum.MODEL,
         ResourceEnum.FIELD,
         ResourceEnum.CATEGORY,

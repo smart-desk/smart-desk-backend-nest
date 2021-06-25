@@ -26,13 +26,13 @@ import { BlockedUserGuard } from '../../guards/blocked-user.guard';
 import { BlockUserDto } from './dto/block-user.dto';
 import { UserInterceptor } from '../../interceptors/user.interceptor';
 import { GetUserPhoneDto } from './dto/get-user-phone.dto';
-import { AdvertsService } from '../adverts/adverts.service';
-import { PreferContact } from '../adverts/models/prefer-contact.enum';
+import { ProductsService } from '../products/products.service';
+import { PreferContact } from '../products/models/prefer-contact.enum';
 
 @Controller('users')
 @ApiTags('Users')
 export class UsersController {
-    constructor(private usersService: UsersService, private advertService: AdvertsService) {}
+    constructor(private usersService: UsersService, private productService: ProductsService) {}
 
     @Get('profile')
     @ApiBearerAuth('access-token')
@@ -121,8 +121,8 @@ export class UsersController {
             throw new NotFoundException('Phone not found');
         }
 
-        const advert = await this.advertService.getById(params.advert, false);
-        if (advert.preferContact === PreferContact.CHAT) {
+        const product = await this.productService.getById(params.product, false);
+        if (product.preferContact === PreferContact.CHAT) {
             throw new BadRequestException('User prefers chat');
         }
         return user.phone;

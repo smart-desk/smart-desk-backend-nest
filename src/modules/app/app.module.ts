@@ -1,9 +1,9 @@
-import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AccessControlModule } from 'nest-access-control';
-import { AdvertsModule } from '../adverts/adverts.module';
+import { ProductsModule } from '../products/products.module';
 import { AuthModule } from '../auth/auth.module';
 import { CategoriesModule } from '../categories/categories.module';
 import { FieldsModule } from '../fields/fields.module';
@@ -29,7 +29,7 @@ const app = [
     CategoriesModule,
     ModelsModule,
     FieldsModule,
-    AdvertsModule,
+    ProductsModule,
     DynamicFieldsModule,
     S3Module,
     BookmarksModule,

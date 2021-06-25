@@ -6,17 +6,17 @@ import { v4 as uuid } from 'uuid';
 import { Connection } from 'typeorm';
 import { AccessControlModule } from 'nest-access-control';
 import { createRepositoryMock, createTestAppForModule, declareCommonProviders } from '../../../../test/test.utils';
-import { Advert } from '../../adverts/entities/advert.entity';
-import { AdvertsModule } from '../../adverts/adverts.module';
+import { Product } from '../../products/entities/product.entity';
+import { ProductsModule } from '../../products/products.module';
 import { Field } from '../../fields/field.entity';
-import { CreateAdvertDto } from '../../adverts/dto/create-advert.dto';
+import { CreateProductDto } from '../../products/dto/create-product.dto';
 import { FieldType } from '../dynamic-fields.module';
 import { JwtAuthGuard } from '../../../guards/jwt-auth.guard';
 import { JwtAuthGuardMock } from '../../../../test/mocks/jwt-auth.guard.mock';
 import { roles, RolesEnum } from '../../app/app.roles';
 import { UsersModule } from '../../users/users.module';
 import { User } from '../../users/entities/user.entity';
-import { UpdateAdvertDto } from '../../adverts/dto/update-advert.dto';
+import { UpdateProductDto } from '../../products/dto/update-product.dto';
 import { FieldCreateDto, FieldUpdateDto, SectionType } from '../../fields/dto/field.dto';
 import { CreatePriceDto } from './dto/create-price.dto';
 import { UpdatePriceDto } from './dto/update-price.dto';
@@ -31,11 +31,11 @@ describe('Price field', () => {
     fieldEntity.title = 'test';
     fieldEntity.params = {};
 
-    const advertEntity = new Advert();
-    advertEntity.id = '1234';
-    advertEntity.userId = '123';
+    const productEntity = new Product();
+    productEntity.id = '1234';
+    productEntity.userId = '123';
 
-    const advertRepositoryMock = createRepositoryMock<Advert>([advertEntity]);
+    const productRepositoryMock = createRepositoryMock<Product>([productEntity]);
     const fieldRepositoryMock = createRepositoryMock<Field>([fieldEntity]);
     const connectionMock = {
         manager: createRepositoryMock(),
@@ -45,12 +45,12 @@ describe('Price field', () => {
 
     beforeAll(async () => {
         let moduleBuilder = Test.createTestingModule({
-            imports: [AdvertsModule, TypeOrmModule.forRoot(), AccessControlModule.forRoles(roles), UsersModule],
+            imports: [ProductsModule, TypeOrmModule.forRoot(), AccessControlModule.forRoles(roles), UsersModule],
         });
 
         const moduleRef = await declareCommonProviders(moduleBuilder)
-            .overrideProvider(getRepositoryToken(Advert))
-            .useValue(advertRepositoryMock)
+            .overrideProvider(getRepositoryToken(Product))
+            .useValue(productRepositoryMock)
             .overrideProvider(getRepositoryToken(Field))
             .useValue(fieldRepositoryMock)
             .overrideProvider(getRepositoryToken(User))
@@ -64,64 +64,64 @@ describe('Price field', () => {
         app = await createTestAppForModule(moduleRef);
     });
 
-    describe('Adverts controller', () => {
-        describe('create advert', () => {
+    describe('Products controller', () => {
+        describe('create product', () => {
             const photoField = new Field();
             photoField.type = FieldType.PRICE;
 
             it(`successfully`, () => {
                 fieldRepositoryMock.findOne.mockReturnValueOnce(photoField);
                 return request(app.getHttpServer())
-                    .post(`/adverts`)
+                    .post(`/products`)
                     .send({
                         model_id: uuid(),
                         category_id: uuid(),
-                        title: 'some advert',
+                        title: 'some product',
                         fields: [
                             {
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: 1000,
                             } as CreatePriceDto,
                         ],
-                    } as CreateAdvertDto)
+                    } as CreateProductDto)
                     .expect(HttpStatus.CREATED);
             });
 
-            it(`with error - not valid field_id`, () => {
+            it(`with error - not valid fieldId`, () => {
                 return request(app.getHttpServer())
-                    .post(`/adverts`)
+                    .post(`/products`)
                     .send({
                         model_id: uuid(),
                         category_id: uuid(),
-                        title: 'some advert',
+                        title: 'some product',
                         fields: [
                             {
-                                field_id: '123',
+                                fieldId: '123',
                                 value: 1000,
                             } as CreatePriceDto,
                         ],
-                    } as CreateAdvertDto)
+                    } as CreateProductDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('field_id must be an UUID');
+                        expect(res.body.message).toContain('fieldId must be an UUID');
                     });
             });
 
             it(`with error - not valid value`, () => {
                 fieldRepositoryMock.findOne.mockReturnValueOnce(photoField);
                 return request(app.getHttpServer())
-                    .post(`/adverts`)
+                    .post(`/products`)
                     .send({
                         model_id: uuid(),
                         category_id: uuid(),
-                        title: 'some advert',
+                        title: 'some product',
                         fields: [
                             {
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: -100,
                             } as CreatePriceDto,
                         ],
-                    } as CreateAdvertDto)
+                    } as CreateProductDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
                         expect(res.body.message).toContain('value must be a positive number');
@@ -129,79 +129,79 @@ describe('Price field', () => {
             });
         });
 
-        describe('update advert', () => {
+        describe('update product', () => {
             const field = new Field();
             field.type = FieldType.PRICE;
 
             it(`successfully`, () => {
                 fieldRepositoryMock.findOne.mockReturnValueOnce(field);
                 return request(app.getHttpServer())
-                    .patch(`/adverts/${uuid()}`)
+                    .patch(`/products/${uuid()}`)
                     .send({
-                        title: 'some advert',
+                        title: 'some product',
                         fields: [
                             {
                                 id: uuid(),
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: 1000,
                             } as UpdatePriceDto,
                         ],
-                    } as UpdateAdvertDto)
+                    } as UpdateProductDto)
                     .expect(HttpStatus.OK);
             });
 
             it(`with error - not valid id`, () => {
                 fieldRepositoryMock.findOne.mockReturnValueOnce(field);
                 return request(app.getHttpServer())
-                    .patch(`/adverts/${uuid()}`)
+                    .patch(`/products/${uuid()}`)
                     .send({
-                        title: 'some advert',
+                        title: 'some product',
                         fields: [
                             {
                                 id: '12312312',
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: 1000,
                             } as UpdatePriceDto,
                         ],
-                    } as UpdateAdvertDto)
+                    } as UpdateProductDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
                         expect(res.body.message).toContain('id must be an UUID');
                     });
             });
 
-            it(`with error - not valid field_id`, () => {
+            it(`with error - not valid fieldId`, () => {
                 return request(app.getHttpServer())
-                    .patch(`/adverts/${uuid()}`)
+                    .patch(`/products/${uuid()}`)
                     .send({
-                        title: 'some advert',
+                        title: 'some product',
                         fields: [
                             {
                                 id: uuid(),
-                                field_id: '123',
+                                fieldId: '123',
                                 value: 1000,
                             } as UpdatePriceDto,
                         ],
-                    } as UpdateAdvertDto)
+                    } as UpdateProductDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('field_id must be an UUID');
+                        expect(res.body.message).toContain('fieldId must be an UUID');
                     });
             });
 
             it(`with error - not valid value`, () => {
                 fieldRepositoryMock.findOne.mockReturnValueOnce(field);
                 return request(app.getHttpServer())
-                    .patch(`/adverts/${uuid()}`)
+                    .patch(`/products/${uuid()}`)
                     .send({
-                        title: 'some advert',
+                        title: 'some product',
                         fields: [
                             {
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: -1000,
                             } as UpdatePriceDto,
                         ],
-                    } as UpdateAdvertDto)
+                    } as UpdateProductDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
                         expect(res.body.message).toContain('value must be a positive number');
@@ -211,17 +211,17 @@ describe('Price field', () => {
             it(`successfully with new photo field`, () => {
                 fieldRepositoryMock.findOne.mockReturnValueOnce(field);
                 return request(app.getHttpServer())
-                    .patch(`/adverts/${uuid()}`)
+                    .patch(`/products/${uuid()}`)
                     .send({
-                        title: 'some advert',
+                        title: 'some product',
                         fields: [
                             {
                                 id: null,
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: 1000,
                             } as UpdatePriceDto,
                         ],
-                    } as UpdateAdvertDto)
+                    } as UpdateProductDto)
                     .expect(HttpStatus.OK);
             });
         });

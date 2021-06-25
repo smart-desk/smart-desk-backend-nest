@@ -11,9 +11,9 @@ import { roles } from '../app/app.roles';
 import { Field } from '../fields/field.entity';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { Bookmark } from './entities/bookmark.entity';
-import { Advert } from '../adverts/entities/advert.entity';
+import { Product } from '../products/entities/product.entity';
 import { FieldType } from '../dynamic-fields/dynamic-fields.module';
-import { AdvertsModule } from '../adverts/adverts.module';
+import { ProductsModule } from '../products/products.module';
 import { Connection } from 'typeorm';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { User } from '../users/entities/user.entity';
@@ -28,16 +28,16 @@ describe('Bookmarks controller', () => {
     fieldEntity.title = 'test';
     fieldEntity.params = { label: 'Test', placeholder: 'test', required: true };
 
-    const advertEntity = new Advert();
-    advertEntity.id = '1234';
-    advertEntity.model_id = '12323';
-    advertEntity.userId = '123';
+    const productEntity = new Product();
+    productEntity.id = '1234';
+    productEntity.model_id = '12323';
+    productEntity.userId = '123';
 
     const bookmark = new Bookmark();
     bookmark.userId = '123';
-    bookmark.advert = advertEntity;
+    bookmark.product = productEntity;
 
-    const advertRepositoryMock = createRepositoryMock<Advert>([advertEntity]);
+    const productRepositoryMock = createRepositoryMock<Product>([productEntity]);
     const fieldRepositoryMock = createRepositoryMock<Field>([fieldEntity]);
     const bookmarkRepositoryMock = createRepositoryMock<Bookmark>([bookmark]);
     const connectionMock = {
@@ -48,12 +48,12 @@ describe('Bookmarks controller', () => {
 
     beforeAll(async () => {
         let moduleBuilder = Test.createTestingModule({
-            imports: [BookmarksModule, AdvertsModule, TypeOrmModule.forRoot(), AccessControlModule.forRoles(roles)],
+            imports: [BookmarksModule, ProductsModule, TypeOrmModule.forRoot(), AccessControlModule.forRoles(roles)],
         });
 
         const moduleRef = await declareCommonProviders(moduleBuilder)
-            .overrideProvider(getRepositoryToken(Advert))
-            .useValue(advertRepositoryMock)
+            .overrideProvider(getRepositoryToken(Product))
+            .useValue(productRepositoryMock)
             .overrideProvider(getRepositoryToken(Field))
             .useValue(fieldRepositoryMock)
             .overrideProvider(getRepositoryToken(Bookmark))
@@ -74,20 +74,20 @@ describe('Bookmarks controller', () => {
             return request(app.getHttpServer())
                 .post('/bookmarks')
                 .send({
-                    advertId: uuid(),
+                    productId: uuid(),
                 } as CreateBookmarkDto)
                 .expect(HttpStatus.CREATED);
         });
 
-        it(`with error - wrong advert id`, () => {
+        it(`with error - wrong product id`, () => {
             return request(app.getHttpServer())
                 .post('/bookmarks')
                 .send({
-                    advertId: '123123123',
+                    productId: '123123123',
                 } as CreateBookmarkDto)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
-                    expect(res.body.message).toContain('advertId must be an UUID');
+                    expect(res.body.message).toContain('productId must be an UUID');
                 });
         });
 
@@ -97,7 +97,7 @@ describe('Bookmarks controller', () => {
             return request(app.getHttpServer())
                 .post('/bookmarks')
                 .send({
-                    advertId: uuid(),
+                    productId: uuid(),
                 } as CreateBookmarkDto)
                 .expect(HttpStatus.FORBIDDEN);
         });
@@ -110,7 +110,7 @@ describe('Bookmarks controller', () => {
             return request(app.getHttpServer())
                 .post('/bookmarks')
                 .send({
-                    advertId: uuid(),
+                    productId: uuid(),
                 } as CreateBookmarkDto)
                 .expect(HttpStatus.FORBIDDEN);
         });

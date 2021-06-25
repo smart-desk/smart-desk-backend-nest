@@ -4,7 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import * as dotenv from 'dotenv';
 import { UsersModule } from '../users/users.module';
 import { ChatService } from './chat.service';
-import { AdvertsModule } from '../adverts/adverts.module';
+import { ProductsModule } from '../products/products.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChatMessage } from './enitities/chat-message.entity';
 import { Chat } from './enitities/chat.entity';
@@ -16,7 +16,7 @@ dotenv.config();
     providers: [ChatGateway, ChatService],
     imports: [
         TypeOrmModule.forFeature([Chat, ChatMessage]),
-        AdvertsModule,
+        ProductsModule,
         JwtModule.register({
             secret: process.env.JWT_SECRET,
             signOptions: { expiresIn: '7d' },

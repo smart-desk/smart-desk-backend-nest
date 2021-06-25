@@ -13,7 +13,7 @@ export class PhotoService extends BaseFieldService {
         super(repository, PhotoEntity, CreatePhotoDto, UpdatePhotoDto, PhotoParamsDto);
     }
 
-    async getAdvertIdsByFilter(fieldId: string, params: any): Promise<string[]> {
+    async getProductIdsByFilter(fieldId: string, params: any): Promise<string[]> {
         return null;
     }
 }

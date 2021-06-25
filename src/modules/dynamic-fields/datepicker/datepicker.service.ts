@@ -15,9 +15,9 @@ export class DatepickerService extends BaseFieldService {
         super(repository, DatepickerEntity, CreateDatepickerDto, UpdateDatepickerDto, DatepickerParamsDto);
     }
 
-    async getAdvertIdsByFilter(fieldId: string, params: DatepickerFilterDto): Promise<string[]> {
+    async getProductIdsByFilter(fieldId: string, params: DatepickerFilterDto): Promise<string[]> {
         const query = this.repository.createQueryBuilder('d').where({
-            field_id: fieldId,
+            fieldId,
         });
 
         if (params.from) {
@@ -41,6 +41,6 @@ export class DatepickerService extends BaseFieldService {
         }
 
         const result = await query.getMany();
-        return result.map(r => r.advert_id);
+        return result.map(r => r.productId);
     }
 }

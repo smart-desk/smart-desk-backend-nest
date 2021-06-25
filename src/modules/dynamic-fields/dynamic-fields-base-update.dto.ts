@@ -7,5 +7,5 @@ export abstract class DynamicFieldsBaseUpdateDto {
 
     @IsUUID()
     @IsNotEmpty()
-    field_id: string;
+    fieldId: string;
 }

@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-import { Advert } from '../../adverts/entities/advert.entity';
+import { Product } from '../../products/entities/product.entity';
 
 @Entity('chats')
 export class Chat {
@@ -13,10 +13,10 @@ export class Chat {
     @Column('uuid', { name: 'user_2' })
     user2: string;
 
-    @Column('uuid', { name: 'advert_id' })
-    advertId: string;
+    @Column('uuid', { name: 'product_id' })
+    productId: string;
 
-    advertData: Advert;
+    productData: Product;
 
     user1Data: User;
 

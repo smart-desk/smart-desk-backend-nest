@@ -9,7 +9,7 @@ import { JwtAuthGuardMock } from '../../../test/mocks/jwt-auth.guard.mock';
 import { ACGuard } from 'nest-access-control';
 import { AcGuardMock } from '../../../test/mocks/ac.guard.mock';
 import { ChatModule } from './chat.module';
-import { Advert } from '../adverts/entities/advert.entity';
+import { Product } from '../products/entities/product.entity';
 import { Field } from '../fields/field.entity';
 import { Chat } from './enitities/chat.entity';
 import { ChatMessage } from './enitities/chat-message.entity';
@@ -17,7 +17,7 @@ import * as io from 'socket.io-client';
 import { ChatEvent } from './chat.gateway';
 import { WsJwtAuthGuard } from '../../guards/ws-jwt-auth.guard';
 import { WsJwtAuthGuardMock } from '../../../test/mocks/ws-jwt-auth.guard.mock';
-import { PreferContact } from '../adverts/models/prefer-contact.enum';
+import { PreferContact } from '../products/models/prefer-contact.enum';
 import { FieldType } from '../dynamic-fields/dynamic-fields.module';
 
 describe('Chat gateway', () => {
@@ -31,22 +31,22 @@ describe('Chat gateway', () => {
     field.id = uuid();
     field.type = FieldType.INPUT_TEXT;
 
-    const advert = new Advert();
-    advert.id = uuid();
-    advert.userId = user.id;
-    advert.fields = [field];
+    const product = new Product();
+    product.id = uuid();
+    product.userId = user.id;
+    product.fields = [field];
 
     const chat = new Chat();
     chat.id = uuid();
     chat.user1 = user.id;
     chat.user2 = 'FromTestWsJwtAuthGuardMock';
-    chat.advertId = uuid();
+    chat.productId = uuid();
 
     const chatMessage = new ChatMessage();
     chatMessage.id = uuid();
 
     const JwtGuard = JwtAuthGuardMock;
-    const advertServiceRepositoryMock = createRepositoryMock([advert]);
+    const productServiceRepositoryMock = createRepositoryMock([product]);
     const userServiceRepositoryMock = createRepositoryMock<User>([user]);
     const chatMessageRepositoryMock = createRepositoryMock([chatMessage]);
     const chatRepositoryMock = createRepositoryMock([chat]);
@@ -61,8 +61,8 @@ describe('Chat gateway', () => {
             .useValue(chatRepositoryMock)
             .overrideProvider(getRepositoryToken(ChatMessage))
             .useValue(chatMessageRepositoryMock)
-            .overrideProvider(getRepositoryToken(Advert))
-            .useValue(advertServiceRepositoryMock)
+            .overrideProvider(getRepositoryToken(Product))
+            .useValue(productServiceRepositoryMock)
             .overrideProvider(getRepositoryToken(Field))
             .useValue(createRepositoryMock([field]))
             .overrideProvider(getRepositoryToken(User))
@@ -86,11 +86,11 @@ describe('Chat gateway', () => {
         it(`successfully`, done => {
             socket = io.connect(baseAddress, { path: '/socket' });
             const id = uuid();
-            const advertId = uuid();
-            socket.emit(ChatEvent.CREATE_CHAT, { id, advertId });
+            const productId = uuid();
+            socket.emit(ChatEvent.CREATE_CHAT, { id, productId });
             socket.on(ChatEvent.CREATE_CHAT, res => {
                 expect(res.id).toBe(id);
-                expect(res.data.advertId).toBe(chat.advertId);
+                expect(res.data.productId).toBe(chat.productId);
                 done();
             });
         });
@@ -99,8 +99,8 @@ describe('Chat gateway', () => {
             WsJwtAuthGuardMock.canActivate.mockReturnValueOnce(false);
             socket = io.connect(baseAddress, { path: '/socket' });
             const id = uuid();
-            const advertId = uuid();
-            socket.emit(ChatEvent.CREATE_CHAT, { id, advertId });
+            const productId = uuid();
+            socket.emit(ChatEvent.CREATE_CHAT, { id, productId });
             socket.on('exception', res => {
                 expect(res.message).toBe('Forbidden resource');
                 done();
@@ -115,8 +115,8 @@ describe('Chat gateway', () => {
 
             socket = io.connect(baseAddress, { path: '/socket' });
             const id = uuid();
-            const advertId = uuid();
-            socket.emit(ChatEvent.CREATE_CHAT, { id, advertId });
+            const productId = uuid();
+            socket.emit(ChatEvent.CREATE_CHAT, { id, productId });
             socket.on('exception', res => {
                 expect(res.message).toContain("Chat participants can't be the same user");
                 done();
@@ -124,13 +124,13 @@ describe('Chat gateway', () => {
         });
 
         it(`with error - user prefers phone`, done => {
-            advert.preferContact = PreferContact.PHONE;
-            advertServiceRepositoryMock.findOne.mockReturnValueOnce(advert);
+            product.preferContact = PreferContact.PHONE;
+            productServiceRepositoryMock.findOne.mockReturnValueOnce(product);
 
             socket = io.connect(baseAddress, { path: '/socket' });
             const id = uuid();
-            const advertId = uuid();
-            socket.emit(ChatEvent.CREATE_CHAT, { id, advertId });
+            const productId = uuid();
+            socket.emit(ChatEvent.CREATE_CHAT, { id, productId });
             socket.on('exception', res => {
                 expect(res.message).toContain('User prefers phone');
                 done();

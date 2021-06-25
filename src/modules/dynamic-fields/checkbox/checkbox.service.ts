@@ -14,9 +14,9 @@ export class CheckboxService extends BaseFieldService {
         super(repository, CheckboxEntity, CreateCheckboxDto, UpdateCheckboxDto, CheckboxParamsDto);
     }
 
-    async getAdvertIdsByFilter(fieldId: string, params: CheckboxFilterDto): Promise<string[]> {
+    async getProductIdsByFilter(fieldId: string, params: CheckboxFilterDto): Promise<string[]> {
         const result = await this.repository.createQueryBuilder('c').where('c.value && :params', { params }).getMany();
 
-        return result.map(r => r.advert_id);
+        return result.map(r => r.productId);
     }
 }

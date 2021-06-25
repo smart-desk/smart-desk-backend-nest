@@ -6,8 +6,8 @@ import { v4 as uuid } from 'uuid';
 import { Connection } from 'typeorm';
 import { AccessControlModule } from 'nest-access-control';
 import { createRepositoryMock, createTestAppForModule, declareCommonProviders } from '../../../../test/test.utils';
-import { Advert } from '../../adverts/entities/advert.entity';
-import { AdvertsModule } from '../../adverts/adverts.module';
+import { Product } from '../../products/entities/product.entity';
+import { ProductsModule } from '../../products/products.module';
 import { Field } from '../../fields/field.entity';
 import { FieldType } from '../dynamic-fields.module';
 import { JwtAuthGuard } from '../../../guards/jwt-auth.guard';
@@ -27,11 +27,11 @@ describe('Text field', () => {
     fieldEntity.title = 'test';
     fieldEntity.params = {};
 
-    const advertEntity = new Advert();
-    advertEntity.id = '1234';
-    advertEntity.userId = '123';
+    const productEntity = new Product();
+    productEntity.id = '1234';
+    productEntity.userId = '123';
 
-    const advertRepositoryMock = createRepositoryMock<Advert>([advertEntity]);
+    const productRepositoryMock = createRepositoryMock<Product>([productEntity]);
     const fieldRepositoryMock = createRepositoryMock<Field>([fieldEntity]);
     const connectionMock = {
         manager: createRepositoryMock(),
@@ -41,12 +41,12 @@ describe('Text field', () => {
 
     beforeAll(async () => {
         let moduleBuilder = Test.createTestingModule({
-            imports: [AdvertsModule, TypeOrmModule.forRoot(), AccessControlModule.forRoles(roles), UsersModule],
+            imports: [ProductsModule, TypeOrmModule.forRoot(), AccessControlModule.forRoles(roles), UsersModule],
         });
 
         const moduleRef = await declareCommonProviders(moduleBuilder)
-            .overrideProvider(getRepositoryToken(Advert))
-            .useValue(advertRepositoryMock)
+            .overrideProvider(getRepositoryToken(Product))
+            .useValue(productRepositoryMock)
             .overrideProvider(getRepositoryToken(Field))
             .useValue(fieldRepositoryMock)
             .overrideProvider(getRepositoryToken(User))
