@@ -18,7 +18,7 @@ export class LocationService extends BaseFieldService {
         const result = await this.repository
             .createQueryBuilder()
             .where({
-                field_id: fieldId,
+                fieldId,
             })
             .getMany();
 

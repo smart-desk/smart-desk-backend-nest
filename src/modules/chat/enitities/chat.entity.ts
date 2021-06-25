@@ -13,7 +13,7 @@ export class Chat {
     @Column('uuid', { name: 'user_2' })
     user2: string;
 
-    @Column('uuid', { name: 'advert_id' })
+    @Column('uuid', { name: 'product_id' })
     productId: string;
 
     productData: Product;

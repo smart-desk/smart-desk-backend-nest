@@ -76,7 +76,7 @@ describe('Checkbox field', () => {
                         fields: [
                             {
                                 productId: null,
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 title: 'test',
                                 value: ['test', 'test1'],
                             } as CreateCheckboxDto,
@@ -94,7 +94,7 @@ describe('Checkbox field', () => {
                         title: 'some product',
                         fields: [
                             {
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 title: 123123,
                                 value: 'a234132',
                             } as any,
@@ -115,7 +115,7 @@ describe('Checkbox field', () => {
                         title: 'some product',
                         fields: [
                             {
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 title: 123123,
                                 value: [1234, 3413],
                             } as any,
@@ -138,7 +138,7 @@ describe('Checkbox field', () => {
                         fields: [
                             {
                                 id: uuid(),
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 title: 'test',
                                 value: ['123'],
                             } as UpdateCheckboxDto,
@@ -154,7 +154,7 @@ describe('Checkbox field', () => {
                         title: 'some product',
                         fields: [
                             {
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 title: 123123,
                                 value: 'a234132',
                             } as any,
@@ -173,7 +173,7 @@ describe('Checkbox field', () => {
                         title: 'some product',
                         fields: [
                             {
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 title: 123123,
                                 value: [1234, 3413],
                             } as any,

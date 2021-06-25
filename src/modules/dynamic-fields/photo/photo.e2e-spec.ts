@@ -77,7 +77,7 @@ describe('Photo field', () => {
                         title: 'some product',
                         fields: [
                             {
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: ['http://text.com/some-picture.png'],
                             } as CreatePhotoDto,
                         ],
@@ -85,7 +85,7 @@ describe('Photo field', () => {
                     .expect(HttpStatus.CREATED);
             });
 
-            it(`with error - not valid field_id`, () => {
+            it(`with error - not valid fieldId`, () => {
                 return request(app.getHttpServer())
                     .post(`/products`)
                     .send({
@@ -94,14 +94,14 @@ describe('Photo field', () => {
                         title: 'some product',
                         fields: [
                             {
-                                field_id: '123',
+                                fieldId: '123',
                                 value: ['http://text.com/some-picture.png'],
                             } as CreatePhotoDto,
                         ],
                     } as CreateProductDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('field_id must be an UUID');
+                        expect(res.body.message).toContain('fieldId must be an UUID');
                     });
             });
 
@@ -115,7 +115,7 @@ describe('Photo field', () => {
                         title: 'some product',
                         fields: [
                             {
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: ['test'],
                             } as CreatePhotoDto,
                         ],
@@ -137,7 +137,7 @@ describe('Photo field', () => {
                         title: 'some product',
                         fields: [
                             {
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: ['http://domain.com/' + Array(1001).fill('a').join('') + '.png'],
                             } as CreatePhotoDto,
                         ],
@@ -162,7 +162,7 @@ describe('Photo field', () => {
                         fields: [
                             {
                                 id: uuid(),
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: ['http://text.com/some-picture.png'],
                             } as UpdatePhotoDto,
                         ],
@@ -179,7 +179,7 @@ describe('Photo field', () => {
                         fields: [
                             {
                                 id: '12312312',
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: ['http://text.com/some-picture.png'],
                             } as UpdatePhotoDto,
                         ],
@@ -190,7 +190,7 @@ describe('Photo field', () => {
                     });
             });
 
-            it(`with error - not valid field_id`, () => {
+            it(`with error - not valid fieldId`, () => {
                 return request(app.getHttpServer())
                     .patch(`/products/${uuid()}`)
                     .send({
@@ -198,14 +198,14 @@ describe('Photo field', () => {
                         fields: [
                             {
                                 id: uuid(),
-                                field_id: '123',
+                                fieldId: '123',
                                 value: ['http://text.com/some-picture.png'],
                             } as UpdatePhotoDto,
                         ],
                     } as UpdateProductDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('field_id must be an UUID');
+                        expect(res.body.message).toContain('fieldId must be an UUID');
                     });
             });
 
@@ -217,7 +217,7 @@ describe('Photo field', () => {
                         title: 'some product',
                         fields: [
                             {
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: ['test'],
                             } as UpdatePhotoDto,
                         ],
@@ -238,7 +238,7 @@ describe('Photo field', () => {
                         fields: [
                             {
                                 id: uuid(),
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: ['http://domain.com/' + Array(1001).fill('a').join('') + '.png'],
                             } as UpdatePhotoDto,
                         ],
@@ -258,7 +258,7 @@ describe('Photo field', () => {
                         fields: [
                             {
                                 id: null,
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: ['http://domain.com/ssdsds.png'],
                             } as UpdatePhotoDto,
                         ],

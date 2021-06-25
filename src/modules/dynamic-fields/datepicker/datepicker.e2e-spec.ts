@@ -74,7 +74,7 @@ describe('Datepicker field', () => {
                         title: 'some product',
                         fields: [
                             {
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 date1: new Date(),
                                 date2: new Date(),
                             } as CreateDatepickerDto,
@@ -90,7 +90,7 @@ describe('Datepicker field', () => {
                         model_id: uuid(),
                         category_id: uuid(),
                         title: 'some product',
-                        fields: [{ field_id: uuid() } as any],
+                        fields: [{ fieldId: uuid() } as any],
                     } as CreateProductDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
@@ -108,7 +108,7 @@ describe('Datepicker field', () => {
                         title: 'some product',
                         fields: [
                             {
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 date1: new Date(),
                                 date2: new Date(),
                             } as UpdateDatepickerDto,
@@ -124,7 +124,7 @@ describe('Datepicker field', () => {
                         title: 'some product',
                         fields: [
                             {
-                                field_id: uuid(),
+                                fieldId: uuid(),
                             } as any,
                         ],
                     } as CreateProductDto)

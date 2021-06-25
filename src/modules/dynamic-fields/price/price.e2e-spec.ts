@@ -79,7 +79,7 @@ describe('Price field', () => {
                         title: 'some product',
                         fields: [
                             {
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: 1000,
                             } as CreatePriceDto,
                         ],
@@ -87,7 +87,7 @@ describe('Price field', () => {
                     .expect(HttpStatus.CREATED);
             });
 
-            it(`with error - not valid field_id`, () => {
+            it(`with error - not valid fieldId`, () => {
                 return request(app.getHttpServer())
                     .post(`/products`)
                     .send({
@@ -96,14 +96,14 @@ describe('Price field', () => {
                         title: 'some product',
                         fields: [
                             {
-                                field_id: '123',
+                                fieldId: '123',
                                 value: 1000,
                             } as CreatePriceDto,
                         ],
                     } as CreateProductDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('field_id must be an UUID');
+                        expect(res.body.message).toContain('fieldId must be an UUID');
                     });
             });
 
@@ -117,7 +117,7 @@ describe('Price field', () => {
                         title: 'some product',
                         fields: [
                             {
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: -100,
                             } as CreatePriceDto,
                         ],
@@ -142,7 +142,7 @@ describe('Price field', () => {
                         fields: [
                             {
                                 id: uuid(),
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: 1000,
                             } as UpdatePriceDto,
                         ],
@@ -159,7 +159,7 @@ describe('Price field', () => {
                         fields: [
                             {
                                 id: '12312312',
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: 1000,
                             } as UpdatePriceDto,
                         ],
@@ -170,7 +170,7 @@ describe('Price field', () => {
                     });
             });
 
-            it(`with error - not valid field_id`, () => {
+            it(`with error - not valid fieldId`, () => {
                 return request(app.getHttpServer())
                     .patch(`/products/${uuid()}`)
                     .send({
@@ -178,14 +178,14 @@ describe('Price field', () => {
                         fields: [
                             {
                                 id: uuid(),
-                                field_id: '123',
+                                fieldId: '123',
                                 value: 1000,
                             } as UpdatePriceDto,
                         ],
                     } as UpdateProductDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('field_id must be an UUID');
+                        expect(res.body.message).toContain('fieldId must be an UUID');
                     });
             });
 
@@ -197,7 +197,7 @@ describe('Price field', () => {
                         title: 'some product',
                         fields: [
                             {
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: -1000,
                             } as UpdatePriceDto,
                         ],
@@ -217,7 +217,7 @@ describe('Price field', () => {
                         fields: [
                             {
                                 id: null,
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: 1000,
                             } as UpdatePriceDto,
                         ],

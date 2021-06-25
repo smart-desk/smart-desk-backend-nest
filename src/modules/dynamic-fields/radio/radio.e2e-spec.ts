@@ -79,7 +79,7 @@ describe('Radio field', () => {
                         title: 'some product',
                         fields: [
                             {
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: 'test',
                             } as CreateRadioDto,
                         ],
@@ -87,7 +87,7 @@ describe('Radio field', () => {
                     .expect(HttpStatus.CREATED);
             });
 
-            it(`with error - not valid field_id`, () => {
+            it(`with error - not valid fieldId`, () => {
                 return request(app.getHttpServer())
                     .post(`/products`)
                     .send({
@@ -96,14 +96,14 @@ describe('Radio field', () => {
                         title: 'some product',
                         fields: [
                             {
-                                field_id: '123',
+                                fieldId: '123',
                                 value: 'test',
                             } as CreateRadioDto,
                         ],
                     } as CreateProductDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('field_id must be an UUID');
+                        expect(res.body.message).toContain('fieldId must be an UUID');
                     });
             });
 
@@ -117,7 +117,7 @@ describe('Radio field', () => {
                         title: 'some product',
                         fields: [
                             {
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: Array(256).fill('a').join(''),
                             } as CreateRadioDto,
                         ],
@@ -142,7 +142,7 @@ describe('Radio field', () => {
                         fields: [
                             {
                                 id: uuid(),
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: 'new text',
                             } as UpdateRadioDto,
                         ],
@@ -150,7 +150,7 @@ describe('Radio field', () => {
                     .expect(HttpStatus.OK);
             });
 
-            it(`with error - not valid field_id`, () => {
+            it(`with error - not valid fieldId`, () => {
                 return request(app.getHttpServer())
                     .patch(`/products/${uuid()}`)
                     .send({
@@ -158,14 +158,14 @@ describe('Radio field', () => {
                         fields: [
                             {
                                 id: uuid(),
-                                field_id: '123',
+                                fieldId: '123',
                                 value: 'new text',
                             } as UpdateRadioDto,
                         ],
                     } as UpdateProductDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('field_id must be an UUID');
+                        expect(res.body.message).toContain('fieldId must be an UUID');
                     });
             });
 
@@ -178,7 +178,7 @@ describe('Radio field', () => {
                         fields: [
                             {
                                 id: uuid(),
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: '',
                             } as UpdateRadioDto,
                         ],
@@ -198,7 +198,7 @@ describe('Radio field', () => {
                         fields: [
                             {
                                 id: uuid(),
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: Array(256).fill('a').join(''),
                             } as UpdateRadioDto,
                         ],
@@ -217,7 +217,7 @@ describe('Radio field', () => {
                         fields: [
                             {
                                 id: '123',
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: '1234',
                             } as UpdateRadioDto,
                         ],
@@ -237,7 +237,7 @@ describe('Radio field', () => {
                         fields: [
                             {
                                 id: uuid(),
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: '1234',
                             } as UpdateRadioDto,
                         ],

@@ -10,11 +10,11 @@ export class Bookmark {
     @Column('uuid', { name: 'user_id' })
     userId: string;
 
-    @Column('uuid', { name: 'advert_id' })
+    @Column('uuid', { name: 'product_id' })
     @Exclude()
     productId: string;
 
     @OneToOne(() => Product, { eager: true })
-    @JoinColumn({ name: 'advert_id' })
+    @JoinColumn({ name: 'product_id' })
     product: Product;
 }

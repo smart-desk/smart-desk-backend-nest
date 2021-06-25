@@ -7,6 +7,6 @@ export abstract class DynamicFieldsBaseEntity {
     @Column('uuid', { name: 'product_id' })
     productId: string;
 
-    @Column('uuid')
-    field_id: string;
+    @Column('uuid', { name: 'field_id' })
+    fieldId: string;
 }

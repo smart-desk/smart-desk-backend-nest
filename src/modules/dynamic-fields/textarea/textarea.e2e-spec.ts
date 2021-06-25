@@ -79,7 +79,7 @@ describe('Textarea field', () => {
                         title: 'some product',
                         fields: [
                             {
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: 'test',
                             } as CreateTextareaDto,
                         ],
@@ -87,7 +87,7 @@ describe('Textarea field', () => {
                     .expect(HttpStatus.CREATED);
             });
 
-            it(`with error - not valid field_id`, () => {
+            it(`with error - not valid fieldId`, () => {
                 return request(app.getHttpServer())
                     .post(`/products`)
                     .send({
@@ -96,14 +96,14 @@ describe('Textarea field', () => {
                         title: 'some product',
                         fields: [
                             {
-                                field_id: '123',
+                                fieldId: '123',
                                 value: 'test',
                             } as CreateTextareaDto,
                         ],
                     } as CreateProductDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('field_id must be an UUID');
+                        expect(res.body.message).toContain('fieldId must be an UUID');
                     });
             });
 
@@ -117,7 +117,7 @@ describe('Textarea field', () => {
                         title: 'some product',
                         fields: [
                             {
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: Array(1001).fill('a').join(''),
                             } as CreateTextareaDto,
                         ],
@@ -142,7 +142,7 @@ describe('Textarea field', () => {
                         fields: [
                             {
                                 id: uuid(),
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: 'new text',
                             } as UpdateTextareaDto,
                         ],
@@ -150,7 +150,7 @@ describe('Textarea field', () => {
                     .expect(HttpStatus.OK);
             });
 
-            it(`with error - not valid field_id`, () => {
+            it(`with error - not valid fieldId`, () => {
                 return request(app.getHttpServer())
                     .patch(`/products/${uuid()}`)
                     .send({
@@ -158,14 +158,14 @@ describe('Textarea field', () => {
                         fields: [
                             {
                                 id: uuid(),
-                                field_id: '123',
+                                fieldId: '123',
                                 value: 'new text',
                             } as UpdateTextareaDto,
                         ],
                     } as UpdateProductDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('field_id must be an UUID');
+                        expect(res.body.message).toContain('fieldId must be an UUID');
                     });
             });
 
@@ -178,7 +178,7 @@ describe('Textarea field', () => {
                         fields: [
                             {
                                 id: uuid(),
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: '',
                             } as UpdateTextareaDto,
                         ],
@@ -198,7 +198,7 @@ describe('Textarea field', () => {
                         fields: [
                             {
                                 id: uuid(),
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: Array(1001).fill('a').join(''),
                             } as UpdateTextareaDto,
                         ],
@@ -217,7 +217,7 @@ describe('Textarea field', () => {
                         fields: [
                             {
                                 id: '123',
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: '1234',
                             } as UpdateTextareaDto,
                         ],
@@ -237,7 +237,7 @@ describe('Textarea field', () => {
                         fields: [
                             {
                                 id: uuid(),
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 value: '1234',
                             } as UpdateTextareaDto,
                         ],

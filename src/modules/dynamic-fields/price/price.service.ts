@@ -19,7 +19,7 @@ export class PriceService extends BaseFieldService {
         const result = await this.repository
             .createQueryBuilder()
             .where({
-                field_id: fieldId,
+                fieldId,
                 value: Between(params.from || 0, params.to || 9999999999999),
             })
             .getMany();
@@ -32,7 +32,7 @@ export class PriceService extends BaseFieldService {
             .createQueryBuilder('price')
             .where({
                 product_id: In(productIds),
-                field_id: fieldId,
+                fieldId,
             })
             .orderBy({ value: direction })
             .select('price.product_id')

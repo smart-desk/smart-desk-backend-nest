@@ -17,7 +17,7 @@ export class RadioService extends BaseFieldService {
     async getProductIdsByFilter(fieldId: string, params: RadioFilterDto): Promise<string[]> {
         const result = await this.repository.find({
             where: {
-                field_id: fieldId,
+                fieldId,
                 value: In(params),
             },
         });

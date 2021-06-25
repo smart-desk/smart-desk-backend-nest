@@ -75,7 +75,7 @@ describe('Location field', () => {
                         title: 'some product',
                         fields: [
                             {
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 title: 'test',
                                 lat: 13,
                                 lng: 123,
@@ -94,7 +94,7 @@ describe('Location field', () => {
                         title: 'some product',
                         fields: [
                             {
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 title: 123123,
                                 lat: '123123',
                                 lng: '123123',
@@ -119,7 +119,7 @@ describe('Location field', () => {
                         title: 'some product',
                         fields: [
                             {
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 title: 'test',
                                 lat: 13,
                                 lng: 123,
@@ -136,7 +136,7 @@ describe('Location field', () => {
                         title: 'some product',
                         fields: [
                             {
-                                field_id: uuid(),
+                                fieldId: uuid(),
                                 title: 123123,
                                 lat: '123123',
                                 lng: '123123',

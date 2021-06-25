@@ -17,7 +17,7 @@ export class DatepickerService extends BaseFieldService {
 
     async getProductIdsByFilter(fieldId: string, params: DatepickerFilterDto): Promise<string[]> {
         const query = this.repository.createQueryBuilder('d').where({
-            field_id: fieldId,
+            fieldId,
         });
 
         if (params.from) {

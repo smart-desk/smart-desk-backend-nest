@@ -58,14 +58,14 @@ export class ProductsService {
     async create(userId: string, productDto: CreateProductDto): Promise<Product> {
         // todo (future) check that model belongs to category
         // todo (future) check that field belongs to model
-        // todo (future) check that field_id is unique for this product
+        // todo (future) check that fieldId is unique for this product
         const validDtos: Array<FieldDataDtoInstance> = [];
         for (const fieldDataObject of productDto.fields) {
-            if (!isUUID(fieldDataObject.field_id)) {
-                throw new BadRequestException('field_id must be an UUID');
+            if (!isUUID(fieldDataObject.fieldId)) {
+                throw new BadRequestException('fieldId must be an UUID');
             }
 
-            const field = await this.fieldsService.getById(fieldDataObject.field_id);
+            const field = await this.fieldsService.getById(fieldDataObject.fieldId);
             const service = this.dynamicFieldsService.getService(field.type);
             if (!service) {
                 continue;
@@ -98,7 +98,7 @@ export class ProductsService {
             if (!service) {
                 continue;
             }
-            fieldData.dto.product_id = productResult.id;
+            fieldData.dto.productId = productResult.id;
             await service.validateAndCreate(fieldData.dto);
         }
 
@@ -110,11 +110,11 @@ export class ProductsService {
 
         const validDtos: Array<FieldDataDtoInstance> = [];
         for (const fieldDataObject of productDto.fields) {
-            if (!isUUID(fieldDataObject.field_id)) {
-                throw new BadRequestException('field_id must be an UUID');
+            if (!isUUID(fieldDataObject.fieldId)) {
+                throw new BadRequestException('fieldId must be an UUID');
             }
 
-            const field = await this.fieldsService.getById(fieldDataObject.field_id);
+            const field = await this.fieldsService.getById(fieldDataObject.fieldId);
             const service = this.dynamicFieldsService.getService(field.type);
             if (!service) {
                 continue;
@@ -222,8 +222,8 @@ export class ProductsService {
             if (repository) {
                 field.data = await repository.findOne({
                     where: {
-                        field_id: field.id,
-                        product_id: product.id,
+                        fieldId: field.id,
+                        productId: product.id,
                     },
                 });
             }
