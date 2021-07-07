@@ -34,5 +34,8 @@ export class Product {
     @UpdateDateColumn({ name: 'updated_at', type: 'timestamp with time zone' })
     updatedAt: Date;
 
+    @Column({ name: 'promotion_timestamp', type: 'timestamp with time zone' })
+    promotionTimestamp: Date;
+
     fields: Field[];
 }

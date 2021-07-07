@@ -244,7 +244,7 @@ export class ProductsService {
         const where = this.getWhereClause(options, categoryId);
         const queryBuilder = this.productRepository.createQueryBuilder('product');
         queryBuilder.where(where);
-        queryBuilder.orderBy({ created_at: SortingType.DESC });
+        queryBuilder.orderBy({ promotion_timestamp: SortingType.DESC });
 
         if (options.filters) {
             let filteredIds = await this.getFilteredIds(options);
