@@ -4,11 +4,12 @@ import Stripe from 'stripe';
 import { Request } from 'express';
 import { AdService } from '../ad/ad.service';
 import { StripeService } from './stripe.service';
+import { ProductsService } from '../products/products.service';
 
 @Controller('stripe')
 @ApiTags('Stripe')
 export class StripeController {
-    constructor(private stripeService: StripeService, private adService: AdService) {}
+    constructor(private stripeService: StripeService, private adService: AdService, private productService: ProductsService) {}
 
     @Post('webhook')
     @HttpCode(HttpStatus.OK)
@@ -18,8 +19,12 @@ export class StripeController {
 
         if (event.type === 'charge.succeeded') {
             const sessionMetadata = event?.data?.object['metadata'];
-            if (sessionMetadata && sessionMetadata['campaign']) {
-                await this.adService.payCampaign(sessionMetadata['campaign']);
+            if (sessionMetadata) {
+                if (sessionMetadata['campaign']) {
+                    await this.adService.payCampaign(sessionMetadata['campaign']);
+                } else if (sessionMetadata['product'] && sessionMetadata['type'] === 'lifting') {
+                    await this.productService.liftProduct(sessionMetadata['product']);
+                }
             }
         }
     }

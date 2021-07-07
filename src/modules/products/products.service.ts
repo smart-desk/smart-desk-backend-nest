@@ -209,6 +209,13 @@ export class ProductsService {
         return product.userId;
     }
 
+    async liftProduct(id: string): Promise<Product> {
+        const product = await this.findOneOrThrowException(id);
+        product.promotionTimestamp = new Date();
+        const updatedProduct = await this.productRepository.preload({ id, ...product });
+        return await this.productRepository.save(updatedProduct);
+    }
+
     async loadFieldDataForProduct(product: Product): Promise<Product> {
         product.fields = await this.fieldsService.getByModelId(product.model_id);
 
