@@ -48,6 +48,7 @@ describe('Stripe controller', () => {
         app = await createTestAppForModule(moduleRef);
     });
 
+    // todo add tests for specific cases
     describe('trigger webhook', () => {
         it('successfully', () => {
             return request(app.getHttpServer()).post('/stripe/webhook').expect(HttpStatus.OK);
