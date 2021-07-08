@@ -9,7 +9,12 @@ import { UsersModule } from '../users/users.module';
 import { StripeModule } from '../stripe/stripe.module';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([AdConfig]), TypeOrmModule.forFeature([AdCampaign]), UsersModule, forwardRef(() => StripeModule)],
+    imports: [
+        TypeOrmModule.forFeature([AdConfig]),
+        TypeOrmModule.forFeature([AdCampaign]),
+        forwardRef(() => UsersModule),
+        forwardRef(() => StripeModule),
+    ],
     controllers: [AdController],
     providers: [AdService, BlockedUserGuard],
     exports: [AdService],

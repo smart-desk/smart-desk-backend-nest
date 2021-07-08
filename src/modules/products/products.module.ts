@@ -15,7 +15,7 @@ import { AdModule } from '../ad/ad.module';
         TypeOrmModule.forFeature([Product]),
         FieldsModule,
         DynamicFieldsModule,
-        AdModule,
+        forwardRef(() => AdModule),
         forwardRef(() => StripeModule),
         forwardRef(() => UsersModule),
         forwardRef(() => MailModule),
