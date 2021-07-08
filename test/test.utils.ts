@@ -18,6 +18,8 @@ import { MailService } from '../src/modules/mail/mail.service';
 import { MailServiceMock } from './mocks/mail.service.mock';
 import { StripeServiceMock } from './mocks/stripe.service.mock';
 import { StripeService } from '../src/modules/stripe/stripe.service';
+import { AdConfig } from '../src/modules/ad/enitities/ad-config.entity';
+import { AdCampaign } from '../src/modules/ad/enitities/ad-campaign.entity';
 
 export async function createTestAppForModule(moduleRef: TestingModule) {
     const app = moduleRef.createNestApplication();
@@ -90,6 +92,10 @@ export function declareCommonProviders(moduleRef: TestingModuleBuilder): Testing
         .overrideProvider(getRepositoryToken(CheckboxEntity))
         .useValue(createRepositoryMock())
         .overrideProvider(getRepositoryToken(DatepickerEntity))
+        .useValue(createRepositoryMock())
+        .overrideProvider(getRepositoryToken(AdConfig))
+        .useValue(createRepositoryMock())
+        .overrideProvider(getRepositoryToken(AdCampaign))
         .useValue(createRepositoryMock())
         .overrideProvider(MailService)
         .useValue(MailServiceMock)
