@@ -218,6 +218,7 @@ export class ProductsController {
         resource: ResourceEnum.PRODUCT,
         action: 'update',
     })
+    @HttpCode(HttpStatus.OK)
     async liftProduct(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<{ id: string }> {
         const isOwner = await this.isOwner(id, req.user);
         if (!isOwner) throw new ForbiddenException();
