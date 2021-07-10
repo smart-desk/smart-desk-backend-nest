@@ -22,6 +22,9 @@ import { UserStatus } from '../users/models/user-status.enum';
 import { BlockedUserGuard } from '../../guards/blocked-user.guard';
 import { BlockedUserGuardMock } from '../../../test/mocks/blocked-user.guard.mock';
 import { PreferContact } from './models/prefer-contact.enum';
+import { AdConfig } from '../ad/enitities/ad-config.entity';
+import { AdCampaign } from '../ad/enitities/ad-campaign.entity';
+import { ProductStatus } from './models/product-status.enum';
 
 describe('Products controller', () => {
     let app: INestApplication;
@@ -503,7 +506,15 @@ describe('Products controller with ACL enabled', () => {
     const productEntity = new Product();
     productEntity.id = '1234';
     productEntity.userId = '123';
+    productEntity.status = ProductStatus.ACTIVE;
 
+    const adConfig = new AdConfig();
+    adConfig.id = '1234';
+    adConfig.liftRate = 350;
+    adConfig.mainHourlyRate = 500;
+    adConfig.sidebarHourlyRate = 45;
+
+    const adConfigRepositoryMock = createRepositoryMock<AdConfig>([adConfig]);
     const productRepositoryMock = createRepositoryMock<Product>([productEntity]);
     const fieldRepositoryMock = createRepositoryMock<Field>([fieldEntity]);
     const connectionMock = {
@@ -524,6 +535,10 @@ describe('Products controller with ACL enabled', () => {
             .useValue(fieldRepositoryMock)
             .overrideProvider(getRepositoryToken(User))
             .useValue(userRepositoryMock)
+            .overrideProvider(getRepositoryToken(AdConfig))
+            .useValue(adConfigRepositoryMock)
+            .overrideProvider(getRepositoryToken(AdCampaign))
+            .useValue(createRepositoryMock())
             .overrideProvider(Connection)
             .useValue(connectionMock)
             .overrideGuard(JwtAuthGuard)
@@ -829,6 +844,66 @@ describe('Products controller with ACL enabled', () => {
             });
 
             return request(app.getHttpServer()).patch(`/products/${uuid()}/complete`).expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
+    describe('lift product', () => {
+        it(`successfully`, () => {
+            productEntity.status = ProductStatus.ACTIVE;
+            return request(app.getHttpServer()).post(`/products/${uuid()}/lift`).expect(HttpStatus.OK);
+        });
+
+        it(`with error - product must be published`, () => {
+            productEntity.status = ProductStatus.BLOCKED;
+            productRepositoryMock.findOne.mockReturnValueOnce({ ...productEntity });
+
+            return request(app.getHttpServer())
+                .post(`/products/${uuid()}/lift`)
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('Product must be published');
+                });
+        });
+
+        it(`with error - no configuration`, () => {
+            adConfig.liftRate = undefined;
+            adConfigRepositoryMock.findOne.mockReturnValueOnce({ ...adConfig });
+
+            return request(app.getHttpServer())
+                .post(`/products/${uuid()}/lift`)
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('No configuration for this action');
+                });
+        });
+
+        it(`with error - not authorized`, () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+            return request(app.getHttpServer()).post(`/products/${uuid()}/lift`).expect(HttpStatus.FORBIDDEN);
+        });
+
+        it(`with error - not valid product id`, () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: ['user', 'admin'] };
+                return true;
+            });
+            return request(app.getHttpServer())
+                .post(`/products/some/lift`)
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('Validation failed (uuid  is expected)');
+                });
+        });
+
+        it(`with error - not owner of product`, () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: ['user'] };
+                return true;
+            });
+
+            return request(app.getHttpServer()).post(`/products/${uuid()}/lift`).expect(HttpStatus.FORBIDDEN);
         });
     });
 

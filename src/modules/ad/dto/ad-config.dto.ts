@@ -8,4 +8,8 @@ export class AdConfigDto {
     @IsOptional()
     @IsNumber()
     sidebarHourlyRate?: number;
+
+    @IsOptional()
+    @IsNumber()
+    liftRate?: number;
 }

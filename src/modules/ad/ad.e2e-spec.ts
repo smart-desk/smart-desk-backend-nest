@@ -1,4 +1,4 @@
-import { ExecutionContext, HttpStatus, INestApplication } from '@nestjs/common';
+import { ExecutionContext, forwardRef, HttpStatus, INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { v4 as uuid } from 'uuid';
 import { createRepositoryMock, createTestAppForModule, declareCommonProviders } from '../../../test/test.utils';
@@ -23,6 +23,7 @@ describe('Ad controller', () => {
     adConfig.id = uuid();
     adConfig.mainHourlyRate = 10;
     adConfig.sidebarHourlyRate = 5;
+    adConfig.liftRate = 60;
 
     const adminUser = new User();
     adminUser.id = uuid();
@@ -42,7 +43,7 @@ describe('Ad controller', () => {
 
     beforeAll(async () => {
         let moduleBuilder = Test.createTestingModule({
-            imports: [AdModule, AccessControlModule.forRoles(roles)],
+            imports: [forwardRef(() => AdModule), AccessControlModule.forRoles(roles)],
         });
 
         const moduleRef = await declareCommonProviders(moduleBuilder)
@@ -70,12 +71,14 @@ describe('Ad controller', () => {
                 .send({
                     mainHourlyRate: 10,
                     sidebarHourlyRate: 5,
+                    liftRate: 60,
                 } as AdConfigDto)
                 .expect(HttpStatus.OK)
                 .expect(res => {
                     expect(res.body.id).toBeDefined();
                     expect(res.body.mainHourlyRate).toEqual(10);
                     expect(res.body.sidebarHourlyRate).toEqual(5);
+                    expect(res.body.liftRate).toEqual(60);
                 });
         });
 
@@ -113,11 +116,13 @@ describe('Ad controller', () => {
                 .send({
                     mainHourlyRate: '5sts',
                     sidebarHourlyRate: '22d',
+                    liftRate: '33es',
                 } as any)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('mainHourlyRate must be a number conforming to the specified constraints');
                     expect(res.body.message).toContain('sidebarHourlyRate must be a number conforming to the specified constraints');
+                    expect(res.body.message).toContain('liftRate must be a number conforming to the specified constraints');
                 });
         });
     });
@@ -131,6 +136,7 @@ describe('Ad controller', () => {
                     expect(res.body.id).toBeDefined();
                     expect(res.body.mainHourlyRate).toEqual(10);
                     expect(res.body.sidebarHourlyRate).toEqual(5);
+                    expect(res.body.liftRate).toEqual(60);
                 });
         });
     });

@@ -209,6 +209,13 @@ export class ProductsService {
         return product.userId;
     }
 
+    async liftProduct(id: string): Promise<Product> {
+        const product = await this.findOneOrThrowException(id);
+        product.promotionTimestamp = new Date();
+        const updatedProduct = await this.productRepository.preload({ id, ...product });
+        return await this.productRepository.save(updatedProduct);
+    }
+
     async loadFieldDataForProduct(product: Product): Promise<Product> {
         product.fields = await this.fieldsService.getByModelId(product.model_id);
 
@@ -244,7 +251,7 @@ export class ProductsService {
         const where = this.getWhereClause(options, categoryId);
         const queryBuilder = this.productRepository.createQueryBuilder('product');
         queryBuilder.where(where);
-        queryBuilder.orderBy({ created_at: SortingType.DESC });
+        queryBuilder.orderBy({ promotion_timestamp: SortingType.DESC });
 
         if (options.filters) {
             let filteredIds = await this.getFilteredIds(options);

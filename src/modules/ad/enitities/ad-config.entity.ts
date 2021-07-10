@@ -10,4 +10,7 @@ export class AdConfig {
 
     @Column('numeric', { name: 'sidebar_hourly_rate', precision: 13, scale: 2 })
     sidebarHourlyRate: number;
+
+    @Column('numeric', { name: 'lift_rate', precision: 13, scale: 2 })
+    liftRate: number;
 }

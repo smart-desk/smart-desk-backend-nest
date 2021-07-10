@@ -1,4 +1,5 @@
 import {
+    BadRequestException,
     Body,
     Controller,
     Delete,
@@ -27,11 +28,13 @@ import { GetProductsDto, GetProductsResponseDto } from './dto/get-products.dto';
 import { BlockedUserGuard } from '../../guards/blocked-user.guard';
 import { ProductStatus } from './models/product-status.enum';
 import { User } from '../users/entities/user.entity';
+import { StripeService } from '../stripe/stripe.service';
+import { AdService } from '../ad/ad.service';
 
 @Controller('products')
 @ApiTags('Products')
 export class ProductsController {
-    constructor(private productsService: ProductsService) {}
+    constructor(private productsService: ProductsService, private stripeService: StripeService, private adService: AdService) {}
 
     @Get()
     @ApiBearerAuth('access-token')
@@ -206,6 +209,50 @@ export class ProductsController {
         const isAdminOrOwner = await this.isAdminOrOwner(id, req.user);
         if (!isAdminOrOwner) throw new ForbiddenException();
         return await this.productsService.delete(id);
+    }
+
+    @Post(':id/lift')
+    @ApiBearerAuth('access-token')
+    @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
+    @UseRoles({
+        resource: ResourceEnum.PRODUCT,
+        action: 'update',
+    })
+    @HttpCode(HttpStatus.OK)
+    async liftProduct(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<{ id: string }> {
+        const isOwner = await this.isOwner(id, req.user);
+        if (!isOwner) throw new ForbiddenException();
+
+        const adConfig = await this.adService.getAdConfig();
+        if (!adConfig || !adConfig.liftRate) throw new BadRequestException('No configuration for this action');
+
+        const product = await this.productsService.getById(id, false);
+        if (product.status !== ProductStatus.ACTIVE) throw new BadRequestException('Product must be published');
+
+        return this.stripeService.createPaymentSession({
+            payment_method_types: ['card'],
+            payment_intent_data: {
+                metadata: {
+                    product: product.id,
+                    type: 'lifting',
+                },
+            },
+            line_items: [
+                {
+                    price_data: {
+                        currency: 'rub', // todo site currency
+                        product_data: {
+                            name: `Поднятие "${product.title}"`,
+                        },
+                        unit_amount: Number.parseFloat(adConfig.liftRate.toString()) * 100,
+                    },
+                    quantity: 1,
+                },
+            ],
+            mode: 'payment',
+            success_url: `${process.env.HOST}/profile`, // todo correct url
+            cancel_url: `${process.env.HOST}/profile`, // todo correct url
+        });
     }
 
     private async isAdminOrOwner(productId: string, user: User): Promise<boolean> {
