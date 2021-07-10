@@ -92,6 +92,25 @@ export class AdController {
         return this.adService.createCampaign(body, req.user.id);
     }
 
+    @Patch('campaigns/:id')
+    @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
+    @ApiBearerAuth('access-token')
+    @UseRoles({
+        resource: ResourceEnum.AD_CAMPAIGN,
+        action: 'update',
+    })
+    async updateCampaign(
+        @Param('id', ParseUUIDPipe) id: string,
+        @Body() body: AdCampaignDto,
+        @Req() req: RequestWithUserPayload
+    ): Promise<AdCampaign> {
+        const isOwner = await this.isOwner(id, req.user);
+        if (!isOwner) throw new ForbiddenException();
+        const errorMessage = await this.checkAdCampaignParams(body);
+        if (errorMessage) throw new BadRequestException(errorMessage);
+        return this.adService.updateCampaign(id, body);
+    }
+
     @Get('campaigns/schedule')
     @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
     @ApiBearerAuth('access-token')
@@ -179,6 +198,11 @@ export class AdController {
 
     private isAdmin(user: User): boolean {
         return user.roles && user.roles.some(role => role === RolesEnum.ADMIN);
+    }
+
+    private async isOwner(campaignId: string, user: User): Promise<boolean> {
+        const campaign = await this.adService.getCampaign(campaignId);
+        return campaign.userId === user.id;
     }
 
     private async checkAdCampaignParams(campaignParams: AdCampaignDto): Promise<string | undefined> {
