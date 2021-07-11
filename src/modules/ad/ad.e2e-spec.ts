@@ -38,6 +38,7 @@ describe('Ad controller', () => {
     adCampaign.endDate = dayjs().add(1, 'day').toDate();
     adCampaign.reason = 'test';
     adCampaign.type = AdCampaignType.MAIN;
+    adCampaign.userId = '123';
 
     const JwtGuard = JwtAuthGuardMock;
 
@@ -188,6 +189,56 @@ describe('Ad controller', () => {
         it('with error unauthorized', () => {
             JwtGuard.canActivate.mockReturnValueOnce(false);
             return request(app.getHttpServer()).post('/ad/campaigns').send({}).expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
+    describe('update campaign', () => {
+        it('successfully', () => {
+            return request(app.getHttpServer())
+                .patch(`/ad/campaigns/${uuid()}`)
+                .send({
+                    ...adCampaign,
+                    startDate: dayjs(adCampaign.endDate).add(1, 'days').toDate(),
+                    endDate: dayjs(adCampaign.endDate).add(2, 'days').toDate(),
+                } as AdCampaignDto)
+                .expect(HttpStatus.OK);
+        });
+
+        it('with error ', () => {
+            return request(app.getHttpServer())
+                .patch(`/ad/campaigns/${uuid()}`)
+                .send(adCampaign)
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('Dates overlap with another campaign');
+                });
+        });
+
+        it('with error wrong values', () => {
+            return request(app.getHttpServer())
+                .patch(`/ad/campaigns/${uuid()}`)
+                .send({})
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('startDate should not be empty');
+                    expect(res.body.message).toContain('endDate should not be empty');
+                    expect(res.body.message).toContain('value must be url to image');
+                    expect(res.body.message).toContain('img must be an URL address');
+                    expect(res.body.message).toContain('img must be shorter than or equal to 1000 characters');
+                    expect(res.body.message).toContain('img must be a string');
+                    expect(res.body.message).toContain('img should not be empty');
+                    expect(res.body.message).toContain('link must be an URL address');
+                    expect(res.body.message).toContain('link must be shorter than or equal to 1000 characters');
+                    expect(res.body.message).toContain('link must be a string');
+                    expect(res.body.message).toContain('link should not be empty');
+                    expect(res.body.message).toContain('type must be a valid enum value');
+                    expect(res.body.message).toContain('type should not be empty');
+                });
+        });
+
+        it('with error unauthorized', () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+            return request(app.getHttpServer()).patch(`/ad/campaigns/${uuid()}`).send({}).expect(HttpStatus.FORBIDDEN);
         });
     });
 

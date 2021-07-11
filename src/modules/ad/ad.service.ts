@@ -30,6 +30,14 @@ export class AdService {
         return await this.adConfigRepository.findOne();
     }
 
+    async getCampaign(id: string): Promise<AdCampaign> {
+        const adCampaign = this.adCampaignRepository.findOne({ id });
+        if (!adCampaign) {
+            throw new NotFoundException(`Ad Campaign ${id} not found`);
+        }
+        return adCampaign;
+    }
+
     async getCampaigns(options: GetAdCampaignsDto): Promise<AdCampaign[]> {
         const builder = this.adCampaignRepository.createQueryBuilder();
         const where = {} as any;
@@ -50,6 +58,13 @@ export class AdService {
     async createCampaign(campaign: AdCampaignDto, userId: string): Promise<AdCampaign> {
         const campaignEntity = this.adCampaignRepository.create({ ...campaign, status: AdCampaignStatus.PENDING, userId });
         return await this.adCampaignRepository.save(campaignEntity);
+    }
+
+    async updateCampaign(id: string, campaign: AdCampaignDto): Promise<AdCampaign> {
+        const oldCampaign = await this.getCampaign(id);
+        oldCampaign.status = AdCampaignStatus.PENDING;
+        const updatedCampaign = await this.adConfigRepository.preload({ id: oldCampaign.id, ...campaign });
+        return await this.adCampaignRepository.save(updatedCampaign);
     }
 
     async getCampaignsSchedule(type: AdCampaignType): Promise<Partial<AdCampaign[]>> {
