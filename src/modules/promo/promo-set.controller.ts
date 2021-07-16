@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { ACGuard, UseRoles } from 'nest-access-control';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ResourceEnum, RolesEnum } from '../app/app.roles';
 import { PromoSetService } from './promo-set.service';
 import { PromoSetDto } from './dto/promo-set.dto';
@@ -24,6 +24,7 @@ import { RequestWithUserPayload } from '../auth/jwt.strategy';
 import { User } from '../users/entities/user.entity';
 
 @Controller('promo-set')
+@ApiTags('Promo Set')
 export class PromoSetController {
     constructor(private promoSetService: PromoSetService) {}
 
