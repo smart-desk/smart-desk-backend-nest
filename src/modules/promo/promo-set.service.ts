@@ -8,6 +8,10 @@ import { PromoSetDto } from './dto/promo-set.dto';
 export class PromoSetService {
     constructor(@InjectRepository(PromoSet) private promoSetRepository: Repository<PromoSet>) {}
 
+    async getList(): Promise<PromoSet[]> {
+        return await this.promoSetRepository.find();
+    }
+
     async getById(id: string): Promise<PromoSet> {
         return await this.findOneOrThrowException(id);
     }

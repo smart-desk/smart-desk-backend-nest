@@ -100,6 +100,48 @@ describe('Promo Set controller', () => {
         });
     });
 
+    describe('get promo sets', () => {
+        it(`successfully`, () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: [RolesEnum.USER, RolesEnum.ADMIN] };
+                return true;
+            });
+
+            return request(app.getHttpServer()).get('/promo-set').expect(HttpStatus.OK);
+        });
+
+        it(`with error for not logged in user`, () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+            return request(app.getHttpServer()).get('/promo-set').expect(HttpStatus.FORBIDDEN);
+        });
+
+        it(`with error not an admin`, () => {
+            return request(app.getHttpServer()).get('/promo-set').expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
+    describe('get promo set', () => {
+        it(`successfully`, () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: [RolesEnum.USER, RolesEnum.ADMIN] };
+                return true;
+            });
+
+            return request(app.getHttpServer()).get(`/promo-set/${uuid()}`).expect(HttpStatus.OK);
+        });
+
+        it(`with error for not logged in user`, () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+            return request(app.getHttpServer()).get(`/promo-set/${uuid()}`).expect(HttpStatus.FORBIDDEN);
+        });
+
+        it(`with error not an admin`, () => {
+            return request(app.getHttpServer()).get(`/promo-set/${uuid()}`).expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
     describe('update promo set', () => {
         it(`successfully`, () => {
             JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {

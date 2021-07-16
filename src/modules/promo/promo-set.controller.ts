@@ -3,6 +3,7 @@ import {
     Controller,
     Delete,
     ForbiddenException,
+    Get,
     HttpCode,
     HttpStatus,
     Param,
@@ -36,6 +37,30 @@ export class PromoSetController {
     createPromoSet(@Body() body: PromoSetDto, @Req() req: RequestWithUserPayload): Promise<PromoSet> {
         if (!this.isAdmin(req.user)) throw new ForbiddenException();
         return this.promoSetService.create(body);
+    }
+
+    @Get()
+    @UseGuards(JwtAuthGuard, ACGuard)
+    @ApiBearerAuth('access-token')
+    @UseRoles({
+        resource: ResourceEnum.PROMO_SET,
+        action: 'read',
+    })
+    getPromoSets(@Req() req: RequestWithUserPayload): Promise<PromoSet[]> {
+        if (!this.isAdmin(req.user)) throw new ForbiddenException();
+        return this.promoSetService.getList();
+    }
+
+    @Get(':id')
+    @UseGuards(JwtAuthGuard, ACGuard)
+    @ApiBearerAuth('access-token')
+    @UseRoles({
+        resource: ResourceEnum.PROMO_SET,
+        action: 'read',
+    })
+    getPromoSet(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<PromoSet> {
+        if (!this.isAdmin(req.user)) throw new ForbiddenException();
+        return this.promoSetService.getById(id);
     }
 
     @Patch(':id')
