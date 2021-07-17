@@ -29,13 +29,16 @@ describe('Ad controller', () => {
     adminUser.id = uuid();
     adminUser.roles = [RolesEnum.USER, RolesEnum.ADMIN];
 
+    const startDayjs = dayjs().add(1, 'day').startOf('day');
+    const endDayjs = dayjs().add(2, 'day').startOf('day');
+
     const adCampaign = new AdCampaign();
     adCampaign.id = uuid();
     adCampaign.status = AdCampaignStatus.PENDING;
     adCampaign.img = 'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png';
     adCampaign.link = 'https://www.google.com/';
-    adCampaign.startDate = new Date().toISOString();
-    adCampaign.endDate = dayjs().add(1, 'day').toDate().toISOString();
+    adCampaign.startDate = startDayjs.toISOString();
+    adCampaign.endDate = endDayjs.toISOString();
     adCampaign.reason = 'test';
     adCampaign.type = AdCampaignType.MAIN;
     adCampaign.userId = '123';
@@ -148,16 +151,20 @@ describe('Ad controller', () => {
                 .post('/ad/campaigns')
                 .send({
                     ...adCampaign,
-                    startDate: dayjs(adCampaign.endDate).add(1, 'days').format(SHORT_DATE_FORMAT),
-                    endDate: dayjs(adCampaign.endDate).add(2, 'days').format(SHORT_DATE_FORMAT),
+                    startDate: startDayjs.add(1, 'days').format(SHORT_DATE_FORMAT),
+                    endDate: endDayjs.add(2, 'days').format(SHORT_DATE_FORMAT),
                 } as AdCampaignDto)
                 .expect(HttpStatus.CREATED);
         });
 
-        it('with error ', () => {
+        it('with error', () => {
             return request(app.getHttpServer())
                 .post('/ad/campaigns')
-                .send(adCampaign)
+                .send({
+                    ...adCampaign,
+                    startDate: startDayjs.format(SHORT_DATE_FORMAT),
+                    endDate: endDayjs.format(SHORT_DATE_FORMAT),
+                })
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('Dates overlap with another campaign');
@@ -198,16 +205,20 @@ describe('Ad controller', () => {
                 .patch(`/ad/campaigns/${uuid()}`)
                 .send({
                     ...adCampaign,
-                    startDate: dayjs(adCampaign.endDate).add(1, 'days').format(SHORT_DATE_FORMAT),
-                    endDate: dayjs(adCampaign.endDate).add(2, 'days').format(SHORT_DATE_FORMAT),
+                    startDate: startDayjs.add(1, 'days').format(SHORT_DATE_FORMAT),
+                    endDate: endDayjs.add(2, 'days').format(SHORT_DATE_FORMAT),
                 } as AdCampaignDto)
                 .expect(HttpStatus.OK);
         });
 
-        it('with error ', () => {
+        it('with error overlapping campaigns', () => {
             return request(app.getHttpServer())
                 .patch(`/ad/campaigns/${uuid()}`)
-                .send(adCampaign)
+                .send({
+                    ...adCampaign,
+                    startDate: startDayjs.format(SHORT_DATE_FORMAT),
+                    endDate: endDayjs.format(SHORT_DATE_FORMAT),
+                })
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('Dates overlap with another campaign');

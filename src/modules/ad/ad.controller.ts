@@ -30,8 +30,10 @@ import { RejectCampaignDto } from './dto/reject-campaign.dto';
 import { GetAdCampaignsDto } from './dto/get-ad-campaigns.dto';
 import * as dotenv from 'dotenv';
 import * as dayjs from 'dayjs';
+import * as minMax from 'dayjs/plugin/minMax';
 import { StripeService } from '../stripe/stripe.service';
 
+dayjs.extend(minMax);
 dotenv.config();
 
 const DATE_FORMAT = 'MMMM D, YYYY';
@@ -221,7 +223,7 @@ export class AdController {
         const overlapping = otherAdCampaigns.some(adCampaign => {
             const adCampaignStartDate = dayjs(adCampaign.startDate);
             const adCampaignEndDate = dayjs(adCampaign.endDate);
-            return targetCampaignStartDate.isBefore(adCampaignEndDate) && adCampaignStartDate.isAfter(targetCampaignEndDate);
+            return dayjs.max(adCampaignStartDate, targetCampaignStartDate).isBefore(dayjs.min(adCampaignEndDate, targetCampaignEndDate));
         });
 
         if (overlapping) {
