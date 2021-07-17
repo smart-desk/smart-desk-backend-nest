@@ -29,6 +29,10 @@ describe('Ad controller', () => {
     adminUser.id = uuid();
     adminUser.roles = [RolesEnum.USER, RolesEnum.ADMIN];
 
+    const anotherUser = new User();
+    anotherUser.id = uuid();
+    anotherUser.roles = [RolesEnum.USER];
+
     const startDayjs = dayjs().add(1, 'day').startOf('day');
     const endDayjs = dayjs().add(2, 'day').startOf('day');
 
@@ -42,6 +46,7 @@ describe('Ad controller', () => {
     adCampaign.reason = 'test';
     adCampaign.type = AdCampaignType.MAIN;
     adCampaign.userId = '123';
+    adCampaign.title = '123';
 
     const JwtGuard = JwtAuthGuardMock;
 
@@ -245,6 +250,27 @@ describe('Ad controller', () => {
                     expect(res.body.message).toContain('type must be a valid enum value');
                     expect(res.body.message).toContain('type should not be empty');
                 });
+        });
+
+        it('with error unauthorized', () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+            return request(app.getHttpServer()).patch(`/ad/campaigns/${uuid()}`).send({}).expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
+    describe('delete campaign', () => {
+        it('successfully', () => {
+            return request(app.getHttpServer()).delete(`/ad/campaigns/${uuid()}`).expect(HttpStatus.OK);
+        });
+
+        it('with error not an owner or admin', () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = anotherUser;
+                return true;
+            });
+
+            return request(app.getHttpServer()).delete(`/ad/campaigns/${uuid()}`).expect(HttpStatus.FORBIDDEN);
         });
 
         it('with error unauthorized', () => {

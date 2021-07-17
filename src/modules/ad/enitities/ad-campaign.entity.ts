@@ -34,6 +34,9 @@ export class AdCampaign {
     @Transform(value => dayjs(value).format(SHORT_DATE_FORMAT), { toPlainOnly: true })
     endDate: string;
 
+    @Column('varchar', { length: 255 })
+    title: string;
+
     @Column('varchar', { length: 1000 })
     img: string;
 

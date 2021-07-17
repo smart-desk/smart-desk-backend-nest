@@ -140,4 +140,8 @@ export class AdService {
         }
         return hours * rate * 100;
     }
+
+    async deleteCampaign(id: string): Promise<any> {
+        return this.adCampaignRepository.delete({ id });
+    }
 }
