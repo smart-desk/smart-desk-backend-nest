@@ -1,4 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Type } from 'class-transformer';
+import * as dayjs from 'dayjs';
+import { Transform } from 'class-transformer/decorators';
 
 export enum AdCampaignType {
     MAIN = 'main',
@@ -13,6 +16,8 @@ export enum AdCampaignStatus {
     PAID = 'paid',
 }
 
+export const SHORT_DATE_FORMAT = 'DD.MM.YYYY';
+
 @Entity('ad_campaigns')
 export class AdCampaign {
     @PrimaryGeneratedColumn('uuid')
@@ -22,10 +27,12 @@ export class AdCampaign {
     userId: string;
 
     @Column('time with time zone', { name: 'start_date' })
-    startDate: Date;
+    @Transform(value => dayjs(value).format(SHORT_DATE_FORMAT), { toPlainOnly: true })
+    startDate: string;
 
     @Column('time with time zone', { name: 'end_date' })
-    endDate: Date;
+    @Transform(value => dayjs(value).format(SHORT_DATE_FORMAT), { toPlainOnly: true })
+    endDate: string;
 
     @Column('varchar', { length: 1000 })
     img: string;

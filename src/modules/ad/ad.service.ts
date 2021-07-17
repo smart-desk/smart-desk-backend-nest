@@ -3,10 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AdConfig } from './enitities/ad-config.entity';
 import { AdConfigDto } from './dto/ad-config.dto';
-import { AdCampaign, AdCampaignStatus, AdCampaignType } from './enitities/ad-campaign.entity';
+import { AdCampaign, AdCampaignStatus, AdCampaignType, SHORT_DATE_FORMAT } from './enitities/ad-campaign.entity';
 import { AdCampaignDto } from './dto/ad-campaign.dto';
 import * as dayjs from 'dayjs';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
 import { GetAdCampaignsDto } from './dto/get-ad-campaigns.dto';
+
+dayjs.extend(customParseFormat);
 
 @Injectable()
 export class AdService {
@@ -56,6 +59,8 @@ export class AdService {
     }
 
     async createCampaign(campaign: AdCampaignDto, userId: string): Promise<AdCampaign> {
+        campaign.startDate = dayjs(campaign.startDate, SHORT_DATE_FORMAT).toISOString();
+        campaign.endDate = dayjs(campaign.endDate, SHORT_DATE_FORMAT).toISOString();
         const campaignEntity = this.adCampaignRepository.create({ ...campaign, status: AdCampaignStatus.PENDING, userId });
         return await this.adCampaignRepository.save(campaignEntity);
     }
@@ -63,6 +68,8 @@ export class AdService {
     async updateCampaign(id: string, campaign: AdCampaignDto): Promise<AdCampaign> {
         const oldCampaign = await this.getCampaign(id);
         oldCampaign.status = AdCampaignStatus.PENDING;
+        campaign.startDate = dayjs(campaign.startDate, SHORT_DATE_FORMAT).toISOString();
+        campaign.endDate = dayjs(campaign.endDate, SHORT_DATE_FORMAT).toISOString();
         const updatedCampaign = await this.adConfigRepository.preload({ id: oldCampaign.id, ...campaign });
         return await this.adCampaignRepository.save(updatedCampaign);
     }
@@ -76,7 +83,6 @@ export class AdService {
             .getMany();
     }
 
-    // todo probably add timezone
     async getCurrentCampaign(type: AdCampaignType): Promise<Partial<AdCampaign>> {
         return await this.adCampaignRepository
             .createQueryBuilder('campaign')

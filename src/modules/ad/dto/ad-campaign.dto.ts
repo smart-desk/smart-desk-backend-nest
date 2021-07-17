@@ -1,16 +1,13 @@
 import { AdCampaignType } from '../enitities/ad-campaign.entity';
-import { Type } from 'class-transformer';
 import { IsEnum, IsNotEmpty, IsString, IsUrl, MaxLength } from 'class-validator';
 import { IsImageUrl } from '../../../utils/validation';
 
 export class AdCampaignDto {
     @IsNotEmpty()
-    @Type(() => Date)
-    startDate: Date;
+    startDate: string;
 
     @IsNotEmpty()
-    @Type(() => Date)
-    endDate: Date;
+    endDate: string;
 
     @IsNotEmpty()
     @IsString()
