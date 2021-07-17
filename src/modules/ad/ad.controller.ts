@@ -2,6 +2,7 @@ import {
     BadRequestException,
     Body,
     Controller,
+    Delete,
     ForbiddenException,
     Get,
     HttpCode,
@@ -198,6 +199,21 @@ export class AdController {
         });
     }
 
+    @Delete('campaigns/:id')
+    @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
+    @ApiBearerAuth('access-token')
+    @UseRoles({
+        resource: ResourceEnum.AD_CAMPAIGN,
+        action: 'delete',
+    })
+    async deleteCampaign(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<any> {
+        const campaign = await this.adService.findOneCampaignOrThrowException(id);
+        const isAdmin = this.isAdmin(req.user);
+        const isOwner = await this.isOwner(campaign.id, req.user);
+        if (!isAdmin && !isOwner) throw new ForbiddenException();
+        return this.adService.deleteCampaign(id);
+    }
+
     private isAdmin(user: User): boolean {
         return user.roles && user.roles.some(role => role === RolesEnum.ADMIN);
     }
@@ -212,7 +228,7 @@ export class AdController {
         const targetCampaignEndDate = dayjs(targetCampaign.endDate, SHORT_DATE_FORMAT);
 
         if (targetCampaignEndDate.isBefore(targetCampaignEndDate)) {
-            return 'Start date must be earlier than End date';
+            return 'Start date must be earlier than End dte';
         }
 
         if (targetCampaignStartDate.isBefore(dayjs())) {
