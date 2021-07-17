@@ -28,8 +28,8 @@ describe('Stripe controller', () => {
     adCampaign.status = AdCampaignStatus.PENDING;
     adCampaign.img = 'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png';
     adCampaign.link = 'https://www.google.com/';
-    adCampaign.startDate = new Date();
-    adCampaign.endDate = dayjs().add(1, 'day').toDate();
+    adCampaign.startDate = new Date().toISOString();
+    adCampaign.endDate = dayjs().add(1, 'day').toDate().toISOString();
     adCampaign.reason = 'test';
     adCampaign.type = AdCampaignType.MAIN;
 
