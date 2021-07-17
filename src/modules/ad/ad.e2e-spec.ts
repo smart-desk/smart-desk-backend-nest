@@ -11,7 +11,7 @@ import { AdModule } from './ad.module';
 import { AdConfigDto } from './dto/ad-config.dto';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { AdConfig } from './enitities/ad-config.entity';
-import { AdCampaign, AdCampaignStatus, AdCampaignType } from './enitities/ad-campaign.entity';
+import { AdCampaign, AdCampaignStatus, AdCampaignType, SHORT_DATE_FORMAT } from './enitities/ad-campaign.entity';
 import * as dayjs from 'dayjs';
 import { User } from '../users/entities/user.entity';
 import { AdCampaignDto } from './dto/ad-campaign.dto';
@@ -34,8 +34,8 @@ describe('Ad controller', () => {
     adCampaign.status = AdCampaignStatus.PENDING;
     adCampaign.img = 'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png';
     adCampaign.link = 'https://www.google.com/';
-    adCampaign.startDate = new Date();
-    adCampaign.endDate = dayjs().add(1, 'day').toDate();
+    adCampaign.startDate = new Date().toISOString();
+    adCampaign.endDate = dayjs().add(1, 'day').toDate().toISOString();
     adCampaign.reason = 'test';
     adCampaign.type = AdCampaignType.MAIN;
     adCampaign.userId = '123';
@@ -148,8 +148,8 @@ describe('Ad controller', () => {
                 .post('/ad/campaigns')
                 .send({
                     ...adCampaign,
-                    startDate: dayjs(adCampaign.endDate).add(1, 'days').toDate(),
-                    endDate: dayjs(adCampaign.endDate).add(2, 'days').toDate(),
+                    startDate: dayjs(adCampaign.endDate).add(1, 'days').format(SHORT_DATE_FORMAT),
+                    endDate: dayjs(adCampaign.endDate).add(2, 'days').format(SHORT_DATE_FORMAT),
                 } as AdCampaignDto)
                 .expect(HttpStatus.CREATED);
         });
@@ -198,8 +198,8 @@ describe('Ad controller', () => {
                 .patch(`/ad/campaigns/${uuid()}`)
                 .send({
                     ...adCampaign,
-                    startDate: dayjs(adCampaign.endDate).add(1, 'days').toDate(),
-                    endDate: dayjs(adCampaign.endDate).add(2, 'days').toDate(),
+                    startDate: dayjs(adCampaign.endDate).add(1, 'days').format(SHORT_DATE_FORMAT),
+                    endDate: dayjs(adCampaign.endDate).add(2, 'days').format(SHORT_DATE_FORMAT),
                 } as AdCampaignDto)
                 .expect(HttpStatus.OK);
         });
