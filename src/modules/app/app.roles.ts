@@ -18,6 +18,7 @@ export enum ResourceEnum {
     CHAT = 'chat',
     AD_CONFIG = 'ad_config',
     AD_CAMPAIGN = 'ad_campaign',
+    PROMO_SET = 'promo_set',
 }
 
 export const roles = new RolesBuilder();
@@ -54,6 +55,7 @@ roles
         ResourceEnum.CHAT,
         ResourceEnum.AD_CONFIG,
         ResourceEnum.AD_CAMPAIGN,
+        ResourceEnum.PROMO_SET,
     ])
     .read([
         ResourceEnum.PRODUCT,
@@ -67,6 +69,7 @@ roles
         ResourceEnum.CHAT,
         ResourceEnum.AD_CONFIG,
         ResourceEnum.AD_CAMPAIGN,
+        ResourceEnum.PROMO_SET,
     ])
     .update([
         ResourceEnum.PRODUCT,
@@ -80,6 +83,7 @@ roles
         ResourceEnum.CHAT,
         ResourceEnum.AD_CONFIG,
         ResourceEnum.AD_CAMPAIGN,
+        ResourceEnum.PROMO_SET,
     ])
     .delete([
         ResourceEnum.PRODUCT,
@@ -93,4 +97,5 @@ roles
         ResourceEnum.CHAT,
         ResourceEnum.AD_CONFIG,
         ResourceEnum.AD_CAMPAIGN,
+        ResourceEnum.PROMO_SET,
     ]);
