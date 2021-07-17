@@ -24,7 +24,7 @@ import { AdConfig } from './enitities/ad-config.entity';
 import { User } from '../users/entities/user.entity';
 import { RequestWithUserPayload } from '../auth/jwt.strategy';
 import { BlockedUserGuard } from '../../guards/blocked-user.guard';
-import { AdCampaign, AdCampaignType } from './enitities/ad-campaign.entity';
+import { AdCampaign, AdCampaignType, SHORT_DATE_FORMAT } from './enitities/ad-campaign.entity';
 import { AdCampaignDto } from './dto/ad-campaign.dto';
 import { RejectCampaignDto } from './dto/reject-campaign.dto';
 import { GetAdCampaignsDto } from './dto/get-ad-campaigns.dto';
@@ -205,15 +205,25 @@ export class AdController {
         return campaign.userId === user.id;
     }
 
-    private async checkAdCampaignParams(campaignParams: AdCampaignDto): Promise<string | undefined> {
-        if (campaignParams.startDate > campaignParams.endDate) {
+    private async checkAdCampaignParams(targetCampaign: AdCampaignDto): Promise<string | undefined> {
+        const targetCampaignStartDate = dayjs(targetCampaign.startDate, SHORT_DATE_FORMAT);
+        const targetCampaignEndDate = dayjs(targetCampaign.endDate, SHORT_DATE_FORMAT);
+
+        if (targetCampaignEndDate.isBefore(targetCampaignEndDate)) {
             return 'Start date must be earlier than End date';
         }
 
-        const takenAdRanges = await this.adService.getCampaignsSchedule(campaignParams.type);
-        const overlapping = takenAdRanges.some(
-            takenAdRange => !(campaignParams.startDate > takenAdRange.endDate || campaignParams.endDate < takenAdRange.startDate)
-        );
+        if (targetCampaignStartDate.isBefore(dayjs())) {
+            return 'Start date must be in future';
+        }
+
+        const otherAdCampaigns = await this.adService.getCampaignsSchedule(targetCampaign.type);
+        const overlapping = otherAdCampaigns.some(adCampaign => {
+            const adCampaignStartDate = dayjs(adCampaign.startDate);
+            const adCampaignEndDate = dayjs(adCampaign.endDate);
+            return targetCampaignStartDate.isBefore(adCampaignEndDate) && adCampaignStartDate.isAfter(targetCampaignEndDate);
+        });
+
         if (overlapping) {
             return 'Dates overlap with another campaign';
         }
