@@ -299,6 +299,34 @@ describe('Ad controller', () => {
         });
     });
 
+    describe('get campaign by id', () => {
+        it('successfully', () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = adminUser;
+                return true;
+            });
+
+            return request(app.getHttpServer()).get(`/ad/campaigns/${uuid()}`).expect(HttpStatus.OK);
+        });
+
+        it('with error not an owner', () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = anotherUser;
+                return true;
+            });
+
+            return request(app.getHttpServer()).get(`/ad/campaigns/${uuid()}`).expect(HttpStatus.FORBIDDEN);
+        });
+
+        it('with error not authorized', () => {
+            JwtGuard.canActivate.mockReturnValueOnce(false);
+
+            return request(app.getHttpServer()).get(`/ad/campaigns/${uuid()}`).expect(HttpStatus.FORBIDDEN);
+        });
+    });
+
     describe('get current campaign', () => {
         it('successfully', () => {
             return request(app.getHttpServer())

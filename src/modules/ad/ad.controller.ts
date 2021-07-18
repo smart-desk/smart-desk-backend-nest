@@ -214,6 +214,21 @@ export class AdController {
         return this.adService.deleteCampaign(id);
     }
 
+    @Get('campaigns/:id')
+    @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
+    @ApiBearerAuth('access-token')
+    @UseRoles({
+        resource: ResourceEnum.AD_CAMPAIGN,
+        action: 'read',
+    })
+    async getCampaign(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<AdCampaign> {
+        const campaign = await this.adService.findOneCampaignOrThrowException(id);
+        const isAdmin = this.isAdmin(req.user);
+        const isOwner = await this.isOwner(id, req.user);
+        if (!isAdmin && !isOwner) throw new ForbiddenException();
+        return campaign;
+    }
+
     private isAdmin(user: User): boolean {
         return user.roles && user.roles.some(role => role === RolesEnum.ADMIN);
     }
