@@ -88,7 +88,7 @@ export class AdService {
             .createQueryBuilder('campaign')
             .where({ status: AdCampaignStatus.PAID, type })
             .andWhere(':today BETWEEN campaign.startDate and campaign.endDate', { today: dayjs().toISOString() })
-            .select(['campaign.link', 'campaign.img', 'campaign.type'])
+            .select(['campaign.link', 'campaign.img', 'campaign.type', 'campaign.title'])
             .getOne();
     }
 
