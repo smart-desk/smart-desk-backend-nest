@@ -34,7 +34,7 @@ export class AdService {
     }
 
     async getCampaign(id: string): Promise<AdCampaign> {
-        const adCampaign = this.adCampaignRepository.findOne({ id });
+        const adCampaign = await this.adCampaignRepository.findOne({ id });
         if (!adCampaign) {
             throw new NotFoundException(`Ad Campaign ${id} not found`);
         }
@@ -70,7 +70,8 @@ export class AdService {
         oldCampaign.status = AdCampaignStatus.PENDING;
         campaign.startDate = dayjs(campaign.startDate, SHORT_DATE_FORMAT).toISOString();
         campaign.endDate = dayjs(campaign.endDate, SHORT_DATE_FORMAT).toISOString();
-        const updatedCampaign = await this.adConfigRepository.preload({ id: oldCampaign.id, ...campaign });
+        const newCampaign = { ...oldCampaign, ...campaign };
+        const updatedCampaign = await this.adCampaignRepository.preload({ id: oldCampaign.id, ...newCampaign });
         return await this.adCampaignRepository.save(updatedCampaign);
     }
 
