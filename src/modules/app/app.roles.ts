@@ -19,6 +19,7 @@ export enum ResourceEnum {
     AD_CONFIG = 'ad_config',
     AD_CAMPAIGN = 'ad_campaign',
     PROMO_SET = 'promo_set',
+    PROMO = 'promo',
 }
 
 export const roles = new RolesBuilder();
@@ -30,7 +31,14 @@ roles
     // User
     .grant(RolesEnum.USER)
     .extend(RolesEnum.VIEWER)
-    .read([ResourceEnum.BOOKMARK, ResourceEnum.ADDRESS, ResourceEnum.CHAT, ResourceEnum.AD_CAMPAIGN, ResourceEnum.AD_CONFIG])
+    .read([
+        ResourceEnum.BOOKMARK,
+        ResourceEnum.ADDRESS,
+        ResourceEnum.CHAT,
+        ResourceEnum.AD_CAMPAIGN,
+        ResourceEnum.AD_CONFIG,
+        ResourceEnum.PROMO,
+    ])
     .create([
         ResourceEnum.PRODUCT,
         ResourceEnum.FILE,
@@ -38,8 +46,16 @@ roles
         ResourceEnum.ADDRESS,
         ResourceEnum.CHAT,
         ResourceEnum.AD_CAMPAIGN,
+        ResourceEnum.PROMO,
     ])
-    .update([ResourceEnum.PRODUCT, ResourceEnum.USER, ResourceEnum.BOOKMARK, ResourceEnum.ADDRESS, ResourceEnum.AD_CAMPAIGN])
+    .update([
+        ResourceEnum.PRODUCT,
+        ResourceEnum.USER,
+        ResourceEnum.BOOKMARK,
+        ResourceEnum.ADDRESS,
+        ResourceEnum.AD_CAMPAIGN,
+        ResourceEnum.PROMO,
+    ])
     .delete([ResourceEnum.PRODUCT, ResourceEnum.BOOKMARK, ResourceEnum.ADDRESS, ResourceEnum.AD_CAMPAIGN])
     // Admin
     .grant(RolesEnum.ADMIN)
@@ -56,6 +72,7 @@ roles
         ResourceEnum.AD_CONFIG,
         ResourceEnum.AD_CAMPAIGN,
         ResourceEnum.PROMO_SET,
+        ResourceEnum.PROMO,
     ])
     .read([
         ResourceEnum.PRODUCT,
@@ -70,6 +87,7 @@ roles
         ResourceEnum.AD_CONFIG,
         ResourceEnum.AD_CAMPAIGN,
         ResourceEnum.PROMO_SET,
+        ResourceEnum.PROMO,
     ])
     .update([
         ResourceEnum.PRODUCT,
@@ -84,6 +102,7 @@ roles
         ResourceEnum.AD_CONFIG,
         ResourceEnum.AD_CAMPAIGN,
         ResourceEnum.PROMO_SET,
+        ResourceEnum.PROMO,
     ])
     .delete([
         ResourceEnum.PRODUCT,
@@ -98,4 +117,5 @@ roles
         ResourceEnum.AD_CONFIG,
         ResourceEnum.AD_CAMPAIGN,
         ResourceEnum.PROMO_SET,
+        ResourceEnum.PROMO,
     ]);
