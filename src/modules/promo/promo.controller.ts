@@ -35,7 +35,7 @@ export class PromoController {
                 metadata: {
                     product: product.id,
                     promoSet: promoSet.id,
-                    type: 'promotion',
+                    type: 'promotion', // todo add enum
                 },
             },
             line_items: [
