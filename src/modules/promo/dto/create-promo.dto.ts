@@ -1,11 +1,9 @@
-import { IsNotEmpty, IsUUID } from 'class-validator';
+import { PromoStatus } from '../entities/promo.entity';
 
 export class CreatePromoDto {
-    @IsNotEmpty()
-    @IsUUID()
-    promoSetId: string;
-
-    @IsNotEmpty()
-    @IsUUID()
     productId: string;
+    promoSetId: string;
+    startDate: string;
+    endDate: string;
+    status?: PromoStatus;
 }
