@@ -21,6 +21,7 @@ import { StripeService } from '../src/modules/stripe/stripe.service';
 import { AdConfig } from '../src/modules/ad/enitities/ad-config.entity';
 import { AdCampaign } from '../src/modules/ad/enitities/ad-campaign.entity';
 import { PromoSet } from '../src/modules/promo/entities/promo-set.entity';
+import { Promo } from '../src/modules/promo/entities/promo.entity';
 
 export async function createTestAppForModule(moduleRef: TestingModule) {
     const app = moduleRef.createNestApplication();
@@ -99,6 +100,8 @@ export function declareCommonProviders(moduleRef: TestingModuleBuilder): Testing
         .overrideProvider(getRepositoryToken(AdCampaign))
         .useValue(createRepositoryMock())
         .overrideProvider(getRepositoryToken(PromoSet))
+        .useValue(createRepositoryMock())
+        .overrideProvider(getRepositoryToken(Promo))
         .useValue(createRepositoryMock())
         .overrideProvider(MailService)
         .useValue(MailServiceMock)
