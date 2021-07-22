@@ -13,6 +13,9 @@ export class Promo {
     @Column('uuid', { name: 'promo_set_id' })
     promoSetId: string;
 
+    @Column('uuid', { name: 'product_id' })
+    productId: string;
+
     @Column('timestamp', { name: 'start_date' })
     startDate: Date;
 

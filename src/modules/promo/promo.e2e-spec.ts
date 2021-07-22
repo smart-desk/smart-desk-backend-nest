@@ -12,7 +12,7 @@ import { RolesEnum } from '../app/app.roles';
 import { PromoModule } from './promo.module';
 import { Promo } from './entities/promo.entity';
 import * as dayjs from 'dayjs';
-import { CreatePromoDto } from './dto/create-promo.dto';
+import { PayPromoDto } from './dto/pay-promo.dto';
 import { BlockedUserGuard } from '../../guards/blocked-user.guard';
 import { BlockedUserGuardMock } from '../../../test/mocks/blocked-user.guard.mock';
 import { Product } from '../products/entities/product.entity';
@@ -72,7 +72,7 @@ describe('Promo controller', () => {
                 .send({
                     productId: uuid(),
                     promoSetId: uuid(),
-                } as CreatePromoDto)
+                } as PayPromoDto)
                 .expect(HttpStatus.OK);
         });
 
@@ -82,7 +82,7 @@ describe('Promo controller', () => {
                 .send({
                     productId: '',
                     promoSetId: '',
-                } as CreatePromoDto)
+                } as PayPromoDto)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('promoSetId must be an UUID');
@@ -109,7 +109,7 @@ describe('Promo controller', () => {
                 .send({
                     productId: uuid(),
                     promoSetId: uuid(),
-                } as CreatePromoDto)
+                } as PayPromoDto)
                 .expect(HttpStatus.FORBIDDEN);
         });
     });

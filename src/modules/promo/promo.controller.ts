@@ -6,10 +6,11 @@ import { BlockedUserGuard } from '../../guards/blocked-user.guard';
 import { ResourceEnum, RolesEnum } from '../app/app.roles';
 import { RequestWithUserPayload } from '../auth/jwt.strategy';
 import { ProductsService } from '../products/products.service';
-import { CreatePromoDto } from './dto/create-promo.dto';
+import { PayPromoDto } from './dto/pay-promo.dto';
 import { User } from '../users/entities/user.entity';
 import { PromoSetService } from './promo-set.service';
 import { StripeService } from '../stripe/stripe.service';
+import { PromotionType } from './entities/promotion-type.enum';
 
 @Controller('promo')
 export class PromoController {
@@ -23,7 +24,7 @@ export class PromoController {
         action: 'update',
     })
     @HttpCode(HttpStatus.OK)
-    async payPromo(@Body() body: CreatePromoDto, @Req() req: RequestWithUserPayload): Promise<{ id: string }> {
+    async payPromo(@Body() body: PayPromoDto, @Req() req: RequestWithUserPayload): Promise<{ id: string }> {
         const isAdminOrOwner = await this.isAdminOrOwner(body.productId, req.user);
         if (!isAdminOrOwner) throw new ForbiddenException();
 
@@ -35,7 +36,7 @@ export class PromoController {
                 metadata: {
                     product: product.id,
                     promoSet: promoSet.id,
-                    type: 'promotion', // todo add enum
+                    type: PromotionType.PROMOTION,
                 },
             },
             line_items: [
