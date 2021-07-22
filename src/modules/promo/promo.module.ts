@@ -8,9 +8,10 @@ import { PromoSet } from './entities/promo-set.entity';
 import { Promo } from './entities/promo.entity';
 import { ProductsModule } from '../products/products.module';
 import { StripeModule } from '../stripe/stripe.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([PromoSet, Promo]), ProductsModule, StripeModule],
+    imports: [TypeOrmModule.forFeature([PromoSet, Promo]), ProductsModule, StripeModule, UsersModule],
     controllers: [PromoController, PromoSetController],
     providers: [PromoService, PromoSetService],
 })
