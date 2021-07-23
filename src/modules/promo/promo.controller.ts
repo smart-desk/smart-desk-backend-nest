@@ -1,5 +1,17 @@
-import { Body, Controller, ForbiddenException, HttpCode, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import {
+    Body,
+    Controller,
+    ForbiddenException,
+    Get,
+    HttpCode,
+    HttpStatus,
+    Param,
+    ParseUUIDPipe,
+    Post,
+    Req,
+    UseGuards,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { ACGuard, UseRoles } from 'nest-access-control';
 import { BlockedUserGuard } from '../../guards/blocked-user.guard';
@@ -11,10 +23,22 @@ import { User } from '../users/entities/user.entity';
 import { PromoSetService } from './promo-set.service';
 import { StripeService } from '../stripe/stripe.service';
 import { PromotionType } from './entities/promotion-type.enum';
+import { Product } from '../products/entities/product.entity';
+import { PromoService } from './promo.service';
+import { randomElementsFormArray } from '../../utils/random-elements-form-array';
+import { Promo } from './entities/promo.entity';
+
+const PROMO_PRODUCTS_ROW_LENGTH = 4;
 
 @Controller('promo')
+@ApiTags('Promo')
 export class PromoController {
-    constructor(private productsService: ProductsService, private promoSetService: PromoSetService, private stripeService: StripeService) {}
+    constructor(
+        private promoService: PromoService,
+        private productsService: ProductsService,
+        private promoSetService: PromoSetService,
+        private stripeService: StripeService
+    ) {}
 
     @Post()
     @ApiBearerAuth('access-token')
@@ -55,6 +79,17 @@ export class PromoController {
             success_url: `${process.env.HOST}/profile`, // todo correct url
             cancel_url: `${process.env.HOST}/profile`, // todo correct url
         });
+    }
+
+    @Get(':id/products')
+    @ApiBearerAuth('access-token')
+    @HttpCode(HttpStatus.OK)
+    async getPromoProducts(@Param('id', ParseUUIDPipe) id: string): Promise<Product[]> {
+        const promos = await this.promoService.getPromosByCategory(id);
+        const resultPromos =
+            promos.length > PROMO_PRODUCTS_ROW_LENGTH ? randomElementsFormArray<Promo>(promos, PROMO_PRODUCTS_ROW_LENGTH) : promos;
+
+        return resultPromos.map(promo => promo.product);
     }
 
     private async isAdminOrOwner(productId: string, user: User): Promise<boolean> {

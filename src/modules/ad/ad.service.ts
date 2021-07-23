@@ -79,7 +79,7 @@ export class AdService {
         return await this.adCampaignRepository
             .createQueryBuilder('campaign')
             .where({ status: AdCampaignStatus.PAID, type })
-            .andWhere('campaign.endDate >= :today', { today: dayjs().toISOString() })
+            .andWhere('campaign.endDate >= now()')
             .select(['campaign.startDate', 'campaign.endDate'])
             .getMany();
     }
@@ -88,7 +88,7 @@ export class AdService {
         return await this.adCampaignRepository
             .createQueryBuilder('campaign')
             .where({ status: AdCampaignStatus.PAID, type })
-            .andWhere(':today BETWEEN campaign.startDate and campaign.endDate', { today: dayjs().toISOString() })
+            .andWhere('now() BETWEEN campaign.startDate and campaign.endDate')
             .select(['campaign.link', 'campaign.img', 'campaign.type', 'campaign.title'])
             .getOne();
     }

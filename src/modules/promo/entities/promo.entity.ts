@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Product } from '../../products/entities/product.entity';
 
 export enum PromoStatus {
     ACTIVE = 'active',
@@ -24,4 +25,8 @@ export class Promo {
 
     @Column('varchar', { length: 100 })
     status: PromoStatus;
+
+    @OneToOne(() => Product)
+    @JoinColumn({ name: 'product_id' })
+    product: Product;
 }
