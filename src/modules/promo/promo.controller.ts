@@ -89,7 +89,7 @@ export class PromoController {
         const resultPromos =
             promos.length > PROMO_PRODUCTS_ROW_LENGTH ? randomElementsFormArray<Promo>(promos, PROMO_PRODUCTS_ROW_LENGTH) : promos;
 
-        return resultPromos.map(promo => promo.product);
+        return await Promise.all(resultPromos.map(promo => this.productsService.getById(promo.productId)));
     }
 
     private async isAdminOrOwner(productId: string, user: User): Promise<boolean> {

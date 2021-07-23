@@ -16,7 +16,7 @@ export class PromoService {
     async getPromosByCategory(categoryId: string): Promise<Promo[]> {
         return await this.promoRepository
             .createQueryBuilder('promo')
-            .leftJoinAndSelect('promo.product', 'product')
+            .leftJoin('promo.product', 'product')
             .where('promo.status=:status', { status: PromoStatus.ACTIVE })
             .andWhere('promo.startDate < now()')
             .andWhere('now() < promo.endDate')
