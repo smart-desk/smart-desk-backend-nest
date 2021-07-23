@@ -114,6 +114,12 @@ describe('Promo controller', () => {
         });
     });
 
+    describe('get promo products', () => {
+        it(`successfully`, () => {
+            return request(app.getHttpServer()).get(`/promo/${uuid()}/products`).expect(HttpStatus.OK);
+        });
+    });
+
     afterAll(async () => {
         await app.close();
     });
