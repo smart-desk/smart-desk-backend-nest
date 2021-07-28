@@ -6,52 +6,47 @@ import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { ACGuard, UseRoles } from 'nest-access-control';
 import { BlockedUserGuard } from '../../guards/blocked-user.guard';
 import { ResourceEnum } from '../app/app.roles';
+import { Pages } from './entities/pages';
 
 dotenv.config();
-
-export interface Page {
-    id: string;
-    title: string;
-    content: string;
-}
 
 @Controller('pages')
 @ApiTags('Pages')
 export class PagesController {
     constructor(private pagesService: PagesService) {}
 
-    @Get() // прислать действующие пейджес
+    @Get('pages')
     @UseGuards(JwtAuthGuard, ACGuard)
     @UseRoles({
         resource: ResourceEnum.PAGES,
         action: 'read',
     })
-    async getAll(): Promise<Page[]> {
+    async getAll(): Promise<Pages[]> {
         return await this.pagesService.getPages();
     }
 
-    @Get('pages') // прислать одну действующие пейджес
+    @Get('pages:id')
     @UseGuards(JwtAuthGuard, ACGuard)
     @UseRoles({
         resource: ResourceEnum.PAGES,
         action: 'read',
     })
-    async get(@Req() id: string): Promise<Page> {
+    async get(@Req() id: string): Promise<Pages> {
         return await this.pagesService.getPage(id);
     }
 
-    @Post('pages') // создать новую пейджес
+    @Post('pages')
     @ApiBearerAuth('access-token')
     @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
     @UseRoles({
         resource: ResourceEnum.PAGES,
         action: 'create',
     })
-    async create(@Body() body: Page): Promise<string> {
+    async create(@Body() body: Pages): Promise<Pages> {
         return await this.pagesService.createPage(body);
     }
 
-    @Patch('pages:id') // отредактировать действвующую пейджес
+    @Patch('pages:id')
     @ApiBearerAuth('access-token')
     @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
     @UseRoles({
@@ -62,7 +57,7 @@ export class PagesController {
         return await this.pagesService.updatePage(id, body);
     }
 
-    @Delete('pages:id') //Удалить действующую пейджес
+    @Delete('pages:id')
     @ApiBearerAuth('access-token')
     @UseGuards(JwtAuthGuard, ACGuard, BlockedUserGuard)
     @UseRoles({
