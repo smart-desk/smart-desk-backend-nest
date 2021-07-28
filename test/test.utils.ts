@@ -55,6 +55,7 @@ export function createRepositoryMock<T>(values?: T[]) {
             getOne: fn().mockReturnValue(resultValues[0]),
             getCount: fn().mockReturnValue(resultValues.length),
             execute: fn(),
+            leftJoin: jest.fn().mockReturnThis(),
             leftJoinAndSelect: jest.fn().mockReturnThis(),
         }),
         find: fn().mockReturnValue(resultValues),

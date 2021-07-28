@@ -17,6 +17,8 @@ import { BlockedUserGuard } from '../../guards/blocked-user.guard';
 import { BlockedUserGuardMock } from '../../../test/mocks/blocked-user.guard.mock';
 import { Product } from '../products/entities/product.entity';
 import { PromoSet } from './entities/promo-set.entity';
+import { Field } from '../fields/field.entity';
+import { FieldType } from '../dynamic-fields/dynamic-fields.module';
 
 describe('Promo controller', () => {
     let app: INestApplication;
@@ -30,6 +32,10 @@ describe('Promo controller', () => {
     productEntity.id = uuid();
     productEntity.userId = '123';
 
+    const fieldEntity = new Field();
+    fieldEntity.id = uuid();
+    fieldEntity.type = FieldType.TEXT;
+
     const promoSet = new PromoSet();
     promoSet.id = uuid();
     promoSet.days = 7;
@@ -38,6 +44,7 @@ describe('Promo controller', () => {
 
     const productRepositoryMock = createRepositoryMock<Product>([productEntity]);
     const promoRepositoryMock = createRepositoryMock<Promo>([promo]);
+    const fieldRepositoryMock = createRepositoryMock<Field>([fieldEntity]);
     const promoSetRepositoryMock = createRepositoryMock<PromoSet>([promoSet]);
 
     const JwtGuard = JwtAuthGuardMock;
@@ -50,6 +57,8 @@ describe('Promo controller', () => {
         const moduleRef = await declareCommonProviders(moduleBuilder)
             .overrideProvider(getRepositoryToken(Promo))
             .useValue(promoRepositoryMock)
+            .overrideProvider(getRepositoryToken(Field))
+            .useValue(fieldRepositoryMock)
             .overrideProvider(getRepositoryToken(Product))
             .useValue(productRepositoryMock)
             .overrideProvider(getRepositoryToken(PromoSet))
