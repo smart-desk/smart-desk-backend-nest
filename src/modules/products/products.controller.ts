@@ -30,6 +30,7 @@ import { ProductStatus } from './models/product-status.enum';
 import { User } from '../users/entities/user.entity';
 import { StripeService } from '../stripe/stripe.service';
 import { AdService } from '../ad/ad.service';
+import { PromotionType } from '../promo/entities/promotion-type.enum';
 
 @Controller('products')
 @ApiTags('Products')
@@ -234,7 +235,7 @@ export class ProductsController {
             payment_intent_data: {
                 metadata: {
                     product: product.id,
-                    type: 'lifting',
+                    type: PromotionType.LIFTING,
                 },
             },
             line_items: [

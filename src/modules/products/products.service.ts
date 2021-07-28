@@ -205,7 +205,7 @@ export class ProductsService {
     }
 
     async getProductOwner(id: string): Promise<string> {
-        const product = await this.getById(id);
+        const product = await this.getById(id, false);
         return product.userId;
     }
 
