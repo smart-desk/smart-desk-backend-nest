@@ -13,6 +13,8 @@ import { RolesEnum } from '../app/app.roles';
 import { UserStatus } from '../users/models/user-status.enum';
 import { JWTPayload } from './jwt.strategy';
 import { NotificationTypes } from '../users/models/notification-types.enum';
+import FB from 'fb';
+import { User } from '../users/entities/user.entity';
 
 dotenv.config();
 
@@ -20,6 +22,22 @@ interface VkAccessTokenResponse {
     access_token: string;
     expires_in: number;
     user_id: number;
+}
+
+interface FacebookUserResponse {
+    id: string;
+    name: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    picture: {
+        data: {
+            height: number;
+            width: string;
+            is_silhouette: boolean;
+            url: string;
+        };
+    };
 }
 
 @Controller('auth')
@@ -30,6 +48,9 @@ export class AuthController {
         this.vk = new VK({
             token: process.env.VK_API_TOKEN,
         });
+
+        FB.options({ version: 'v10.0' });
+        FB.extend({ appId: process.env.FACEBOOK_CLIENT_ID, appSecret: process.env.FACEBOOK_CLIENT_SECRET });
     }
 
     @Post('google/login')
@@ -114,5 +135,47 @@ export class AuthController {
         return {
             access_token: this.jwtService.sign(jwtPayload),
         };
+    }
+
+    @Post('/facebook/login')
+    async facebookLogin(@Body('token') code: string): Promise<any> {
+        const facebookUser = await this.getFacebookUserInfoByToken(code);
+
+        // todo update facebookId if found by email
+        let user: User;
+        if (facebookUser.email) {
+            user = await this.userService.findByEmail(facebookUser.email);
+        } else {
+            user = await this.userService.findByFacebookId(facebookUser.id);
+        }
+
+        if (!user) {
+            user = await this.userService.createUser({
+                email: facebookUser.email,
+                firstName: facebookUser.first_name,
+                lastName: facebookUser.last_name,
+                avatar: facebookUser?.picture?.data?.url,
+                roles: [RolesEnum.USER],
+                status: UserStatus.ACTIVE,
+                emailNotifications: Object.values(NotificationTypes) as NotificationTypes[],
+            });
+        }
+
+        const jwtPayload: JWTPayload = { sub: user.id, email: user.email };
+        return {
+            access_token: this.jwtService.sign(jwtPayload),
+        };
+    }
+
+    private getFacebookUserInfoByToken(token: string): Promise<FacebookUserResponse> {
+        return new Promise((resolve, reject) => {
+            FB.api('/me', 'GET', { fields: 'id,first_name,last_name,email,picture', access_token: token }, function (res) {
+                if (!res || res.error) {
+                    reject(res);
+                    return;
+                }
+                resolve(res);
+            });
+        });
     }
 }

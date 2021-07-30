@@ -28,6 +28,7 @@ export class UpdateUserDto {
     @IsPhoneNumber('ZZ')
     phone?: string;
 
+    // todo check that it's removed
     @ApiHideProperty()
     isPhoneVerified: boolean;
 
