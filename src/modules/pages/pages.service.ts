@@ -1,17 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Pages } from './entities/pages';
+import { Page } from './entities/page';
 import { PageDto } from './dto/page.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 
 @Injectable()
 export class PagesService {
-    constructor(@InjectRepository(Pages) private pagesRepository: Repository<Pages>) {}
-    async getPages(): Promise<Pages[]> {
+    constructor(@InjectRepository(Page) private pagesRepository: Repository<Page>) {}
+    async getPages(): Promise<Page[]> {
         return await this.pagesRepository.find();
     }
 
-    async getPage(id: string): Promise<Pages> {
+    async getPage(id: string): Promise<Page> {
         const page = await this.pagesRepository.findOne({ id });
         if (!page) {
             throw new NotFoundException(`page ${id} not found`);
@@ -19,7 +19,7 @@ export class PagesService {
         return page;
     }
 
-    async createPage(body: PageDto): Promise<Pages> {
+    async createPage(body: PageDto): Promise<Page> {
         const pagesEntity = this.pagesRepository.create({ ...body });
         return await this.pagesRepository.save(pagesEntity);
     }
