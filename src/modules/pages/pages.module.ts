@@ -12,4 +12,4 @@ import { Pages } from './entities/pages';
     providers: [PagesService, BlockedUserGuard],
     exports: [PagesService],
 })
-export class AdModule {}
+export class PagesModule {}

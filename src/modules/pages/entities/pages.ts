@@ -5,7 +5,7 @@ export class Pages {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column('varchar', { length: 1000 })
+    @Column('varchar', { length: 255 })
     title: string;
 
     @Column('varchar', { length: 10000 })

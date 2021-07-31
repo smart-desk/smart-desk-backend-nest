@@ -3,11 +3,11 @@ import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
 export class PageDto {
     @IsNotEmpty()
     @IsString()
-    @MaxLength(1000)
+    @MaxLength(255)
     title: string;
 
     @IsNotEmpty()
     @IsString()
-    @MaxLength(10000) // todo: уточнить, объем памяти для ячейки.
+    @MaxLength(10000)
     content: string;
 }

@@ -2,8 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Pages } from './entities/pages';
 import { PageDto } from './dto/page.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { AdCampaignStatus } from '../ad/enitities/ad-campaign.entity';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 
 @Injectable()
 export class PagesService {
@@ -24,11 +23,11 @@ export class PagesService {
         const pagesEntity = this.pagesRepository.create({ ...body });
         return await this.pagesRepository.save(pagesEntity);
     }
-    updatePage(id: string, body: Pages): Promise<string> {
-        return {} as Promise<string>;
+    updatePage(id: string, body: PageDto): Promise<UpdateResult> {
+        return this.pagesRepository.update(id, body);
     }
 
-    deletePage(id: string) {
-        return {} as Promise<string>;
+    deletePage(id: string): Promise<DeleteResult> {
+        return this.pagesRepository.delete(id);
     }
 }
