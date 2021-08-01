@@ -8,7 +8,7 @@ import { DeleteResult, Repository } from 'typeorm';
 export class PagesService {
     constructor(@InjectRepository(PageEntity) private pagesRepository: Repository<PageEntity>) {}
     async getPages(): Promise<PageEntity[]> {
-        return await this.pagesRepository.find();
+        return await this.pagesRepository.createQueryBuilder('pages').select('pages.title').getMany();
     }
 
     async getPage(id: string): Promise<PageEntity> {
