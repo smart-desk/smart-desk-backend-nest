@@ -5,11 +5,11 @@ import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { ACGuard, UseRoles } from 'nest-access-control';
 import { BlockedUserGuard } from '../../guards/blocked-user.guard';
 import { ResourceEnum, RolesEnum } from '../app/app.roles';
-import { Page } from './entities/page';
+import { PageEntity } from './entities/page.entity';
 import { RequestWithUserPayload } from '../auth/jwt.strategy';
 import { User } from '../users/entities/user.entity';
 import { PageDto } from './dto/page.dto';
-import { DeleteResult, UpdateResult } from 'typeorm';
+import { DeleteResult } from 'typeorm';
 
 @Controller('pages')
 @ApiTags('Pages')
@@ -21,12 +21,12 @@ export class PagesController {
     }
 
     @Get()
-    async getAll(): Promise<Page[]> {
+    async getAll(): Promise<PageEntity[]> {
         return await this.pagesService.getPages();
     }
 
     @Get(':id')
-    async getPage(@Param('id', ParseUUIDPipe) id: string): Promise<Page> {
+    async getPage(@Param('id', ParseUUIDPipe) id: string): Promise<PageEntity> {
         return await this.pagesService.getPage(id);
     }
 
@@ -37,7 +37,7 @@ export class PagesController {
         resource: ResourceEnum.PAGES,
         action: 'create',
     })
-    async create(@Body() body: PageDto, @Req() req: RequestWithUserPayload): Promise<Page> {
+    async create(@Body() body: PageDto, @Req() req: RequestWithUserPayload): Promise<PageEntity> {
         const isAdmin = this.isAdmin(req.user);
         if (!isAdmin) throw new ForbiddenException();
         return await this.pagesService.createPage(body);
@@ -50,7 +50,7 @@ export class PagesController {
         resource: ResourceEnum.PAGES,
         action: 'update',
     })
-    async update(@Body() body: Page, @Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<UpdateResult> {
+    async update(@Body() body: PageDto, @Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<PageEntity> {
         const isAdmin = this.isAdmin(req.user);
         if (!isAdmin) throw new ForbiddenException();
         return await this.pagesService.updatePage(id, body);

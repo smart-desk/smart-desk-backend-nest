@@ -1,17 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Page } from './entities/page';
+import { PageEntity } from './entities/page.entity';
 import { PageDto } from './dto/page.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeleteResult, Repository, UpdateResult } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 
 @Injectable()
 export class PagesService {
-    constructor(@InjectRepository(Page) private pagesRepository: Repository<Page>) {}
-    async getPages(): Promise<Page[]> {
+    constructor(@InjectRepository(PageEntity) private pagesRepository: Repository<PageEntity>) {}
+    async getPages(): Promise<PageEntity[]> {
         return await this.pagesRepository.find();
     }
 
-    async getPage(id: string): Promise<Page> {
+    async getPage(id: string): Promise<PageEntity> {
         const page = await this.pagesRepository.findOne({ id });
         if (!page) {
             throw new NotFoundException(`page ${id} not found`);
@@ -19,12 +19,14 @@ export class PagesService {
         return page;
     }
 
-    async createPage(body: PageDto): Promise<Page> {
-        const pagesEntity = this.pagesRepository.create({ ...body });
-        return await this.pagesRepository.save(pagesEntity);
+    async createPage(body: PageDto): Promise<PageEntity> {
+        const pageEntity = this.pagesRepository.create({ ...body });
+        return await this.pagesRepository.save(pageEntity);
     }
-    updatePage(id: string, body: PageDto): Promise<UpdateResult> {
-        return this.pagesRepository.update(id, body);
+
+    async updatePage(id: string, body: PageDto): Promise<PageEntity> {
+        const pageEntity = await this.pagesRepository.preload({ id, ...body });
+        return this.pagesRepository.save(pageEntity);
     }
 
     deletePage(id: string): Promise<DeleteResult> {

@@ -4,10 +4,10 @@ import { UsersModule } from '../users/users.module';
 import { BlockedUserGuard } from '../../guards/blocked-user.guard';
 import { PagesController } from './pages.controller';
 import { PagesService } from './pages.service';
-import { Page } from './entities/page';
+import { PageEntity } from './entities/page.entity';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Page]), forwardRef(() => UsersModule)],
+    imports: [TypeOrmModule.forFeature([PageEntity]), forwardRef(() => UsersModule)],
     controllers: [PagesController],
     providers: [PagesService, BlockedUserGuard],
     exports: [PagesService],
