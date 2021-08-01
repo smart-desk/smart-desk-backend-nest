@@ -22,6 +22,7 @@ import { AdConfig } from '../src/modules/ad/enitities/ad-config.entity';
 import { AdCampaign } from '../src/modules/ad/enitities/ad-campaign.entity';
 import { PromoSet } from '../src/modules/promo/entities/promo-set.entity';
 import { PageEntity } from '../src/modules/pages/entities/page.entity';
+import { Promo } from '../src/modules/promo/entities/promo.entity';
 
 export async function createTestAppForModule(moduleRef: TestingModule) {
     const app = moduleRef.createNestApplication();
@@ -55,6 +56,8 @@ export function createRepositoryMock<T>(values?: T[]) {
             getOne: fn().mockReturnValue(resultValues[0]),
             getCount: fn().mockReturnValue(resultValues.length),
             execute: fn(),
+            leftJoin: jest.fn().mockReturnThis(),
+            leftJoinAndSelect: jest.fn().mockReturnThis(),
         }),
         find: fn().mockReturnValue(resultValues),
         findOne: fn().mockReturnValue(resultValues[0]),
@@ -102,6 +105,8 @@ export function declareCommonProviders(moduleRef: TestingModuleBuilder): Testing
         .overrideProvider(getRepositoryToken(PromoSet))
         .useValue(createRepositoryMock())
         .overrideProvider(getRepositoryToken(PageEntity))
+        .useValue(createRepositoryMock())
+        .overrideProvider(getRepositoryToken(Promo))
         .useValue(createRepositoryMock())
         .overrideProvider(MailService)
         .useValue(MailServiceMock)

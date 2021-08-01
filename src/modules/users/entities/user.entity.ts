@@ -34,6 +34,9 @@ export class User {
     @Column('varchar', { length: 100, name: 'vk_id' })
     vkId: string;
 
+    @Column('varchar', { length: 100, name: 'facebook_id' })
+    facebookId: string;
+
     @Column('varchar', { length: 100, name: 'email_notifications', array: true })
     emailNotifications: NotificationTypes[];
 }

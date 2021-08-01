@@ -12,6 +12,8 @@ import { RolesEnum } from '../app/app.roles';
 import { PromoSet } from './entities/promo-set.entity';
 import { PromoSetDto } from './dto/promo-set.dto';
 import { PromoModule } from './promo.module';
+import { BlockedUserGuard } from '../../guards/blocked-user.guard';
+import { BlockedUserGuardMock } from '../../../test/mocks/blocked-user.guard.mock';
 
 describe('Promo Set controller', () => {
     let app: INestApplication;
@@ -37,6 +39,8 @@ describe('Promo Set controller', () => {
             .useValue(JwtGuard)
             .overrideGuard(ACGuard)
             .useValue(AcGuardMock)
+            .overrideGuard(BlockedUserGuard)
+            .useValue(BlockedUserGuardMock)
             .compile();
 
         app = await createTestAppForModule(moduleRef);
