@@ -11,10 +11,10 @@ import { SortingType } from '../products/models/sorting';
 export abstract class BaseFieldService {
     protected constructor(
         protected repository: Repository<DynamicFieldsBaseEntity>,
-        private entityType: Type<DynamicFieldsBaseEntity>,
-        private createDtoType: Type<DynamicFieldsBaseCreateDto>,
-        private updateDtoType: Type<DynamicFieldsBaseUpdateDto>,
-        private paramsDtoType: Type<Record<any, any>>
+        protected entityType: Type<DynamicFieldsBaseEntity>,
+        protected createDtoType: Type<DynamicFieldsBaseCreateDto>,
+        protected updateDtoType: Type<DynamicFieldsBaseUpdateDto>,
+        protected paramsDtoType: Type<Record<any, any>>
     ) {}
 
     getRepository(): Repository<DynamicFieldsBaseEntity> {
