@@ -44,7 +44,7 @@ describe('page controller', () => {
         app = await createTestAppForModule(moduleRef);
     });
 
-    it('update', () => {
+    it('update, admin user', () => {
         JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
             const req = context.switchToHttp().getRequest();
             req.user = adminUser;
@@ -112,7 +112,7 @@ describe('page controller', () => {
             });
     });
 
-    it('create', () => {
+    it('create, adminUser user', () => {
         JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
             const req = context.switchToHttp().getRequest();
             req.user = adminUser;
@@ -149,7 +149,7 @@ describe('page controller', () => {
             .expect(HttpStatus.FORBIDDEN);
     });
 
-    it('create', () => {
+    it('create, anotherUser user', () => {
         JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
             const req = context.switchToHttp().getRequest();
             req.user = anotherUser;
@@ -170,7 +170,7 @@ describe('page controller', () => {
             });
     });
 
-    it('get', () => {
+    it('get, role adminUser', () => {
         JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
             const req = context.switchToHttp().getRequest();
             req.user = adminUser;
@@ -189,7 +189,26 @@ describe('page controller', () => {
             });
     });
 
-    it('delete', () => {
+    it('get, role anotherUser', () => {
+        JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+            const req = context.switchToHttp().getRequest();
+            req.user = anotherUser;
+            return true;
+        });
+
+        return request(app.getHttpServer())
+            .get(`/pages`)
+            .send({
+                title: 'title',
+                content: 'content',
+            })
+            .expect(HttpStatus.OK)
+            .expect(res => {
+                expect(res.body.length).toEqual(1);
+            });
+    });
+
+    it('delete, user role anotherUser', () => {
         JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
             const req = context.switchToHttp().getRequest();
             req.user = anotherUser;
@@ -199,7 +218,7 @@ describe('page controller', () => {
         return request(app.getHttpServer()).delete(`/pages/${page.id}`).expect(HttpStatus.FORBIDDEN);
     });
 
-    it('delete', () => {
+    it('delete, user role admin', () => {
         JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
             const req = context.switchToHttp().getRequest();
             req.user = adminUser;
@@ -214,7 +233,7 @@ describe('page controller', () => {
             });
     });
 
-    it('get page by id, user role admin ', () => {
+    it('get page by id, user role admin', () => {
         JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
             const req = context.switchToHttp().getRequest();
             req.user = adminUser;
