@@ -22,6 +22,8 @@ import { AdConfig } from '../src/modules/ad/enitities/ad-config.entity';
 import { AdCampaign } from '../src/modules/ad/enitities/ad-campaign.entity';
 import { PromoSet } from '../src/modules/promo/entities/promo-set.entity';
 import { Promo } from '../src/modules/promo/entities/promo.entity';
+import { S3Service } from '../src/modules/s3/s3.service';
+import { S3ServiceMock } from './mocks/s3.service.mock';
 
 export async function createTestAppForModule(moduleRef: TestingModule) {
     const app = moduleRef.createNestApplication();
@@ -108,5 +110,7 @@ export function declareCommonProviders(moduleRef: TestingModuleBuilder): Testing
         .overrideProvider(MailService)
         .useValue(MailServiceMock)
         .overrideProvider(StripeService)
-        .useValue(StripeServiceMock);
+        .useValue(StripeServiceMock)
+        .overrideProvider(S3Service)
+        .useValue(S3ServiceMock);
 }
