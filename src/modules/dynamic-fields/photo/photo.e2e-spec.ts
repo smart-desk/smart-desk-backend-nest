@@ -78,7 +78,7 @@ describe('Photo field', () => {
                         fields: [
                             {
                                 fieldId: uuid(),
-                                value: ['http://text.com/some-picture.png'],
+                                value: ['temp/some-picture.png'],
                             } as CreatePhotoDto,
                         ],
                     } as CreateProductDto)
@@ -95,7 +95,7 @@ describe('Photo field', () => {
                         fields: [
                             {
                                 fieldId: '123',
-                                value: ['http://text.com/some-picture.png'],
+                                value: ['temp/some-picture.png'],
                             } as CreatePhotoDto,
                         ],
                     } as CreateProductDto)
@@ -116,14 +116,16 @@ describe('Photo field', () => {
                         fields: [
                             {
                                 fieldId: uuid(),
-                                value: ['test'],
+                                value: null,
                             } as CreatePhotoDto,
                         ],
                     } as CreateProductDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('value must be url to image');
-                        expect(res.body.message).toContain('each value in value must be an URL address');
+                        expect(res.body.message).toContain('each value in value must be a string');
+                        expect(res.body.message).toContain('each value in value must be shorter than or equal to 1000 characters');
+                        expect(res.body.message).toContain('value must be an array');
+                        expect(res.body.message).toContain('value should not be empty');
                     });
             });
 
@@ -138,7 +140,7 @@ describe('Photo field', () => {
                         fields: [
                             {
                                 fieldId: uuid(),
-                                value: ['http://domain.com/' + Array(1001).fill('a').join('') + '.png'],
+                                value: ['temp/' + Array(1001).fill('a').join('') + '.png'],
                             } as CreatePhotoDto,
                         ],
                     } as CreateProductDto)
@@ -163,7 +165,7 @@ describe('Photo field', () => {
                             {
                                 id: uuid(),
                                 fieldId: uuid(),
-                                value: ['http://text.com/some-picture.png'],
+                                value: ['temp/some-picture.png'],
                             } as UpdatePhotoDto,
                         ],
                     } as UpdateProductDto)
@@ -180,7 +182,7 @@ describe('Photo field', () => {
                             {
                                 id: '12312312',
                                 fieldId: uuid(),
-                                value: ['http://text.com/some-picture.png'],
+                                value: ['temp/some-picture.png'],
                             } as UpdatePhotoDto,
                         ],
                     } as UpdateProductDto)
@@ -199,7 +201,7 @@ describe('Photo field', () => {
                             {
                                 id: uuid(),
                                 fieldId: '123',
-                                value: ['http://text.com/some-picture.png'],
+                                value: ['temp/some-picture.png'],
                             } as UpdatePhotoDto,
                         ],
                     } as UpdateProductDto)
@@ -218,14 +220,16 @@ describe('Photo field', () => {
                         fields: [
                             {
                                 fieldId: uuid(),
-                                value: ['test'],
+                                value: null,
                             } as UpdatePhotoDto,
                         ],
                     } as UpdateProductDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('value must be url to image');
-                        expect(res.body.message).toContain('each value in value must be an URL address');
+                        expect(res.body.message).toContain('each value in value must be a string');
+                        expect(res.body.message).toContain('each value in value must be shorter than or equal to 1000 characters');
+                        expect(res.body.message).toContain('value must be an array');
+                        expect(res.body.message).toContain('value should not be empty');
                     });
             });
 
@@ -239,7 +243,7 @@ describe('Photo field', () => {
                             {
                                 id: uuid(),
                                 fieldId: uuid(),
-                                value: ['http://domain.com/' + Array(1001).fill('a').join('') + '.png'],
+                                value: ['temp/' + Array(1001).fill('a').join('') + '.png'],
                             } as UpdatePhotoDto,
                         ],
                     } as UpdateProductDto)
@@ -259,7 +263,7 @@ describe('Photo field', () => {
                             {
                                 id: null,
                                 fieldId: uuid(),
-                                value: ['http://domain.com/ssdsds.png'],
+                                value: ['temp/ssdsds.png'],
                             } as UpdatePhotoDto,
                         ],
                     } as UpdateProductDto)
