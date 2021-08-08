@@ -66,6 +66,29 @@ describe('page controller', () => {
             });
     });
 
+    it('update with error too long value', () => {
+        JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+            const req = context.switchToHttp().getRequest();
+            req.user = adminUser;
+            return true;
+        });
+        const title = Array(256).fill('1').join();
+        const content = Array(10001).fill('1').join();
+
+        return request(app.getHttpServer())
+            .patch(`/pages/${page.id}`)
+            .send({
+                id: page.id,
+                title: title,
+                content: content,
+            })
+            .expect(HttpStatus.BAD_REQUEST)
+            .expect(res => {
+                expect(res.body.message).toContain('title must be shorter than or equal to 255 characters');
+                expect(res.body.message).toContain('content must be shorter than or equal to 10000 characters');
+            });
+    });
+
     it('update with error unauthorized', () => {
         JwtGuard.canActivate.mockReturnValueOnce(false);
 
@@ -106,7 +129,6 @@ describe('page controller', () => {
             })
             .expect(HttpStatus.BAD_REQUEST)
             .expect(res => {
-                // todo: проверка на максимальную длинну, 255 и 10000 символов
                 expect(res.body.message).toContain('title must be a string');
                 expect(res.body.message).toContain('content must be a string');
             });
