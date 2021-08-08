@@ -44,7 +44,7 @@ describe('page controller', () => {
         app = await createTestAppForModule(moduleRef);
     });
 
-    it('update, admin user', () => {
+    it('update successfully with admin user', () => {
         JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
             const req = context.switchToHttp().getRequest();
             req.user = adminUser;
@@ -112,7 +112,7 @@ describe('page controller', () => {
             });
     });
 
-    it('create, adminUser user', () => {
+    it('create successfully with admin user', () => {
         JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
             const req = context.switchToHttp().getRequest();
             req.user = adminUser;
@@ -149,7 +149,7 @@ describe('page controller', () => {
             .expect(HttpStatus.FORBIDDEN);
     });
 
-    it('create, anotherUser user', () => {
+    it('create with error not an admin', () => {
         JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
             const req = context.switchToHttp().getRequest();
             req.user = anotherUser;
@@ -162,63 +162,23 @@ describe('page controller', () => {
                 title: 'title',
                 content: 'content',
             })
-            .expect(HttpStatus.BAD_REQUEST)
-            .expect(res => {
-                // todo: проверка на максимальную длинну, 255 и 10000 символов
-                expect(res.body.message).toContain('title must be a string');
-                expect(res.body.message).toContain('content must be a string');
-            });
+            .expect(HttpStatus.FORBIDDEN);
     });
 
-    it('get, role adminUser', () => {
-        JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
-            const req = context.switchToHttp().getRequest();
-            req.user = adminUser;
-            return true;
-        });
-
+    it('get all pages successfully for not authorized user', () => {
         return request(app.getHttpServer())
             .get(`/pages`)
-            .send({
-                title: 'title',
-                content: 'content',
-            })
             .expect(HttpStatus.OK)
             .expect(res => {
                 expect(res.body.length).toEqual(1);
             });
     });
 
-    it('get, role anotherUser', () => {
-        JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
-            const req = context.switchToHttp().getRequest();
-            req.user = anotherUser;
-            return true;
-        });
-
-        return request(app.getHttpServer())
-            .get(`/pages`)
-            .send({
-                title: 'title',
-                content: 'content',
-            })
-            .expect(HttpStatus.OK)
-            .expect(res => {
-                expect(res.body.length).toEqual(1);
-            });
-    });
-
-    it('delete, user role anotherUser', () => {
-        JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
-            const req = context.switchToHttp().getRequest();
-            req.user = anotherUser;
-            return true;
-        });
-
+    it('delete with error not an admin', () => {
         return request(app.getHttpServer()).delete(`/pages/${page.id}`).expect(HttpStatus.FORBIDDEN);
     });
 
-    it('delete, user role admin', () => {
+    it('delete successfully for admin', () => {
         JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
             const req = context.switchToHttp().getRequest();
             req.user = adminUser;
@@ -233,38 +193,9 @@ describe('page controller', () => {
             });
     });
 
-    it('get page by id, user role admin', () => {
-        JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
-            const req = context.switchToHttp().getRequest();
-            req.user = adminUser;
-            return true;
-        });
-
+    it('get page by id successfully for not authorized user', () => {
         return request(app.getHttpServer())
             .get(`/pages/${page.id}`)
-            .send({
-                title: 'title',
-                content: 'content',
-            })
-            .expect(HttpStatus.OK)
-            .expect(res => {
-                expect(res.body.id).toEqual(page.id);
-            });
-    });
-
-    it('get page by id, user role anotherUser ', () => {
-        JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
-            const req = context.switchToHttp().getRequest();
-            req.user = anotherUser;
-            return true;
-        });
-
-        return request(app.getHttpServer())
-            .get(`/pages/${page.id}`)
-            .send({
-                title: 'title',
-                content: 'content',
-            })
             .expect(HttpStatus.OK)
             .expect(res => {
                 expect(res.body.id).toEqual(page.id);
