@@ -19,6 +19,7 @@ export enum ResourceEnum {
     AD_CONFIG = 'ad_config',
     AD_CAMPAIGN = 'ad_campaign',
     PROMO_SET = 'promo_set',
+    PAGES = 'pages',
     PROMO = 'promo',
 }
 
@@ -27,7 +28,7 @@ export const roles = new RolesBuilder();
 roles
     // Viewer
     .grant(RolesEnum.VIEWER)
-    .read([ResourceEnum.PRODUCT, ResourceEnum.CATEGORY, ResourceEnum.USER])
+    .read([ResourceEnum.PRODUCT, ResourceEnum.CATEGORY, ResourceEnum.USER, ResourceEnum.PAGES])
     // User
     .grant(RolesEnum.USER)
     .extend(RolesEnum.VIEWER)
@@ -72,6 +73,7 @@ roles
         ResourceEnum.AD_CONFIG,
         ResourceEnum.AD_CAMPAIGN,
         ResourceEnum.PROMO_SET,
+        ResourceEnum.PAGES,
         ResourceEnum.PROMO,
     ])
     .read([
@@ -87,6 +89,7 @@ roles
         ResourceEnum.AD_CONFIG,
         ResourceEnum.AD_CAMPAIGN,
         ResourceEnum.PROMO_SET,
+        ResourceEnum.PAGES,
         ResourceEnum.PROMO,
     ])
     .update([
@@ -102,6 +105,7 @@ roles
         ResourceEnum.AD_CONFIG,
         ResourceEnum.AD_CAMPAIGN,
         ResourceEnum.PROMO_SET,
+        ResourceEnum.PAGES,
         ResourceEnum.PROMO,
     ])
     .delete([
@@ -117,5 +121,6 @@ roles
         ResourceEnum.AD_CONFIG,
         ResourceEnum.AD_CAMPAIGN,
         ResourceEnum.PROMO_SET,
+        ResourceEnum.PAGES,
         ResourceEnum.PROMO,
     ]);

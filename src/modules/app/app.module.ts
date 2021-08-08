@@ -23,6 +23,7 @@ import { RawBodyMiddleware } from '../../middlewares/raw-body.middleware';
 import { StripeController } from '../stripe/stripe.controller';
 import { ParsedBodyMiddleware } from '../../middlewares/parsed-body.middleware';
 import { PromoModule } from '../promo/promo.module';
+import { PagesModule } from '../pages/pages.module';
 
 const app = [
     AuthModule,
@@ -40,6 +41,7 @@ const app = [
     AdModule,
     StripeModule,
     PromoModule,
+    PagesModule,
 ];
 
 @Module({

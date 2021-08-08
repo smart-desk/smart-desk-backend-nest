@@ -21,6 +21,7 @@ import { StripeService } from '../src/modules/stripe/stripe.service';
 import { AdConfig } from '../src/modules/ad/enitities/ad-config.entity';
 import { AdCampaign } from '../src/modules/ad/enitities/ad-campaign.entity';
 import { PromoSet } from '../src/modules/promo/entities/promo-set.entity';
+import { PageEntity } from '../src/modules/pages/entities/page.entity';
 import { Promo } from '../src/modules/promo/entities/promo.entity';
 import { S3Service } from '../src/modules/s3/s3.service';
 import { S3ServiceMock } from './mocks/s3.service.mock';
@@ -104,6 +105,8 @@ export function declareCommonProviders(moduleRef: TestingModuleBuilder): Testing
         .overrideProvider(getRepositoryToken(AdCampaign))
         .useValue(createRepositoryMock())
         .overrideProvider(getRepositoryToken(PromoSet))
+        .useValue(createRepositoryMock())
+        .overrideProvider(getRepositoryToken(PageEntity))
         .useValue(createRepositoryMock())
         .overrideProvider(getRepositoryToken(Promo))
         .useValue(createRepositoryMock())
