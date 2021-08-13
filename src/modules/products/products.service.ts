@@ -294,9 +294,10 @@ export class ProductsService {
             where.userId = options.user;
         }
 
+        // todo search depends on lang
         if (options.search) {
-            where.title = Raw(title => `LOWER(${title} COLLATE "en_US") ILIKE :phrase`, {
-                phrase: `%${options.search.toLocaleLowerCase()}%`,
+            where.title = Raw(title => `to_tsvector('russian', ${title}) @@ phraseto_tsquery('russian', :phrase)`, {
+                phrase: options.search,
             });
         }
 
