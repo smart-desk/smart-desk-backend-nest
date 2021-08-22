@@ -68,7 +68,6 @@ export class UsersController {
     @Get(':id')
     @ApiBearerAuth('access-token')
     @UseInterceptors(UserInterceptor)
-    @UseGuards(new JwtAuthGuard({ allowNoToken: true }))
     async getUser(@Param('id', ParseUUIDPipe) id: string): Promise<User> {
         return await this.usersService.findOne(id);
     }
