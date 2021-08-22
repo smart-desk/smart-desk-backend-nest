@@ -39,8 +39,7 @@ export class ProductsController {
 
     @Get()
     @ApiBearerAuth('access-token')
-    @UseGuards(new JwtAuthGuard({ allowNoToken: true }))
-    async getAll(@Req() req: RequestWithUserPayload, @Query() options: GetProductsDto): Promise<GetProductsResponseDto> {
+    async getAll(@Query() options: GetProductsDto): Promise<GetProductsResponseDto> {
         return this.productsService.getAll(options);
     }
 
@@ -103,9 +102,7 @@ export class ProductsController {
 
     @Get('/category/:categoryId')
     @ApiBearerAuth('access-token')
-    @UseGuards(new JwtAuthGuard({ allowNoToken: true }))
     async getForCategory(
-        @Req() req: RequestWithUserPayload,
         @Param('categoryId', ParseUUIDPipe) categoryId: string,
         @Query() options: GetProductsDto
     ): Promise<GetProductsResponseDto> {
@@ -120,8 +117,7 @@ export class ProductsController {
 
     @Get(':id/recommended')
     @ApiBearerAuth('access-token')
-    @UseGuards(new JwtAuthGuard({ allowNoToken: true }))
-    async getRecommended(@Req() req: RequestWithUserPayload, @Param('id', ParseUUIDPipe) id: string): Promise<GetProductsResponseDto> {
+    async getRecommended(@Param('id', ParseUUIDPipe) id: string): Promise<GetProductsResponseDto> {
         return this.productsService.getRecommendedById(id);
     }
 
