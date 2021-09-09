@@ -7,6 +7,7 @@ import {
     Get,
     HttpCode,
     HttpStatus,
+    NotFoundException,
     Param,
     ParseUUIDPipe,
     Patch,
@@ -31,6 +32,7 @@ import { User } from '../users/entities/user.entity';
 import { StripeService } from '../stripe/stripe.service';
 import { AdService } from '../ad/ad.service';
 import { PromotionType } from '../promo/entities/promotion-type.enum';
+import { OptionalJwtAuthGuard } from '../../guards/optional-jwt-auth.guard';
 
 @Controller('products')
 @ApiTags('Products')
@@ -110,9 +112,20 @@ export class ProductsController {
     }
 
     @Get(':id')
-    getById(@Param('id', ParseUUIDPipe) id: string): Promise<Product> {
-        // todo should not be available for others if it's blocked or pending
-        return this.productsService.getById(id);
+    @UseGuards(OptionalJwtAuthGuard)
+    // todo add tests
+    async getById(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<Product> {
+        const isAdminOrOwner = await this.isAdminOrOwner(id, req.user);
+        const product = await this.productsService.getById(id);
+        if (isAdminOrOwner) {
+            return product;
+        }
+
+        if (product.status === ProductStatus.PENDING || product.status === ProductStatus.BLOCKED) {
+            throw new NotFoundException();
+        }
+
+        return product;
     }
 
     @Get(':id/recommended')
@@ -259,6 +272,9 @@ export class ProductsController {
     }
 
     private async isOwner(productId: string, user: User): Promise<boolean> {
+        if (!user) {
+            return false;
+        }
         const owner = await this.productsService.getProductOwner(productId);
         return owner === user.id;
     }
