@@ -76,8 +76,8 @@ export class PromoController {
                 },
             ],
             mode: 'payment',
-            success_url: `${process.env.HOST}/profile`, // todo correct url
-            cancel_url: `${process.env.HOST}/profile`, // todo correct url
+            success_url: `${process.env.HOST}/products/${product.id}`,
+            cancel_url: `${process.env.HOST}/products/${product.id}`,
         });
     }
 

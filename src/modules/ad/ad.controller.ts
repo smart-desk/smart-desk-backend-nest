@@ -194,8 +194,8 @@ export class AdController {
                 },
             ],
             mode: 'payment',
-            success_url: `${process.env.HOST}/profile/my-ad-campaigns/${campaign.id}`,
-            cancel_url: `${process.env.HOST}/profile/my-ad-campaigns/${campaign.id}`,
+            success_url: `${process.env.HOST}/profile/my-ad-campaigns`,
+            cancel_url: `${process.env.HOST}/profile/my-ad-campaigns`,
         });
     }
 
