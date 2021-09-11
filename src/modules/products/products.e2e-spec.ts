@@ -25,6 +25,7 @@ import { PreferContact } from './models/prefer-contact.enum';
 import { AdConfig } from '../ad/enitities/ad-config.entity';
 import { AdCampaign } from '../ad/enitities/ad-campaign.entity';
 import { ProductStatus } from './models/product-status.enum';
+import { OptionalJwtAuthGuard } from '../../guards/optional-jwt-auth.guard';
 
 describe('Products controller', () => {
     let app: INestApplication;
@@ -38,6 +39,7 @@ describe('Products controller', () => {
     const productEntity = new Product();
     productEntity.id = '1234';
     productEntity.userId = '123';
+    productEntity.status = ProductStatus.ACTIVE;
 
     const productRepositoryMock = createRepositoryMock<Product>([productEntity]);
     const fieldRepositoryMock = createRepositoryMock<Field>([fieldEntity]);
@@ -58,6 +60,8 @@ describe('Products controller', () => {
             .overrideProvider(Connection)
             .useValue(connectionMock)
             .overrideGuard(JwtAuthGuard)
+            .useValue(JwtAuthGuardMock)
+            .overrideGuard(OptionalJwtAuthGuard)
             .useValue(JwtAuthGuardMock)
             .overrideGuard(ACGuard)
             .useValue(AcGuardMock)
@@ -543,6 +547,8 @@ describe('Products controller with ACL enabled', () => {
             .useValue(connectionMock)
             .overrideGuard(JwtAuthGuard)
             .useValue(JwtGuard)
+            .overrideGuard(OptionalJwtAuthGuard)
+            .useValue(JwtGuard)
             .compile();
 
         app = await createTestAppForModule(moduleRef);
@@ -557,6 +563,39 @@ describe('Products controller with ACL enabled', () => {
     describe('get product by id', () => {
         it(`successfully`, () => {
             return request(app.getHttpServer()).get(`/products/${uuid()}`).expect(HttpStatus.OK);
+        });
+
+        it(`with error 404 - status pending`, () => {
+            productEntity.status = ProductStatus.PENDING;
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: ['user'] };
+                return true;
+            });
+            productRepositoryMock.findOne.mockReturnValueOnce(productEntity);
+            return request(app.getHttpServer()).get(`/products/${uuid()}`).expect(HttpStatus.NOT_FOUND);
+        });
+
+        it(`with error 404 - status blocked wrong user`, () => {
+            productEntity.status = ProductStatus.BLOCKED;
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: ['user'] };
+                return true;
+            });
+            productRepositoryMock.findOne.mockReturnValueOnce(productEntity);
+            return request(app.getHttpServer()).get(`/products/${uuid()}`).expect(HttpStatus.NOT_FOUND);
+        });
+
+        it(`with error 403 - status blocked, unauthorised`, () => {
+            productEntity.status = ProductStatus.BLOCKED;
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = undefined;
+                return true;
+            });
+            productRepositoryMock.findOne.mockReturnValueOnce(productEntity);
+            return request(app.getHttpServer()).get(`/products/${uuid()}`).expect(HttpStatus.NOT_FOUND);
         });
     });
 

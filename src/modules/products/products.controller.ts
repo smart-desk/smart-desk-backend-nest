@@ -113,7 +113,6 @@ export class ProductsController {
 
     @Get(':id')
     @UseGuards(OptionalJwtAuthGuard)
-    // todo add tests
     async getById(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<Product> {
         const isAdminOrOwner = await this.isAdminOrOwner(id, req.user);
         const product = await this.productsService.getById(id);
@@ -280,6 +279,9 @@ export class ProductsController {
     }
 
     private isAdmin(user: User): boolean {
+        if (!user) {
+            return false;
+        }
         return user.roles && user.roles.some(role => role === RolesEnum.ADMIN);
     }
 }
