@@ -11,6 +11,6 @@ export class CreateCategoryDto {
     @IsString()
     name: string;
 
-    // @IsString()
-    // img: string;
+    @IsString()
+    img: string;
 }
