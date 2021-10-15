@@ -23,6 +23,7 @@ const CATEGORIES: Category[] = [
         name: 'Test Category 1',
         createdAt: '2004-10-19 10:23:54',
         updatedAt: '2004-10-19 10:23:54',
+        img: 'test img',
     },
     {
         id: '2',
@@ -31,6 +32,7 @@ const CATEGORIES: Category[] = [
         name: 'Test Category 2',
         createdAt: '2004-10-19 10:23:54',
         updatedAt: '2004-10-19 10:23:54',
+        img: 'test img',
     },
 ];
 

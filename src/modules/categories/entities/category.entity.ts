@@ -14,6 +14,9 @@ export class Category {
     @Column('varchar', { length: 255 })
     name: string;
 
+    @Column('varchar', { length: 1000 })
+    img: string;
+
     @Column('date', { name: 'created_at' })
     createdAt: string;
 
