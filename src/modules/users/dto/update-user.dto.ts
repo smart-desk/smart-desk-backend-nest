@@ -1,6 +1,5 @@
 import { IsArray, IsEnum, IsOptional, IsPhoneNumber, IsString, IsUrl, MaxLength, MinLength } from 'class-validator';
 import { ApiHideProperty } from '@nestjs/swagger';
-import { IsImageUrl } from '../../../utils/validation';
 import { NotificationTypes } from '../models/notification-types.enum';
 
 export class UpdateUserDto {
@@ -20,7 +19,6 @@ export class UpdateUserDto {
     @MaxLength(1000)
     @IsString()
     @IsUrl()
-    @IsImageUrl()
     avatar?: string;
 
     @IsOptional()

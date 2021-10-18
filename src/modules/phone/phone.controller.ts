@@ -41,6 +41,16 @@ export class PhoneController {
         }
 
         const result = await this.phoneService.verifyCheck(body);
+        // https://help.nexmo.com/hc/en-us/articles/360025561931-What-do-the-Verify-API-response-codes-mean-
+        if (result !== '0') {
+            switch (result) {
+                case '16':
+                    throw new BadRequestException(`Code is not correct`);
+                default:
+                    throw new BadRequestException(`Code error is ${result}`);
+            }
+        }
+
         await this.usersService.updateUser(user.id, { isPhoneVerified: true });
         return result;
     }
