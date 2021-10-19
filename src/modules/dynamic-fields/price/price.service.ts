@@ -31,11 +31,11 @@ export class PriceService extends BaseFieldService {
         const result = await this.repository
             .createQueryBuilder('price')
             .where({
-                product_id: In(productIds),
+                productId: In(productIds),
                 fieldId,
             })
             .orderBy({ value: direction })
-            .select('price.product_id')
+            .select('price.productId')
             .getMany();
 
         return result.map(r => r.productId);
