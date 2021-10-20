@@ -147,6 +147,24 @@ describe('Phone controller', () => {
                         expect(res.body.message).toContain('User 123 has already verified phone number');
                     });
             });
+
+            it(`with error - code is not correct`, () => {
+                const userMock = new User();
+                userMock.phone = '123123';
+                userServiceRepositoryMock.findOne.mockReturnValue(userMock);
+                phoneServiceMock.verifyCheck.mockReturnValueOnce('16');
+
+                return request(app.getHttpServer())
+                    .post('/phone/verify/check')
+                    .send({
+                        code: '1334',
+                        requestId: '1313',
+                    } as PhoneVerifyCheckDto)
+                    .expect(HttpStatus.BAD_REQUEST)
+                    .expect(res => {
+                        expect(res.body.message).toContain('Code is not correct');
+                    });
+            });
         });
     });
 });

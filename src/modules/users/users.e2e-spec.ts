@@ -142,7 +142,6 @@ describe('Users controller', () => {
                 .expect(res => {
                     expect(res.body.message).toContain('firstName must be longer than or equal to 1 characters');
                     expect(res.body.message).toContain('lastName must be longer than or equal to 1 characters');
-                    expect(res.body.message).toContain('value must be url to image');
                     expect(res.body.message).toContain('avatar must be an URL address');
                     expect(res.body.message).toContain('phone must be a valid phone number');
                     expect(res.body.message).toContain('each value in emailNotifications must be a valid enum value');
