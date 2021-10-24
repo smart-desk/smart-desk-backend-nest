@@ -74,6 +74,13 @@ describe('Products controller', () => {
 
     describe('get products', () => {
         it(`successfully with no params`, () => {
+            const JwtGuard = JwtAuthGuardMock;
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: ['user', 'admin'] };
+                return true;
+            });
+
             return request(app.getHttpServer())
                 .get('/products')
                 .expect(HttpStatus.OK)
@@ -86,6 +93,13 @@ describe('Products controller', () => {
         });
 
         it(`successfully with page, limit, search and category`, () => {
+            const JwtGuard = JwtAuthGuardMock;
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: ['user', 'admin'] };
+                return true;
+            });
+
             return request(app.getHttpServer())
                 .get('/products')
                 .query({
@@ -144,6 +158,12 @@ describe('Products controller', () => {
         });
 
         it(`successfully with filters`, () => {
+            const JwtGuard = JwtAuthGuardMock;
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: ['user', 'admin'] };
+                return true;
+            });
             return request(app.getHttpServer())
                 .get(`/products?filters[${uuid()}][from]=100&filters[${uuid()}][to]=500`)
                 .expect(HttpStatus.OK);
@@ -159,6 +179,12 @@ describe('Products controller', () => {
         });
 
         it(`successfully with sorting`, () => {
+            const JwtGuard = JwtAuthGuardMock;
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: ['user', 'admin'] };
+                return true;
+            });
             return request(app.getHttpServer()).get(`/products?sorting[${uuid()}]=ASC`).expect(HttpStatus.OK);
         });
 
@@ -172,6 +198,12 @@ describe('Products controller', () => {
         });
 
         it(`successfully with user id`, () => {
+            const JwtGuard = JwtAuthGuardMock;
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: ['user', 'admin'] };
+                return true;
+            });
             return request(app.getHttpServer()).get(`/products?user=${uuid()}`).expect(HttpStatus.OK);
         });
 
@@ -556,6 +588,13 @@ describe('Products controller with ACL enabled', () => {
 
     describe('get products', () => {
         it(`successfully`, () => {
+            const JwtGuard = JwtAuthGuardMock;
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: ['user', 'admin'] };
+                return true;
+            });
+
             return request(app.getHttpServer()).get('/products').expect(HttpStatus.OK);
         });
     });
@@ -596,82 +635,6 @@ describe('Products controller with ACL enabled', () => {
             });
             productRepositoryMock.findOne.mockReturnValueOnce(productEntity);
             return request(app.getHttpServer()).get(`/products/${uuid()}`).expect(HttpStatus.NOT_FOUND);
-        });
-    });
-
-    describe('get my products', () => {
-        it(`successfully`, () => {
-            return request(app.getHttpServer())
-                .get('/products/my')
-                .expect(HttpStatus.OK)
-                .expect(res => {
-                    expect(res.body.products).toBeDefined();
-                    expect(res.body.limit).toEqual(20);
-                    expect(res.body.totalCount).toEqual(1);
-                    expect(res.body.page).toEqual(1);
-                });
-        });
-
-        it(`with error - not authorized`, () => {
-            JwtGuard.canActivate.mockReturnValueOnce(false);
-            return request(app.getHttpServer()).get('/products/my').expect(HttpStatus.FORBIDDEN);
-        });
-    });
-
-    describe('get blocked products', () => {
-        it(`successfully`, () => {
-            return request(app.getHttpServer())
-                .get('/products/blocked')
-                .expect(HttpStatus.OK)
-                .expect(res => {
-                    expect(res.body.products).toBeDefined();
-                    expect(res.body.limit).toEqual(20);
-                    expect(res.body.totalCount).toEqual(1);
-                    expect(res.body.page).toEqual(1);
-                });
-        });
-
-        it(`with error - not authorized`, () => {
-            JwtGuard.canActivate.mockReturnValueOnce(false);
-            return request(app.getHttpServer()).get('/products/blocked').expect(HttpStatus.FORBIDDEN);
-        });
-    });
-
-    describe('get pending products', () => {
-        it(`successfully`, () => {
-            return request(app.getHttpServer())
-                .get('/products/pending')
-                .expect(HttpStatus.OK)
-                .expect(res => {
-                    expect(res.body.products).toBeDefined();
-                    expect(res.body.limit).toEqual(20);
-                    expect(res.body.totalCount).toEqual(1);
-                    expect(res.body.page).toEqual(1);
-                });
-        });
-
-        it(`with error - not authorized`, () => {
-            JwtGuard.canActivate.mockReturnValueOnce(false);
-            return request(app.getHttpServer()).get('/products/pending').expect(HttpStatus.FORBIDDEN);
-        });
-    });
-
-    describe('get completed products', () => {
-        it(`successfully`, () => {
-            return request(app.getHttpServer())
-                .get('/products/completed')
-                .expect(HttpStatus.OK)
-                .expect(res => {
-                    expect(res.body.products).toBeDefined();
-                    expect(res.body.limit).toEqual(20);
-                    expect(res.body.totalCount).toEqual(1);
-                    expect(res.body.page).toEqual(1);
-                });
-        });
-
-        it(`with error - not authorized`, () => {
-            JwtGuard.canActivate.mockReturnValueOnce(false);
-            return request(app.getHttpServer()).get('/products/completed').expect(HttpStatus.FORBIDDEN);
         });
     });
 
