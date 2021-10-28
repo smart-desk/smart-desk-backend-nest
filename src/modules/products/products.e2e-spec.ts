@@ -73,16 +73,18 @@ describe('Products controller', () => {
     });
 
     describe('get products', () => {
-        it(`successfully with no params`, () => {
-            const JwtGuard = JwtAuthGuardMock;
-            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
-                const req = context.switchToHttp().getRequest();
-                req.user = { id: '007', email: 'test@email.com', roles: ['user', 'admin'] };
-                return true;
-            });
+        it(`successfully with status completed`, () => {
+            return request(app.getHttpServer()).get('/products').query({ status: ProductStatus.COMPLETED }).expect(HttpStatus.OK);
+        });
 
+        it(`forbiden with options not completed or active`, () => {
+            return request(app.getHttpServer()).get('/products').query({ status: ProductStatus.PENDING }).expect(HttpStatus.FORBIDDEN);
+        });
+
+        it(`successfully with res.body and status active`, () => {
             return request(app.getHttpServer())
                 .get('/products')
+                .query({ status: ProductStatus.ACTIVE })
                 .expect(HttpStatus.OK)
                 .expect(res => {
                     expect(res.body.products).toBeDefined();
@@ -93,16 +95,10 @@ describe('Products controller', () => {
         });
 
         it(`successfully with page, limit, search and category`, () => {
-            const JwtGuard = JwtAuthGuardMock;
-            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
-                const req = context.switchToHttp().getRequest();
-                req.user = { id: '007', email: 'test@email.com', roles: ['user', 'admin'] };
-                return true;
-            });
-
             return request(app.getHttpServer())
                 .get('/products')
                 .query({
+                    options: ProductStatus.ACTIVE,
                     page: 2,
                     limit: 2,
                     category_id: uuid(),
@@ -178,7 +174,7 @@ describe('Products controller', () => {
                 });
         });
 
-        it(`successfully with sorting`, () => {
+        it(`successfully with sorting if user admin`, () => {
             const JwtGuard = JwtAuthGuardMock;
             JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
                 const req = context.switchToHttp().getRequest();
@@ -204,7 +200,10 @@ describe('Products controller', () => {
                 req.user = { id: '007', email: 'test@email.com', roles: ['user', 'admin'] };
                 return true;
             });
-            return request(app.getHttpServer()).get(`/products?user=${uuid()}`).expect(HttpStatus.OK);
+            return request(app.getHttpServer())
+                .get(`/products?user=${uuid()}`)
+
+                .expect(HttpStatus.OK);
         });
 
         it(`with error - user uuid is not valid`, () => {
@@ -214,6 +213,18 @@ describe('Products controller', () => {
                 .expect(res => {
                     expect(res.body.message).toContain('user must be an UUID');
                 });
+        });
+
+        it(`successfully if user equal current user`, () => {
+            const JwtGuard = JwtAuthGuardMock;
+            const userId = uuid();
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: userId, email: 'test@email.com', roles: ['user'] };
+                return true;
+            });
+
+            return request(app.getHttpServer()).get('/products').query({ user: userId }).expect(HttpStatus.OK);
         });
     });
 
@@ -587,7 +598,7 @@ describe('Products controller with ACL enabled', () => {
     });
 
     describe('get products', () => {
-        it(`successfully`, () => {
+        it(`successfully with user admin`, () => {
             const JwtGuard = JwtAuthGuardMock;
             JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
                 const req = context.switchToHttp().getRequest();
