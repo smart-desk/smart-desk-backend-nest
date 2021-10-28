@@ -98,7 +98,7 @@ describe('Products controller', () => {
             return request(app.getHttpServer())
                 .get('/products')
                 .query({
-                    options: ProductStatus.ACTIVE,
+                    status: ProductStatus.ACTIVE,
                     page: 2,
                     limit: 2,
                     category_id: uuid(),
