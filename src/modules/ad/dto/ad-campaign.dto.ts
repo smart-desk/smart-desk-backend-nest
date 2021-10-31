@@ -18,8 +18,6 @@ export class AdCampaignDto {
     @IsNotEmpty()
     @IsString()
     @MaxLength(1000)
-    @IsUrl()
-    @IsImageUrl()
     img: string;
 
     @IsNotEmpty()

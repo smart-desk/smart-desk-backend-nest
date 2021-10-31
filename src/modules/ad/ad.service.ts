@@ -8,6 +8,7 @@ import { AdCampaignDto } from './dto/ad-campaign.dto';
 import * as dayjs from 'dayjs';
 import * as customParseFormat from 'dayjs/plugin/customParseFormat';
 import { GetAdCampaignsDto } from './dto/get-ad-campaigns.dto';
+import { S3Service } from '../s3/s3.service';
 
 dayjs.extend(customParseFormat);
 
@@ -15,7 +16,8 @@ dayjs.extend(customParseFormat);
 export class AdService {
     constructor(
         @InjectRepository(AdConfig) private adConfigRepository: Repository<AdConfig>,
-        @InjectRepository(AdCampaign) private adCampaignRepository: Repository<AdCampaign>
+        @InjectRepository(AdCampaign) private adCampaignRepository: Repository<AdCampaign>,
+        private s3Service: S3Service
     ) {}
 
     async updateAdConfig(newConfig: AdConfigDto): Promise<AdConfig> {
@@ -59,6 +61,8 @@ export class AdService {
     }
 
     async createCampaign(campaign: AdCampaignDto, userId: string): Promise<AdCampaign> {
+        await this.s3Service.moveImageToPublic(campaign.img);
+        campaign.img = campaign.img.replace('temp', 'public');
         campaign.startDate = dayjs(campaign.startDate, SHORT_DATE_FORMAT).toISOString();
         campaign.endDate = dayjs(campaign.endDate, SHORT_DATE_FORMAT).toISOString();
         const campaignEntity = this.adCampaignRepository.create({ ...campaign, status: AdCampaignStatus.PENDING, userId });
@@ -66,10 +70,13 @@ export class AdService {
     }
 
     async updateCampaign(id: string, campaign: AdCampaignDto): Promise<AdCampaign> {
+        await this.s3Service.moveImageToPublic(campaign.img);
+        campaign.img = campaign.img.replace('temp', 'public');
         const oldCampaign = await this.getCampaign(id);
         oldCampaign.status = AdCampaignStatus.PENDING;
         campaign.startDate = dayjs(campaign.startDate, SHORT_DATE_FORMAT).toISOString();
         campaign.endDate = dayjs(campaign.endDate, SHORT_DATE_FORMAT).toISOString();
+
         const newCampaign = { ...oldCampaign, ...campaign };
         const updatedCampaign = await this.adCampaignRepository.preload({ id: oldCampaign.id, ...newCampaign });
         return await this.adCampaignRepository.save(updatedCampaign);
