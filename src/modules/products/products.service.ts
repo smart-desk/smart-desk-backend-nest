@@ -45,7 +45,7 @@ export class ProductsService {
     async getRecommendedById(id: string): Promise<GetProductsResponseDto> {
         const product = await this.findOneOrThrowException(id);
         const options = new GetProductsDto();
-        options.limit = 11;
+        options.limit = 9;
 
         const recommended = await this.getForCategory(product.category_id, options);
         recommended.products = recommended.products.filter(a => a.id !== product.id);
