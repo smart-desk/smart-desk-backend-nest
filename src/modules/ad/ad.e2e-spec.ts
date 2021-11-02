@@ -184,8 +184,6 @@ describe('Ad controller', () => {
                 .expect(res => {
                     expect(res.body.message).toContain('startDate should not be empty');
                     expect(res.body.message).toContain('endDate should not be empty');
-                    expect(res.body.message).toContain('value must be url to image');
-                    expect(res.body.message).toContain('img must be an URL address');
                     expect(res.body.message).toContain('img must be shorter than or equal to 1000 characters');
                     expect(res.body.message).toContain('img must be a string');
                     expect(res.body.message).toContain('img should not be empty');
@@ -238,8 +236,6 @@ describe('Ad controller', () => {
                 .expect(res => {
                     expect(res.body.message).toContain('startDate should not be empty');
                     expect(res.body.message).toContain('endDate should not be empty');
-                    expect(res.body.message).toContain('value must be url to image');
-                    expect(res.body.message).toContain('img must be an URL address');
                     expect(res.body.message).toContain('img must be shorter than or equal to 1000 characters');
                     expect(res.body.message).toContain('img must be a string');
                     expect(res.body.message).toContain('img should not be empty');
