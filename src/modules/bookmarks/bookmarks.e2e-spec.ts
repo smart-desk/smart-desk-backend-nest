@@ -1,4 +1,4 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
+import { ExecutionContext, HttpStatus, INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import * as request from 'supertest';
 import { v4 as uuid } from 'uuid';
@@ -29,12 +29,12 @@ describe('Bookmarks controller', () => {
     fieldEntity.params = { label: 'Test', placeholder: 'test', required: true };
 
     const productEntity = new Product();
-    productEntity.id = '1234';
+    productEntity.id = 'cdad7290-07c9-4419-a9d7-2c6c843fef51';
     productEntity.model_id = '12323';
-    productEntity.userId = '123';
+    productEntity.userId = 'cdad7290-07c9-4419-a9d7-2c6c843fef50';
 
     const bookmark = new Bookmark();
-    bookmark.userId = '123';
+    bookmark.userId = 'cdad7290-07c9-4419-a9d7-2c6c843fef50';
     bookmark.product = productEntity;
 
     const productRepositoryMock = createRepositoryMock<Product>([productEntity]);
@@ -103,9 +103,11 @@ describe('Bookmarks controller', () => {
         });
 
         it(`with error - user blocked`, () => {
-            const user = new User();
-            user.status = UserStatus.BLOCKED;
-            userRepositoryMock.findOne.mockReturnValueOnce(user);
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: ['user', 'admin'], status: UserStatus.BLOCKED };
+                return true;
+            });
 
             return request(app.getHttpServer())
                 .post('/bookmarks')
@@ -122,9 +124,11 @@ describe('Bookmarks controller', () => {
         });
 
         it(`with error - user blocked`, () => {
-            const user = new User();
-            user.status = UserStatus.BLOCKED;
-            userRepositoryMock.findOne.mockReturnValueOnce(user);
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: ['user', 'admin'], status: UserStatus.BLOCKED };
+                return true;
+            });
 
             return request(app.getHttpServer()).delete(`/bookmarks/${uuid()}`).expect(HttpStatus.FORBIDDEN);
         });
