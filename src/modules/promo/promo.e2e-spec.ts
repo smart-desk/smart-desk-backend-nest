@@ -29,8 +29,8 @@ describe('Promo controller', () => {
     promo.endDate = dayjs().add(4).toDate();
 
     const productEntity = new Product();
-    productEntity.id = uuid();
-    productEntity.userId = '123';
+    productEntity.id = 'cdad7290-07c9-4419-a9d7-2c6c843fef51';
+    productEntity.userId = 'cdad7290-07c9-4419-a9d7-2c6c843fef50';
 
     const fieldEntity = new Field();
     fieldEntity.id = uuid();

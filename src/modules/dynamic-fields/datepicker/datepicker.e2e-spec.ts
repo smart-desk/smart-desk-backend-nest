@@ -32,8 +32,8 @@ describe('Datepicker field', () => {
     fieldEntity.params = {};
 
     const productEntity = new Product();
-    productEntity.id = '1234';
-    productEntity.userId = '123';
+    productEntity.id = 'cdad7290-07c9-4419-a9d7-2c6c843fef51';
+    productEntity.userId = 'cdad7290-07c9-4419-a9d7-2c6c843fef50';
 
     const productRepositoryMock = createRepositoryMock<Product>([productEntity]);
     const fieldRepositoryMock = createRepositoryMock<Field>([fieldEntity]);
