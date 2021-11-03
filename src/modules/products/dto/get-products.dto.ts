@@ -34,7 +34,7 @@ export class GetProductsDto {
 
     @IsOptional()
     @IsEnum(ProductStatus)
-    status?: ProductStatus;
+    status?: ProductStatus = ProductStatus.ACTIVE;
 
     @IsObject()
     @IsOptional()

@@ -1,14 +1,11 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { UsersService } from '../modules/users/users.service';
 import { RequestWithUserPayload } from '../modules/auth/jwt.strategy';
+import { UserStatus } from '../modules/users/models/user-status.enum';
 
 @Injectable()
 export class BlockedUserGuard implements CanActivate {
-    constructor(private userService: UsersService) {}
-
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request: RequestWithUserPayload = context.switchToHttp().getRequest();
-        const isBlocked = await this.userService.isUserBlocked(request.user.id);
-        return !isBlocked;
+        return request.user?.status !== UserStatus.BLOCKED;
     }
 }
