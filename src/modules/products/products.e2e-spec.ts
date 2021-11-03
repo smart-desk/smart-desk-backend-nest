@@ -406,6 +406,7 @@ describe('Products controller', () => {
 
     describe('get recommended products by id', () => {
         it(`successfully`, () => {
+            productEntity.status = ProductStatus.ACTIVE;
             return request(app.getHttpServer()).get(`/products/${uuid()}/recommended`).expect(HttpStatus.OK);
         });
 
