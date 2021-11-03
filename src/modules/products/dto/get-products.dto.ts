@@ -1,5 +1,5 @@
-import { IsNumber, IsObject, IsOptional, IsPositive, IsString, IsUUID, Max, MaxLength } from 'class-validator';
-import { Exclude, Transform } from 'class-transformer';
+import { IsEnum, IsNumber, IsObject, IsOptional, IsPositive, IsString, IsUUID, Max, MaxLength } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { Product } from '../entities/product.entity';
 import { ProductStatus } from '../models/product-status.enum';
 import { Sorting } from '../models/sorting';
@@ -32,8 +32,9 @@ export class GetProductsDto {
     @IsOptional()
     user?: string;
 
-    @Exclude()
-    status: ProductStatus = ProductStatus.ACTIVE;
+    @IsOptional()
+    @IsEnum(ProductStatus)
+    status?: ProductStatus = ProductStatus.ACTIVE;
 
     @IsObject()
     @IsOptional()

@@ -41,65 +41,21 @@ export class ProductsController {
 
     @Get()
     @ApiBearerAuth('access-token')
-    async getAll(@Query() options: GetProductsDto): Promise<GetProductsResponseDto> {
-        return this.productsService.getAll(options);
-    }
-
-    @Get('/blocked')
-    @ApiBearerAuth('access-token')
-    @UseGuards(JwtAuthGuard, ACGuard)
-    @UseRoles({
-        resource: ResourceEnum.PRODUCT,
-        action: 'read',
-    })
-    async getBlocked(@Req() req: RequestWithUserPayload, @Query() options: GetProductsDto): Promise<GetProductsResponseDto> {
-        if (!this.isAdmin(req.user)) {
-            options.user = req.user.id;
+    @UseGuards(OptionalJwtAuthGuard)
+    async getAll(@Req() req: RequestWithUserPayload, @Query() options: GetProductsDto): Promise<GetProductsResponseDto> {
+        if (this.isAdmin(req.user)) {
+            return this.productsService.getAll(options);
         }
-        options.status = ProductStatus.BLOCKED;
-        return this.productsService.getAll(options);
-    }
 
-    @Get('/pending')
-    @ApiBearerAuth('access-token')
-    @UseGuards(JwtAuthGuard, ACGuard)
-    @UseRoles({
-        resource: ResourceEnum.PRODUCT,
-        action: 'read',
-    })
-    async getPending(@Req() req: RequestWithUserPayload, @Query() options: GetProductsDto): Promise<GetProductsResponseDto> {
-        if (!this.isAdmin(req.user)) {
-            options.user = req.user.id;
+        if (options.status === ProductStatus.ACTIVE || options.status === ProductStatus.COMPLETED) {
+            return this.productsService.getAll(options);
         }
-        options.status = ProductStatus.PENDING;
-        return this.productsService.getAll(options);
-    }
 
-    @Get('/completed')
-    @ApiBearerAuth('access-token')
-    @UseGuards(JwtAuthGuard, ACGuard)
-    @UseRoles({
-        resource: ResourceEnum.PRODUCT,
-        action: 'read',
-    })
-    async getCompleted(@Req() req: RequestWithUserPayload, @Query() options: GetProductsDto): Promise<GetProductsResponseDto> {
-        if (!this.isAdmin(req.user)) {
-            options.user = req.user.id;
+        if (options.user === req.user?.id) {
+            return this.productsService.getAll(options);
         }
-        options.status = ProductStatus.COMPLETED;
-        return this.productsService.getAll(options);
-    }
 
-    @Get('/my')
-    @UseGuards(JwtAuthGuard, ACGuard)
-    @ApiBearerAuth('access-token')
-    @UseRoles({
-        resource: ResourceEnum.PRODUCT,
-        action: 'read',
-    })
-    getMy(@Req() req: RequestWithUserPayload, @Query() options: GetProductsDto): Promise<GetProductsResponseDto> {
-        options.user = req.user.id;
-        return this.productsService.getAll(options);
+        throw new ForbiddenException();
     }
 
     @Get('/category/:categoryId')

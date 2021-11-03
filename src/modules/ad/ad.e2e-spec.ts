@@ -45,7 +45,7 @@ describe('Ad controller', () => {
     adCampaign.endDate = endDayjs.toISOString();
     adCampaign.reason = 'test';
     adCampaign.type = AdCampaignType.MAIN;
-    adCampaign.userId = '123';
+    adCampaign.userId = 'cdad7290-07c9-4419-a9d7-2c6c843fef50';
     adCampaign.title = '123';
 
     const JwtGuard = JwtAuthGuardMock;

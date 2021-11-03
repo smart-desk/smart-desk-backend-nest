@@ -60,7 +60,7 @@ describe('Phone controller', () => {
                     .post('/phone/verify/request')
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('User 123 has no phone number');
+                        expect(res.body.message).toContain('User cdad7290-07c9-4419-a9d7-2c6c843fef50 has no phone number');
                     });
             });
 
@@ -74,7 +74,7 @@ describe('Phone controller', () => {
                     .post('/phone/verify/request')
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('User 123 has already verified phone number');
+                        expect(res.body.message).toContain('User cdad7290-07c9-4419-a9d7-2c6c843fef50 has already verified phone number');
                     });
             });
         });
@@ -126,7 +126,7 @@ describe('Phone controller', () => {
                     } as PhoneVerifyCheckDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('User 123 has no phone number');
+                        expect(res.body.message).toContain('User cdad7290-07c9-4419-a9d7-2c6c843fef50 has no phone number');
                     });
             });
 
@@ -144,7 +144,7 @@ describe('Phone controller', () => {
                     } as PhoneVerifyCheckDto)
                     .expect(HttpStatus.BAD_REQUEST)
                     .expect(res => {
-                        expect(res.body.message).toContain('User 123 has already verified phone number');
+                        expect(res.body.message).toContain('User cdad7290-07c9-4419-a9d7-2c6c843fef50 has already verified phone number');
                     });
             });
 
