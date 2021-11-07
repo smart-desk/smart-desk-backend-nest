@@ -14,6 +14,7 @@ import { ProductStatus } from './models/product-status.enum';
 import { MailService } from '../mail/mail.service';
 import { SortingType } from './models/sorting';
 import { NotificationTypes } from '../users/models/notification-types.enum';
+import { BlockProductDto } from './dto/block-product.dto';
 
 interface FieldDataDtoInstance {
     type: FieldType;
@@ -162,9 +163,10 @@ export class ProductsService {
         return await this.productRepository.save(updatedProduct);
     }
 
-    async block(id: string): Promise<Product> {
+    async block(id: string, blockDto: BlockProductDto): Promise<Product> {
         const product = await this.findOneOrThrowException(id);
         product.status = ProductStatus.BLOCKED;
+        product.reason = blockDto.reason;
         const updatedProduct = await this.productRepository.preload({ id, ...product });
         const resultBlockedProduct = await this.productRepository.save(updatedProduct);
         // todo send prepared html templates
@@ -180,6 +182,7 @@ export class ProductsService {
     async publish(id: string): Promise<Product> {
         const product = await this.findOneOrThrowException(id);
         product.status = ProductStatus.ACTIVE;
+        product.reason = null;
         const updatedProduct = await this.productRepository.preload({ id, ...product });
         const resultPublishedProduct = await this.productRepository.save(updatedProduct);
         // todo send prepared html templates
@@ -195,6 +198,7 @@ export class ProductsService {
     async complete(id: string): Promise<Product> {
         const product = await this.findOneOrThrowException(id);
         product.status = ProductStatus.COMPLETED;
+        product.reason = null;
         const updatedProduct = await this.productRepository.preload({ id, ...product });
         return await this.productRepository.save(updatedProduct);
     }

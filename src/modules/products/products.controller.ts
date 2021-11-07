@@ -33,6 +33,7 @@ import { StripeService } from '../stripe/stripe.service';
 import { AdService } from '../ad/ad.service';
 import { PromotionType } from '../promo/entities/promotion-type.enum';
 import { OptionalJwtAuthGuard } from '../../guards/optional-jwt-auth.guard';
+import { BlockProductDto } from './dto/block-product.dto';
 
 @Controller('products')
 @ApiTags('Products')
@@ -130,10 +131,14 @@ export class ProductsController {
         resource: ResourceEnum.PRODUCT,
         action: 'update',
     })
-    async blockProduct(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequestWithUserPayload): Promise<Product> {
+    async blockProduct(
+        @Param('id', ParseUUIDPipe) id: string,
+        @Req() req: RequestWithUserPayload,
+        @Body() body: BlockProductDto
+    ): Promise<Product> {
         const isAdmin = await this.isAdmin(req.user);
         if (!isAdmin) throw new ForbiddenException();
-        return this.productsService.block(id);
+        return this.productsService.block(id, body);
     }
 
     @Patch(':id/publish')

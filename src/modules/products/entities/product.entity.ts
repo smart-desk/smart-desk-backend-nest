@@ -22,6 +22,9 @@ export class Product {
     @Column('varchar', { length: 255 })
     status: string;
 
+    @Column('varchar', { length: 1000 })
+    reason: string;
+
     @Column('integer')
     views: number;
 
