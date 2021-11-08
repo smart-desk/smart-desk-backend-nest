@@ -806,16 +806,22 @@ describe('Products controller', () => {
                 req.user = { id: '007', email: 'test@email.com', roles: ['user', 'admin'] };
                 return true;
             });
-            return request(app.getHttpServer()).patch(`/products/${uuid()}/block`).expect(HttpStatus.OK);
+            return request(app.getHttpServer()).patch(`/products/${uuid()}/block`).send({ reason: 'This is wrong' }).expect(HttpStatus.OK);
         });
 
         it(`with error - not authorized`, () => {
             JwtGuard.canActivate.mockReturnValueOnce(false);
-            return request(app.getHttpServer()).patch(`/products/${uuid()}/block`).expect(HttpStatus.FORBIDDEN);
+            return request(app.getHttpServer())
+                .patch(`/products/${uuid()}/block`)
+                .send({ reason: 'This is wrong' })
+                .expect(HttpStatus.FORBIDDEN);
         });
 
         it(`with error - not an admin`, () => {
-            return request(app.getHttpServer()).patch(`/products/${uuid()}/block`).expect(HttpStatus.FORBIDDEN);
+            return request(app.getHttpServer())
+                .patch(`/products/${uuid()}/block`)
+                .send({ reason: 'This is wrong' })
+                .expect(HttpStatus.FORBIDDEN);
         });
 
         it(`with error - not valid product id`, () => {
@@ -826,9 +832,27 @@ describe('Products controller', () => {
             });
             return request(app.getHttpServer())
                 .patch(`/products/some/block`)
+                .send({ reason: 'This is wrong' })
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('Validation failed (uuid  is expected)');
+                });
+        });
+
+        it(`with error - invalid reason`, () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: ['user', 'admin'] };
+                return true;
+            });
+            return request(app.getHttpServer())
+                .patch(`/products/${uuid()}/block`)
+                .send({ reason: null })
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('reason should not be empty');
+                    expect(res.body.message).toContain('reason must be shorter than or equal to 1000 characters');
+                    expect(res.body.message).toContain('reason must be a string');
                 });
         });
     });
