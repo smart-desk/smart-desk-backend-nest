@@ -60,11 +60,25 @@ export class ProductsController {
 
     @Get('/category/:categoryId')
     @ApiBearerAuth('access-token')
+    @UseGuards(OptionalJwtAuthGuard)
     async getForCategory(
         @Param('categoryId', ParseUUIDPipe) categoryId: string,
-        @Query() options: GetProductsDto
+        @Query() options: GetProductsDto,
+        @Req() req: RequestWithUserPayload
     ): Promise<GetProductsResponseDto> {
-        return this.productsService.getForCategory(categoryId, options);
+        if (this.isAdmin(req.user)) {
+            return this.productsService.getForCategory(categoryId, options);
+        }
+
+        if (options.status === ProductStatus.ACTIVE || options.status === ProductStatus.COMPLETED) {
+            return this.productsService.getForCategory(categoryId, options);
+        }
+
+        if (options.user === req.user?.id) {
+            return this.productsService.getForCategory(categoryId, options);
+        }
+
+        throw new ForbiddenException();
     }
 
     @Get(':id')
