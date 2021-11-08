@@ -56,11 +56,10 @@ describe('Products controller', () => {
     };
     const JwtGuard = JwtAuthGuardMock;
     const OptionalJwtGuard = JwtAuthGuardMock;
-    const userRepositoryMock = createRepositoryMock<User>([]);
     const adConfigRepositoryMock = createRepositoryMock<AdConfig>([adConfig]);
 
     beforeAll(async () => {
-        let moduleBuilder = await Test.createTestingModule({
+        const moduleBuilder = await Test.createTestingModule({
             imports: [ProductsModule, TypeOrmModule.forRoot(), AccessControlModule.forRoles(roles)],
         });
 
@@ -338,7 +337,14 @@ describe('Products controller', () => {
         });
 
         it(`successfully with user id`, () => {
-            return request(app.getHttpServer()).get(`/products/category/${uuid()}?user=${uuid()}`).expect(HttpStatus.OK);
+            const JwtGuard = JwtAuthGuardMock;
+            const userId = uuid();
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: userId, email: 'test@email.com', roles: ['user'] };
+                return true;
+            });
+            return request(app.getHttpServer()).get(`/products/category/${uuid()}?user=${userId}`).expect(HttpStatus.OK);
         });
 
         it(`with error - user uuid is not valid`, () => {
@@ -348,6 +354,32 @@ describe('Products controller', () => {
                 .expect(res => {
                     expect(res.body.message).toContain('user must be an UUID');
                 });
+        });
+
+        it(`successfully if user requests his own pending products`, () => {
+            return request(app.getHttpServer())
+                .get('/products/category/' + uuid())
+                .query({ user: 'cdad7290-07c9-4419-a9d7-2c6c843fef50', status: ProductStatus.PENDING })
+                .expect(HttpStatus.OK);
+        });
+
+        it(`successfully if user requests his own blocked products`, () => {
+            return request(app.getHttpServer())
+                .get('/products/category/' + uuid())
+                .query({ user: 'cdad7290-07c9-4419-a9d7-2c6c843fef50', status: ProductStatus.BLOCKED })
+                .expect(HttpStatus.OK);
+        });
+
+        it(`successfully with user admin as well`, () => {
+            JwtGuard.canActivate.mockImplementationOnce((context: ExecutionContext) => {
+                const req = context.switchToHttp().getRequest();
+                req.user = { id: '007', email: 'test@email.com', roles: ['user', 'admin'] };
+                return true;
+            });
+
+            return request(app.getHttpServer())
+                .get('/products/category/' + uuid())
+                .expect(HttpStatus.OK);
         });
     });
 
