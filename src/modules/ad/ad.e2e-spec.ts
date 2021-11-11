@@ -24,6 +24,7 @@ describe('Ad controller', () => {
     adConfig.mainHourlyRate = 10;
     adConfig.sidebarHourlyRate = 5;
     adConfig.liftRate = 60;
+    adConfig.adsense = { s: 'a' };
 
     const adminUser = new User();
     adminUser.id = uuid();
@@ -81,6 +82,7 @@ describe('Ad controller', () => {
                     mainHourlyRate: 10,
                     sidebarHourlyRate: 5,
                     liftRate: 60,
+                    adsense: '<script src="adsbygoogle.js?client=ca-pub-1471761211228571"></script>',
                 } as AdConfigDto)
                 .expect(HttpStatus.OK)
                 .expect(res => {
@@ -88,6 +90,7 @@ describe('Ad controller', () => {
                     expect(res.body.mainHourlyRate).toEqual(10);
                     expect(res.body.sidebarHourlyRate).toEqual(5);
                     expect(res.body.liftRate).toEqual(60);
+                    expect(res.body.adsense).toBeDefined();
                 });
         });
 
@@ -126,12 +129,16 @@ describe('Ad controller', () => {
                     mainHourlyRate: '5sts',
                     sidebarHourlyRate: '22d',
                     liftRate: '33es',
+                    adsense: null,
                 } as any)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
                     expect(res.body.message).toContain('mainHourlyRate must be a number conforming to the specified constraints');
                     expect(res.body.message).toContain('sidebarHourlyRate must be a number conforming to the specified constraints');
                     expect(res.body.message).toContain('liftRate must be a number conforming to the specified constraints');
+                    expect(res.body.message).toContain('adsense must contain a adsbygoogle.js string');
+                    expect(res.body.message).toContain('adsense must be shorter than or equal to 1000 characters');
+                    expect(res.body.message).toContain('adsense must be a string');
                 });
         });
     });

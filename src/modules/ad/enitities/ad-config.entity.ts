@@ -17,4 +17,7 @@ export class AdConfig {
     @Column('numeric', { name: 'lift_rate', precision: 13, scale: 2 })
     @Type(() => Number)
     liftRate: number;
+
+    @Column('json')
+    adsense: unknown;
 }

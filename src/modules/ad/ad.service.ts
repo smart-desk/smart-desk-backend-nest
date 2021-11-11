@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { parse } from 'node-html-parser';
 import { AdConfig } from './enitities/ad-config.entity';
 import { AdConfigDto } from './dto/ad-config.dto';
 import { AdCampaign, AdCampaignStatus, AdCampaignType, SHORT_DATE_FORMAT } from './enitities/ad-campaign.entity';
@@ -22,12 +23,16 @@ export class AdService {
 
     async updateAdConfig(newConfig: AdConfigDto): Promise<AdConfig> {
         const oldConfig = await this.adConfigRepository.findOne();
+        let adsense = oldConfig?.adsense;
+        if (newConfig.adsense) {
+            adsense = parse(newConfig.adsense);
+        }
         if (oldConfig) {
-            const updatedConfig = await this.adConfigRepository.preload({ id: oldConfig.id, ...newConfig });
+            const updatedConfig = await this.adConfigRepository.preload({ id: oldConfig.id, ...newConfig, adsense });
             return await this.adConfigRepository.save(updatedConfig);
         }
 
-        const newConfigEntity = this.adConfigRepository.create(newConfig);
+        const newConfigEntity = this.adConfigRepository.create({ ...newConfig, adsense });
         return this.adConfigRepository.save(newConfigEntity);
     }
 
