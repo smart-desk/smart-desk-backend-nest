@@ -6,7 +6,8 @@ export class AdSenseConfig1636667026418 implements MigrationInterface {
             'ad_config',
             new TableColumn({
                 name: 'adsense',
-                type: 'json',
+                type: 'varchar',
+                length: '1000',
                 isNullable: true,
             })
         );

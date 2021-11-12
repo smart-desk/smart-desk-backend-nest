@@ -24,7 +24,7 @@ describe('Ad controller', () => {
     adConfig.mainHourlyRate = 10;
     adConfig.sidebarHourlyRate = 5;
     adConfig.liftRate = 60;
-    adConfig.adsense = { s: 'a' };
+    adConfig.adsense = 'adsbygoogle.js?client=ca-pub-1471761211228571';
 
     const adminUser = new User();
     adminUser.id = uuid();
@@ -90,7 +90,7 @@ describe('Ad controller', () => {
                     expect(res.body.mainHourlyRate).toEqual(10);
                     expect(res.body.sidebarHourlyRate).toEqual(5);
                     expect(res.body.liftRate).toEqual(60);
-                    expect(res.body.adsense).toBeDefined();
+                    expect(res.body.adsense).toEqual(adConfig.adsense);
                 });
         });
 
@@ -129,7 +129,7 @@ describe('Ad controller', () => {
                     mainHourlyRate: '5sts',
                     sidebarHourlyRate: '22d',
                     liftRate: '33es',
-                    adsense: null,
+                    adsense: '',
                 } as any)
                 .expect(HttpStatus.BAD_REQUEST)
                 .expect(res => {
@@ -137,8 +137,6 @@ describe('Ad controller', () => {
                     expect(res.body.message).toContain('sidebarHourlyRate must be a number conforming to the specified constraints');
                     expect(res.body.message).toContain('liftRate must be a number conforming to the specified constraints');
                     expect(res.body.message).toContain('adsense must contain a adsbygoogle.js string');
-                    expect(res.body.message).toContain('adsense must be shorter than or equal to 1000 characters');
-                    expect(res.body.message).toContain('adsense must be a string');
                 });
         });
     });

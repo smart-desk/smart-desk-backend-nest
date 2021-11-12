@@ -18,6 +18,6 @@ export class AdConfig {
     @Type(() => Number)
     liftRate: number;
 
-    @Column('json')
-    adsense: unknown;
+    @Column('varchar')
+    adsense?: string;
 }

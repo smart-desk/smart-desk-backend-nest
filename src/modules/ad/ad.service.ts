@@ -25,7 +25,9 @@ export class AdService {
         const oldConfig = await this.adConfigRepository.findOne();
         let adsense = oldConfig?.adsense;
         if (newConfig.adsense) {
-            adsense = parse(newConfig.adsense);
+            const parsedScript = parse(newConfig.adsense);
+            const scriptElem = parsedScript.querySelector('script');
+            adsense = scriptElem.getAttribute('src');
         }
         if (oldConfig) {
             const updatedConfig = await this.adConfigRepository.preload({ id: oldConfig.id, ...newConfig, adsense });
