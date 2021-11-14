@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional } from 'class-validator';
+import { Contains, IsNumber, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class AdConfigDto {
     @IsOptional()
@@ -12,4 +12,10 @@ export class AdConfigDto {
     @IsOptional()
     @IsNumber()
     liftRate?: number;
+
+    @IsString()
+    @MaxLength(1000)
+    @Contains('adsbygoogle.js')
+    @IsOptional()
+    adsense?: string;
 }
