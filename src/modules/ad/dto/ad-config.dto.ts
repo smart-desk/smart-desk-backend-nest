@@ -15,7 +15,6 @@ export class AdConfigDto {
 
     @IsString()
     @MaxLength(1000)
-    @Contains('adsbygoogle.js')
     @IsOptional()
     adsense?: string;
 }

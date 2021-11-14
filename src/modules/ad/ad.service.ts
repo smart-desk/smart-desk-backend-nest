@@ -23,18 +23,17 @@ export class AdService {
 
     async updateAdConfig(newConfig: AdConfigDto): Promise<AdConfig> {
         const oldConfig = await this.adConfigRepository.findOne();
-        let adsense = oldConfig?.adsense;
         if (newConfig.adsense) {
             const parsedScript = parse(newConfig.adsense);
-            const scriptElem = parsedScript.querySelector('script');
-            adsense = scriptElem.getAttribute('src');
+            const scriptElem = parsedScript?.querySelector('script');
+            newConfig.adsense = scriptElem?.getAttribute('src');
         }
         if (oldConfig) {
-            const updatedConfig = await this.adConfigRepository.preload({ id: oldConfig.id, ...newConfig, adsense });
+            const updatedConfig = await this.adConfigRepository.preload({ id: oldConfig.id, ...newConfig });
             return await this.adConfigRepository.save(updatedConfig);
         }
 
-        const newConfigEntity = this.adConfigRepository.create({ ...newConfig, adsense });
+        const newConfigEntity = this.adConfigRepository.create({ ...newConfig });
         return this.adConfigRepository.save(newConfigEntity);
     }
 
