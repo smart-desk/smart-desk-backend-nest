@@ -136,7 +136,6 @@ describe('Ad controller', () => {
                     expect(res.body.message).toContain('mainHourlyRate must be a number conforming to the specified constraints');
                     expect(res.body.message).toContain('sidebarHourlyRate must be a number conforming to the specified constraints');
                     expect(res.body.message).toContain('liftRate must be a number conforming to the specified constraints');
-                    expect(res.body.message).toContain('adsense must contain a adsbygoogle.js string');
                 });
         });
     });
