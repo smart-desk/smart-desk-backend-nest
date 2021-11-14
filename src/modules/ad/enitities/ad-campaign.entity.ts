@@ -1,5 +1,4 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { Type } from 'class-transformer';
 import * as dayjs from 'dayjs';
 import { Transform } from 'class-transformer/decorators';
 

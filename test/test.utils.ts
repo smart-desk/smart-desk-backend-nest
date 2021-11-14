@@ -23,6 +23,7 @@ import { AdCampaign } from '../src/modules/ad/enitities/ad-campaign.entity';
 import { PromoSet } from '../src/modules/promo/entities/promo-set.entity';
 import { PageEntity } from '../src/modules/pages/entities/page.entity';
 import { Promo } from '../src/modules/promo/entities/promo.entity';
+import { AppConfig } from '../src/modules/app-config/enitities/app-config.entity';
 import { S3Service } from '../src/modules/s3/s3.service';
 import { S3ServiceMock } from './mocks/s3.service.mock';
 
@@ -109,6 +110,8 @@ export function declareCommonProviders(moduleRef: TestingModuleBuilder): Testing
         .overrideProvider(getRepositoryToken(PageEntity))
         .useValue(createRepositoryMock())
         .overrideProvider(getRepositoryToken(Promo))
+        .useValue(createRepositoryMock())
+        .overrideProvider(getRepositoryToken(AppConfig))
         .useValue(createRepositoryMock())
         .overrideProvider(MailService)
         .useValue(MailServiceMock)

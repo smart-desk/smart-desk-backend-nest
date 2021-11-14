@@ -16,6 +16,7 @@ export enum ResourceEnum {
     BOOKMARK = 'bookmark',
     ADDRESS = 'address',
     CHAT = 'chat',
+    APP_CONFIG = 'app_config',
     AD_CONFIG = 'ad_config',
     AD_CAMPAIGN = 'ad_campaign',
     PROMO_SET = 'promo_set',
@@ -28,18 +29,18 @@ export const roles = new RolesBuilder();
 roles
     // Viewer
     .grant(RolesEnum.VIEWER)
-    .read([ResourceEnum.PRODUCT, ResourceEnum.CATEGORY, ResourceEnum.USER, ResourceEnum.PAGES])
+    .read([
+        ResourceEnum.PRODUCT,
+        ResourceEnum.CATEGORY,
+        ResourceEnum.USER,
+        ResourceEnum.PAGES,
+        ResourceEnum.APP_CONFIG,
+        ResourceEnum.AD_CAMPAIGN,
+    ])
     // User
     .grant(RolesEnum.USER)
     .extend(RolesEnum.VIEWER)
-    .read([
-        ResourceEnum.BOOKMARK,
-        ResourceEnum.ADDRESS,
-        ResourceEnum.CHAT,
-        ResourceEnum.AD_CAMPAIGN,
-        ResourceEnum.AD_CONFIG,
-        ResourceEnum.PROMO,
-    ])
+    .read([ResourceEnum.BOOKMARK, ResourceEnum.ADDRESS, ResourceEnum.CHAT, ResourceEnum.AD_CONFIG, ResourceEnum.PROMO])
     .create([
         ResourceEnum.PRODUCT,
         ResourceEnum.FILE,
@@ -75,6 +76,7 @@ roles
         ResourceEnum.PROMO_SET,
         ResourceEnum.PAGES,
         ResourceEnum.PROMO,
+        ResourceEnum.APP_CONFIG,
     ])
     .read([
         ResourceEnum.PRODUCT,
@@ -91,6 +93,7 @@ roles
         ResourceEnum.PROMO_SET,
         ResourceEnum.PAGES,
         ResourceEnum.PROMO,
+        ResourceEnum.APP_CONFIG,
     ])
     .update([
         ResourceEnum.PRODUCT,
@@ -107,6 +110,7 @@ roles
         ResourceEnum.PROMO_SET,
         ResourceEnum.PAGES,
         ResourceEnum.PROMO,
+        ResourceEnum.APP_CONFIG,
     ])
     .delete([
         ResourceEnum.PRODUCT,
@@ -123,4 +127,5 @@ roles
         ResourceEnum.PROMO_SET,
         ResourceEnum.PAGES,
         ResourceEnum.PROMO,
+        ResourceEnum.APP_CONFIG,
     ]);
