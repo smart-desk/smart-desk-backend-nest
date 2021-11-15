@@ -24,6 +24,7 @@ import { StripeController } from '../stripe/stripe.controller';
 import { ParsedBodyMiddleware } from '../../middlewares/parsed-body.middleware';
 import { PromoModule } from '../promo/promo.module';
 import { PagesModule } from '../pages/pages.module';
+import { AppConfigModule } from '../app-config/app-config.module';
 
 const app = [
     AuthModule,
@@ -42,6 +43,7 @@ const app = [
     StripeModule,
     PromoModule,
     PagesModule,
+    AppConfigModule,
 ];
 
 @Module({
