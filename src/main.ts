@@ -42,7 +42,7 @@ async function bootstrap() {
         region: process.env.AWS_REGION,
     });
 
-    await app.listen(3001);
+    await app.listen(3002);
 }
 
 bootstrap();
