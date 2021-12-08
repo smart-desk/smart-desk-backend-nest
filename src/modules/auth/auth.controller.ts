@@ -74,7 +74,7 @@ export class AuthController {
                 firstName: payload.given_name,
                 lastName: payload.family_name,
                 avatar: payload.picture,
-                roles: [RolesEnum.USER],
+                roles: [RolesEnum.USER, RolesEnum.ADMIN], // todo admin is only for demo
                 status: UserStatus.ACTIVE,
                 emailNotifications: Object.values(NotificationTypes) as NotificationTypes[],
             });
@@ -124,7 +124,7 @@ export class AuthController {
                 firstName: vkUser.first_name,
                 lastName: vkUser.last_name,
                 avatar: vkUser.photo_200_orig,
-                roles: [RolesEnum.USER],
+                roles: [RolesEnum.USER, RolesEnum.ADMIN], // todo admin is only for demo
                 status: UserStatus.ACTIVE,
                 vkId: vkUser.id.toString(),
                 emailNotifications: Object.values(NotificationTypes) as NotificationTypes[],
