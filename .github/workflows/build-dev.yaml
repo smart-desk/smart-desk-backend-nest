@@ -1,11 +1,11 @@
-name: Build Staging
+name: Build Dev
 on:
     push:
         branches: [master]
 
 jobs:
     deploy:
-        name: Build Staging
+        name: Build Dev
 
         runs-on: ubuntu-latest
 
@@ -34,4 +34,4 @@ jobs:
                   key: ${{ secrets.SSH_KEY }}
                   script: |
                       cd /var/www
-                      ./deploy_backend.sh
+                      ./deploy_backend_dev.sh
