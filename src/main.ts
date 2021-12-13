@@ -15,20 +15,13 @@ async function bootstrap() {
     app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
     app.setGlobalPrefix('api');
 
-    // todo remove on prod!!!
-    app.enableCors({
-        origin: 'http://localhost:4200',
-        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-        allowedHeaders: 'Content-Type, Accept',
-        credentials: true,
-    });
-
     const swaggerOptions = new DocumentBuilder()
         .setTitle('Smart Desk')
         .setDescription('Smart Desk REST API')
         .setVersion('1.0')
         .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'access-token')
         .build();
+
     const document = SwaggerModule.createDocument(app, swaggerOptions);
     SwaggerModule.setup('swag', app, document, {
         swaggerOptions: {
