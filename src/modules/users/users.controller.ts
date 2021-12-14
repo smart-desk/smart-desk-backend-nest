@@ -60,6 +60,8 @@ export class UsersController {
         action: 'read',
     })
     async getUsers(@Req() req: RequestWithUserPayload): Promise<User[]> {
+        throw new ForbiddenException(); // todo only for demo
+
         const isAdmin = this.isAdmin(req.user);
         if (!isAdmin) throw new ForbiddenException();
         return await this.usersService.findAll();
@@ -84,6 +86,8 @@ export class UsersController {
         @Req() req: RequestWithUserPayload,
         @Body() body: UpdateUserRolesDto
     ): Promise<User> {
+        throw new ForbiddenException(); // todo only for demo
+
         const isAdmin = this.isAdmin(req.user);
         if (!isAdmin) throw new ForbiddenException();
         return this.usersService.updateUserRoles(id, body.roles);
@@ -97,6 +101,8 @@ export class UsersController {
         action: 'update',
     })
     async blockUser(@Param('id', ParseUUIDPipe) id: string, @Body() body: BlockUserDto, @Req() req: RequestWithUserPayload): Promise<User> {
+        throw new ForbiddenException(); // todo only for demo
+
         const isAdmin = this.isAdmin(req.user);
         if (!isAdmin) throw new ForbiddenException();
         return this.usersService.blockUser(id, body.value);

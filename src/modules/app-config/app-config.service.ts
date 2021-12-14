@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AppConfig } from './enitities/app-config.entity';
@@ -10,6 +10,8 @@ export class AppConfigService {
     constructor(@InjectRepository(AppConfig) private appConfigRepository: Repository<AppConfig>, private s3Service: S3Service) {}
 
     async updateAppConfig(newConfig: AppConfigDto): Promise<AppConfig> {
+        throw new ForbiddenException(); // todo only for demo
+
         if (newConfig?.logo) {
             await this.s3Service.moveImageToPublic(newConfig?.logo);
             newConfig.logo = newConfig?.logo.replace('temp', 'public');
