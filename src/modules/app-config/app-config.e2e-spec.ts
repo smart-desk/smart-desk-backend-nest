@@ -57,11 +57,7 @@ describe('App Config controller', () => {
                 .send({
                     logo: 'test',
                 } as AppConfigDto)
-                .expect(HttpStatus.OK)
-                .expect(res => {
-                    expect(res.body.id).toBeDefined();
-                    expect(res.body.logo).toEqual('test');
-                });
+                .expect(HttpStatus.FORBIDDEN);
         });
 
         it('with error unauthorized', () => {

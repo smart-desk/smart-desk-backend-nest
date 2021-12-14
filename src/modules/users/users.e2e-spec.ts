@@ -63,12 +63,7 @@ describe('Users controller', () => {
                 return true;
             });
 
-            return request(app.getHttpServer())
-                .get('/users')
-                .expect(HttpStatus.OK)
-                .expect(res => {
-                    expect(res.body).toBeDefined();
-                });
+            return request(app.getHttpServer()).get('/users').expect(HttpStatus.FORBIDDEN);
         });
 
         it(`with error - unauthorized`, () => {
@@ -176,7 +171,7 @@ describe('Users controller', () => {
             return request(app.getHttpServer())
                 .patch(`/users/${uuid()}/roles`)
                 .send({ roles: [RolesEnum.USER, RolesEnum.ADMIN] } as UpdateUserRolesDto)
-                .expect(HttpStatus.OK);
+                .expect(HttpStatus.FORBIDDEN);
         });
 
         it(`with error - wrong users roles`, () => {
@@ -222,7 +217,7 @@ describe('Users controller', () => {
             return request(app.getHttpServer())
                 .patch(`/users/${uuid()}/block`)
                 .send({ value: true } as BlockUserDto)
-                .expect(HttpStatus.OK);
+                .expect(HttpStatus.FORBIDDEN);
         });
 
         it(`with error - wrong value`, () => {
