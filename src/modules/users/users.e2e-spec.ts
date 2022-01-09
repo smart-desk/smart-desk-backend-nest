@@ -17,6 +17,7 @@ import { UserStatus } from './models/user-status.enum';
 import { Product } from '../products/entities/product.entity';
 import { PreferContact } from '../products/models/prefer-contact.enum';
 import { NotificationTypes } from './models/notification-types.enum';
+import { ProductStatus } from '../products/models/product-status.enum';
 
 describe('Users controller', () => {
     let app: INestApplication;
@@ -31,6 +32,7 @@ describe('Users controller', () => {
 
     const productEntity = new Product();
     productEntity.id = uuid();
+    productEntity.status = ProductStatus.ACTIVE;
 
     const productRepositoryMock = createRepositoryMock<Product>([productEntity]);
     const userRepositoryMock = createRepositoryMock<User>([user]);
@@ -306,6 +308,21 @@ describe('Users controller', () => {
                 .expect(HttpStatus.NOT_FOUND)
                 .expect(res => {
                     expect(res.body.message).toContain('Phone not found');
+                });
+        });
+
+        it(`with error - product is not active`, () => {
+            productEntity.preferContact = null;
+            user.phone = '+796521234434';
+            user.isPhoneVerified = true;
+            productEntity.status = ProductStatus.COMPLETED;
+            productRepositoryMock.findOne.mockReturnValueOnce(productEntity);
+
+            return request(app.getHttpServer())
+                .get(`/users/${uuid()}/phone?product=${uuid()}`)
+                .expect(HttpStatus.BAD_REQUEST)
+                .expect(res => {
+                    expect(res.body.message).toContain('Product must be active');
                 });
         });
 
