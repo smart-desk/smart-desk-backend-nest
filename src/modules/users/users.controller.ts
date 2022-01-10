@@ -28,6 +28,7 @@ import { UserInterceptor } from '../../interceptors/user.interceptor';
 import { GetUserPhoneDto } from './dto/get-user-phone.dto';
 import { ProductsService } from '../products/products.service';
 import { PreferContact } from '../products/models/prefer-contact.enum';
+import { ProductStatus } from '../products/models/product-status.enum';
 
 @Controller('users')
 @ApiTags('Users')
@@ -124,6 +125,11 @@ export class UsersController {
         if (product.preferContact === PreferContact.CHAT) {
             throw new BadRequestException('User prefers chat');
         }
+
+        if (product.status !== ProductStatus.ACTIVE) {
+            throw new BadRequestException('Product must be active');
+        }
+
         return user.phone;
     }
 
